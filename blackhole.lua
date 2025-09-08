@@ -10,6 +10,12 @@ end
 
 -- inward purple particles
 local parts = {}
+-- gentle fallback behavior when no hole influences a particle
+local ORPHAN_DAMP  = 0.65   -- was 0.85 (stronger damping)
+local ORPHAN_DRIFT = 0.20   -- was 0.5 (subtler drift)
+local PARTICLE_MAXSPD = 1.8 -- was 1.4, allow a bit more swirl speed
+local ORPHAN_MAXSPD  = 0.6  -- cap when orphaned
+local SPIN_STEP = 8         -- frames per 90° step (slower spin)
 
 -- get player bullets from ship.lua
 local function get_player_bullets()
@@ -57,8 +63,9 @@ local function spawn_hole()
 		x = flr(rnd(128-8)),
 		y = -10,
 		w = 8, h = 8,
-		spd = 0.8,     -- scroll with near-ish layer
-		r = 50         -- was 36; larger influence radius
+		spd = 0.8,
+		r = 50,
+		spin_t = 0 -- add spin timer
 	})
 end
 
@@ -66,12 +73,20 @@ local function spawn_particles(h)
 	-- spawn slightly fewer particles: always 1, 50% chance of a second
 	local count = 1 + (rnd(1) < 0.5 and 1 or 0)
 	for i=1,count do
-		local ang = rnd(1)*2*0.785
-		local rad = 6 + rnd(4)
+		-- use pico-8 "turns" (0..1) for angle to keep spawn truly circular
+		local ang = rnd(1)
+		-- start close to the core
+		local rad = 2 + rnd(2)
 		local px = h.x + 4 + cos(ang)*rad
 		local py = h.y + 4 + sin(ang)*rad
-		local vx = (rnd(0.4)-0.2)
-		local vy = (rnd(0.4)-0.2)
+		-- give initial tangential velocity for spiral (stronger than before)
+		local tx, ty = -sin(ang), cos(ang)
+		local speed = 0.45 + rnd(0.45)
+		local vx = tx*speed + (rnd(0.2)-0.1)
+		local vy = ty*speed + (rnd(0.2)-0.1)
+		-- tiny outward kick to prevent immediate collapse
+		vx += cos(ang)*0.08
+		vy += sin(ang)*0.08
 		add(parts, { x=px, y=py, vx=vx, vy=vy, life=20 + flr(rnd(10)) })
 	end
 end
@@ -79,7 +94,7 @@ end
 local function update_particles()
 	for p in all(parts) do
 		-- pull toward nearest hole center
-		local cx, cy, bestd2
+		local cx, cy, bestd2, hh
 		for h in all(holes) do
 			local hx, hy = h.x+4, h.y+4
 			local dx, dy = hx-p.x, hy-p.y
@@ -87,6 +102,7 @@ local function update_particles()
 			if not bestd2 or d2 < bestd2 then
 				bestd2 = d2
 				cx, cy = hx, hy
+				hh = h
 			end
 		end
 		if cx then
@@ -94,10 +110,49 @@ local function update_particles()
 			local d2 = dx*dx + dy*dy
 			if d2 > 0.1 then
 				local invd = 1/sqrt(d2)
-				local pull = 1.2 -- was 0.7
-				p.vx += dx*invd * pull * 0.8 -- was *0.5
-				p.vy += dy*invd * pull * 0.8
+				local r = (hh and hh.r) or 32
+				local d = sqrt(d2)
+				local fall = 1 - min(d/r, 1)
+				-- bias toward tangential swirl; keep radial modest so particles orbit
+				local radial_gain = 0.30 * fall
+				local swirl_gain  = 0.80 * max(fall, 0.20)
+
+				-- radial pull
+				p.vx += dx*invd * radial_gain
+				p.vy += dy*invd * radial_gain
+
+				-- tangential swirl (perpendicular to radial)
+				local tx, ty = -dy*invd, dx*invd
+				p.vx += tx * swirl_gain
+				p.vy += ty * swirl_gain
+
+				-- gentle outward bias if too close to core to avoid clustering
+				if d < 2.2 then
+					p.vx -= dx*invd * 0.20
+					p.vy -= dy*invd * 0.20
+				end
+
+				-- clamp speed under influence
+				local sp = sqrt(p.vx*p.vx + p.vy*p.vy)
+				if sp > PARTICLE_MAXSPD then
+					local s = PARTICLE_MAXSPD/sp
+					p.vx *= s
+					p.vy *= s
+				end
 			end
+		else
+			-- no active hole nearby: damp velocity, cap speed, and gently drift down
+			p.vx *= ORPHAN_DAMP
+			p.vy *= ORPHAN_DAMP
+			local sp = sqrt(p.vx*p.vx + p.vy*p.vy)
+			if sp > ORPHAN_MAXSPD then
+				local s = ORPHAN_MAXSPD/sp
+				p.vx *= s
+				p.vy *= s
+			end
+			p.vy += ORPHAN_DRIFT
+			if abs(p.vx) < 0.01 then p.vx = 0 end
+			if abs(p.vy) < 0.01 then p.vy = 0 end
 		end
 
 		-- integrate and decay
@@ -125,6 +180,8 @@ function update_blackhole()
 	for h in all(holes) do
 		-- scroll
 		h.y += h.spd
+		-- advance spin (wrap every 4 phases)
+		h.spin_t = (h.spin_t + 1) % (SPIN_STEP*4)
 
 		-- apply pull to stars (slightly reduced earlier)
 		if starfield_pull then
@@ -134,6 +191,11 @@ function update_blackhole()
 		-- pull moon debris toward the center (moderate strength)
 		if moon_debris_pull then
 			moon_debris_pull(h.x+4, h.y+4, h.r, 0.35)
+		end
+
+		-- pull ship trails (exhaust and death particles)
+		if ship_trails_pull then
+			ship_trails_pull(h.x+4, h.y+4, h.r, 0.22)
 		end
 
 		-- pull player if close (stronger)
@@ -156,10 +218,13 @@ function update_blackhole()
 			end
 		end
 
-		-- collide with player -> reset
+		-- collide with player -> start death animation
 		if ship and aabb(h.x,h.y,h.w,h.h, ship.x,ship.y,ship.w,ship.h) then
-			if reset_game then reset_game() end
-			return
+			if game_state == "game" and ship_kill then
+				ship_kill()
+				return
+			end
+			-- while dying/gameover, don't exit early; keep updating particles
 		end
 
 		-- cull if offscreen
@@ -168,6 +233,11 @@ function update_blackhole()
 		-- remove moons that intersect the hole
 		if moon_absorb then
 			moon_absorb(h.x,h.y,h.w,h.h)
+		end
+
+		-- absorb ship trails that touch the core
+		if ship_trails_absorb then
+			ship_trails_absorb(h.x,h.y,h.w,h.h)
 		end
 
 		-- particles around this hole
@@ -183,11 +253,16 @@ end
 function draw_blackhole()
 	-- draw particles (purple hues) behind the hole
 	for p in all(parts) do
-		local c = p.life > 16 and 13 or (p.life > 8 and 2 or 1)
+		-- pink for brightest, then medium/dark purple
+		local c = p.life > 16 and 14 or (p.life > 8 and 2 or 1)
 		pset(flr(p.x), flr(p.y), c)
 	end
-	-- draw holes
+	-- draw holes (flip-based 0/90/180/270 "rotation")
 	for h in all(holes) do
-		spr(3, h.x, h.y)
+		local phase = flr(h.spin_t / SPIN_STEP) % 4
+		-- sequence: 0: no flip, 1: flip x, 2: flip x+y, 3: flip y
+		local fx = (phase == 1) or (phase == 2)
+		local fy = (phase == 2) or (phase == 3)
+		spr(3, h.x, h.y, 1, 1, fx, fy)
 	end
 end

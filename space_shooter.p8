@@ -44,6 +44,21 @@ function _update()
         update_blackhole()
         update_moon()
         update_ship()
+        -- transition if ship triggered death internally (optional guard)
+        if ship and ship.dying then game_state="dying" end
+    elseif game_state == "dying" then
+        -- keep background/obstacles moving for drama
+        update_blackhole()
+        update_moon()
+        update_ship()
+        if ship_death_done and ship_death_done() then
+            game_state = "gameover"
+        end
+    elseif game_state == "gameover" then
+        -- wait for confirm to return to menu
+        if btnp(4) then
+            reset_game()
+        end
     end
 end
 
@@ -54,15 +69,22 @@ function _draw()
         draw_menu()
     elseif game_state == "controls" then
         draw_controls()
-    elseif game_state == "game" then
+    elseif game_state == "game" or game_state == "dying" then
         draw_blackhole()
         draw_moon()
         draw_ship()
         draw_hud()
+    elseif game_state == "gameover" then
+        -- show game over with score and hint
+        draw_hud()
+        local t = "game over"
+        local p = "z: menu"
+        print(t, 40, 54, 7)
+        print(p, 46, 66, 6)
     end
 end
 __gfx__
-00000000001661000666665000eee000001661000660065000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000001661000666665000eee000001661000660065000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000016cc610665666650e222e0001cc66106656666500000000000000000000000000000000000000000000000000000000000000000000000000000000
 007007001666666165665665e21002e0156666606566566500000000000000000000000000000000000000000000000000000000000000000000000000000000
 000770006676676665666655e20000ee576676600560065000000000000000000000000000000000000000000000000000000000000000000000000000000000

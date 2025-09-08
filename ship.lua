@@ -27,6 +27,9 @@ local STRENGTH_IDLE  = 0.2
 local STRENGTH_DOWN  = 0.03
 local STRENGTH_UP    = 0.45
 
+-- death
+local DEATH_FRAMES = 45 -- ~1.5s at 30fps
+
 -- ship state
 ship = ship or {
 	x = START_X,
@@ -37,7 +40,10 @@ ship = ship or {
 	spd = SHIP_SPEED,
 	flipx = false,
 	vx = 0, vy = 0,
-	acc = SHIP_ACC
+	acc = SHIP_ACC,
+	-- death state
+	dying = false,
+	death_t = 0
 }
 
 -- lasers
@@ -45,6 +51,9 @@ local bullets = {}
 
 -- exhaust particles
 local exhaust = {}
+
+-- death particles
+local death_fx = {}
 
 local function spawn_laser()
 	-- fire upward from the ship's nose (top-center)
@@ -100,15 +109,79 @@ local function update_exhaust()
 	end
 end
 
+local function spawn_death_fx()
+	-- burst of colored pixels from ship center
+	for i=1,22 do
+		local a = rnd(1)
+		local sp = 0.7 + rnd(1.3)
+		add(death_fx, {
+			x=ship.x+ship.w/2, y=ship.y+ship.h/2,
+			dx=cos(a)*sp, dy=sin(a)*sp,
+			life=flr(10+rnd(20))
+		})
+	end
+end
+
+function ship_kill()
+	if ship.dying then return end
+	ship.dying = true
+	ship.death_t = 0
+	-- stop moving and clear exhaust
+	ship.vx, ship.vy = 0, 0
+	exhaust = {}
+	death_fx = {}
+	spawn_death_fx()
+	-- reuse sfx(1) for death for now
+	sfx(1)
+	-- move game into dying state
+	game_state = "dying"
+end
+
+function ship_death_done()
+	return ship.dying and ship.death_t >= DEATH_FRAMES
+end
+
 function ship_init()
 	-- no-op for now (hook for future resets)
 	bullets = {}
 	exhaust = {}
+	death_fx = {}
 	-- reset movement
 	ship.vx, ship.vy = 0, 0
+	ship.dying = false
+	ship.death_t = 0
+end
+
+local function update_death_fx()
+	for p in all(death_fx) do
+		p.x += p.dx
+		p.y += p.dy
+		-- slight drag
+		p.dx *= 0.98
+		p.dy *= 0.98
+		p.life -= 1
+		if p.life <= 0 then
+			del(death_fx, p)
+		end
+	end
 end
 
 function update_ship()
+	-- dying: freeze input, play particles, advance timer, keep bullets flying/culling
+	if ship.dying then
+		ship.death_t += 1
+		update_death_fx()
+		-- keep bullets moving/culling
+		for b in all(bullets) do
+			b.x += b.dx
+			b.y += b.dy
+			if b.x < OFF_MIN or b.x > OFF_MAX or b.y < OFF_MIN or b.y > OFF_MAX then
+				del(bullets, b)
+			end
+		end
+		return
+	end
+
 	local dx, dy = 0, 0
 	if btn(0) then dx -= 1 end
 	if btn(1) then dx += 1 end
@@ -186,13 +259,21 @@ function draw_ship()
 		pset(flr(p.x), flr(p.y), c)
 	end
 
-	-- ship sprite (lean when moving horizontally)
-	local sid, flip = SPR_SHIP, false
-	if abs(ship.vx) > FACE_EPS then
-		sid = SPR_SHIP_LEAN
-		flip = ship.vx > 0 -- lean sprite is left-facing; flip when moving right
+	-- dying: draw explosion particles instead of ship sprite
+	if ship.dying then
+		for p in all(death_fx) do
+			local c = p.life > 16 and 10 or (p.life > 8 and 9 or 8)
+			pset(flr(p.x), flr(p.y), c)
+		end
+	else
+		-- ship sprite (lean when moving horizontally)
+		local sid, flip = SPR_SHIP, false
+		if abs(ship.vx) > FACE_EPS then
+			sid = SPR_SHIP_LEAN
+			flip = ship.vx > 0 -- lean sprite is left-facing; flip when moving right
+		end
+		spr(sid, ship.x, ship.y, 1, 1, flip, false)
 	end
-	spr(sid, ship.x, ship.y, 1, 1, flip, false)
 
 	-- draw lasers
 	for b in all(bullets) do
@@ -203,4 +284,40 @@ end
 -- expose player bullets for other systems (e.g., moon/hud)
 function ship_get_bullets()
 	return bullets
+end
+
+-- allow external forces (e.g., blackholes) to pull exhaust/death particles
+function ship_trails_pull(cx,cy,r,strength)
+	local r2 = r*r
+	local function pull_list(list)
+		if not list then return end
+		for p in all(list) do
+			local dx = cx - p.x
+			local dy = cy - p.y
+			local d2 = dx*dx + dy*dy
+			if d2 > 0.5 and d2 < r2 then
+				local invd = 1/sqrt(d2)
+				local fall = 1 - d2/r2
+				local acc = strength * fall
+				p.dx += dx*invd * acc
+				p.dy += dy*invd * acc
+			end
+		end
+	end
+	pull_list(exhaust)
+	if death_fx then pull_list(death_fx) end
+end
+
+-- absorb (delete) any exhaust/death particles intersecting a region (e.g., hole core)
+function ship_trails_absorb(hx,hy,hw,hh)
+	local function absorb_list(list)
+		if not list then return end
+		for p in all(list) do
+			if p.x >= hx and p.x < hx+hw and p.y >= hy and p.y < hy+hh then
+				del(list, p)
+			end
+		end
+	end
+	absorb_list(exhaust)
+	if death_fx then absorb_list(death_fx) end
 end

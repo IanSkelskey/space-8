@@ -119,17 +119,9 @@ function update_moon()
 			end
 		end
 
-		-- player collision -> reset game
+		-- player collision -> start death
 		if ship and aabb(m.x,m.y,m.w,m.h, ship.x,ship.y,ship.w,ship.h) then
-			if reset_game then reset_game()
-			else
-				-- fallback reset
-				starfield_init()
-				ship_init()
-				moon_init()
-				game_state = "menu"
-				if menu_init then menu_init() end
-			end
+			if game_state == "game" and ship_kill then ship_kill() end
 			return
 		end
 
@@ -152,9 +144,9 @@ function update_moon()
 			spawn_chunk_dust(d.x+2, d.y+2)
 			del(debris, d)
 		else
-			-- collide debris with player -> reset
+			-- collide debris with player -> start death
 			if ship and aabb(d.x,d.y,4,4, ship.x,ship.y,ship.w,ship.h) then
-				if reset_game then reset_game() end
+				if game_state == "game" and ship_kill then ship_kill() end
 				return
 			end
 			-- cull if offscreen
