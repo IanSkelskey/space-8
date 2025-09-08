@@ -6,7 +6,10 @@ ship = ship or {
 	h = 8,
 	spr = 1,
 	spd = 1.5,
-	flipx = false
+	flipx = false,
+
+	vx = 0, vy = 0,    -- velocity
+	acc = 0.12         -- acceleration per frame (subtle)
 }
 
 -- lasers
@@ -61,6 +64,8 @@ function ship_init()
 	-- no-op for now (hook for future resets)
 	bullets = {}
 	exhaust = {}
+	-- reset movement
+	ship.vx, ship.vy = 0, 0
 end
 
 function update_ship()
@@ -80,14 +85,29 @@ function update_ship()
 		dy /= mag
 	end
 
-	if dx < 0 then ship.flipx = true end
-	if dx > 0 then ship.flipx = false end
+	-- face by actual motion when possible (fallback to input)
+	if ship.vx < -0.05 or (ship.vx == 0 and dx < 0) then ship.flipx = true end
+	if ship.vx >  0.05 or (ship.vx == 0 and dx > 0) then ship.flipx = false end
 
-	ship.x += dx * ship.spd
-	ship.y += dy * ship.spd
+	-- target velocity from input
+	local tx = dx * ship.spd
+	local ty = dy * ship.spd
 
-	ship.x = mid(0, ship.x, 128 - ship.w)
-	ship.y = mid(0, ship.y, 128 - ship.h)
+	-- accelerate toward target velocity (subtle accel/decel)
+	ship.vx += mid(-ship.acc, tx - ship.vx, ship.acc)
+	ship.vy += mid(-ship.acc, ty - ship.vy, ship.acc)
+
+	-- integrate position
+	ship.x += ship.vx
+	ship.y += ship.vy
+
+	-- clamp to screen (128x128) and cancel outward velocity on edges
+	local minx, maxx = 0, 128 - ship.w
+	local miny, maxy = 0, 128 - ship.h
+	if ship.x < minx then ship.x=minx if ship.vx<0 then ship.vx=0 end end
+	if ship.x > maxx then ship.x=maxx if ship.vx>0 then ship.vx=0 end end
+	if ship.y < miny then ship.y=miny if ship.vy<0 then ship.vy=0 end end
+	if ship.y > maxy then ship.y=maxy if ship.vy>0 then ship.vy=0 end end
 
 	-- exhaust strength rules (shorter trail when moving up)
 	local strength = 0.6 -- horizontal/diagonal
