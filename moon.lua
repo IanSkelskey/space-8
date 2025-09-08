@@ -60,6 +60,7 @@ function update_moon()
 			m.hp -= 1
 			if m.hp <= 0 then
 				if hud_add_score then hud_add_score(100) end
+				sfx(1)
 				del(moons, m)
 				goto continue
 			end
