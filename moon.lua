@@ -59,6 +59,7 @@ function update_moon()
 		if hit_by_player_bullet(m.x,m.y,m.w,m.h) then
 			m.hp -= 1
 			if m.hp <= 0 then
+				if hud_add_score then hud_add_score(100) end
 				del(moons, m)
 				goto continue
 			end

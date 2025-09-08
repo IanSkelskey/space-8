@@ -9,6 +9,7 @@ __lua__
 #include starfield.lua
 #include ship.lua
 #include moon.lua
+#include hud.lua
 
 game_state = "menu"
 
@@ -17,6 +18,7 @@ function reset_game()
     starfield_init()
     ship_init()
     moon_init()
+    hud_init()
     menu_init()
     game_state = "menu"
 end
@@ -25,6 +27,7 @@ function _init()
     starfield_init()
     ship_init()
     moon_init()
+    hud_init()
     menu_init()
 end
 
@@ -50,6 +53,7 @@ function _draw()
     elseif game_state == "game" then
         draw_moon()
         draw_ship()
+        draw_hud()
     end
 end
 __gfx__

@@ -4,6 +4,7 @@ local opts = {
 		game_state = "game"
 		ship_init()
 		moon_init()
+		hud_init()
 	end },
 	{ label="controls", action=function()
 		game_state = "controls"

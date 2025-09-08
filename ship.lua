@@ -135,6 +135,7 @@ function draw_ship()
 	end
 end
 
+-- expose player bullets for other systems (e.g., moon/hud)
 function ship_get_bullets()
 	return bullets
 end
