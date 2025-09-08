@@ -3,6 +3,7 @@ local opts = {
 	{ label="start", action=function()
 		game_state = "game"
 		ship_init()
+		moon_init()
 	end },
 	{ label="controls", action=function()
 		game_state = "controls"
