@@ -3,6 +3,9 @@
 game_state = "menu"
 prev_game_state = "menu"
 
+-- reserve channels: music on 0-1, sfx on 2-3
+local MUSIC_MASK = 3 -- 0b0011
+
 -- mission system
 current_mission = nil
 round_number = 1
@@ -186,14 +189,27 @@ function _draw()
         draw_ship()
         draw_hud()
         
-        -- draw distance remaining with better visibility
-        if distance_remaining > 0 then
-            -- Draw background box for better readability
-            rectfill(86, 0, 127, 8, 0)
-            print("dist: "..distance_remaining, 88, 2, 11)
+        -- subtle distance meter: slim bar + destination pin, no labels/numbers
+        if mission_distance > 0 then
+            local frac = (mission_distance - max(0, distance_remaining)) / max(1, mission_distance)
+            frac = mid(0, frac, 1)
+            local w, h = 60, 3
+            local x = flr((128 - w) / 2)
+            local y = 122
+            -- track
+            rectfill(x, y, x+w, y+h, 0)                -- outer (blend with bg)
+            rectfill(x+1, y+1, x+w-1, y+h-1, 1)        -- inner track
+            -- progress fill
+            local filled = flr(frac * (w - 2))
+            if filled > 0 then
+                rectfill(x+1, y+1, x+1+filled, y+h-1, 6) -- subtle light fill
+            end
+            -- destination pin at right end
+            local pinx = x + w - 1
+            circfill(pinx, y-1, 1, 8)                 -- pin head
+            pset(pinx, y+1, 8)                         -- tiny pointer/stem
         end
     elseif game_state == "gameover" then
-        -- show game over with score and hint
         draw_hud()
         local t = "game over"
         local p = "z: menu"
