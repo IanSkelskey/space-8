@@ -8,37 +8,37 @@ local SHIP_ACC = 0.12
 local START_X = SCREEN_W/2 - SHIP_W/2
 local START_Y = SCREEN_H/2 - SHIP_H/2
 
-local LASER_SPEED = 3
-local LASER_SFX = 0
+-- group constants to reduce local count
+local LASER = { SPEED=2, SFX=0, COOLDOWN=15, BEND_THRESHOLD=0.3, CHANNEL=1 }
 local OFF_MIN, OFF_MAX = -4, 132
 local FACE_EPS = 0.05
 
--- exhaust tuning
-local EXH_NOZZLE_L, EXH_NOZZLE_R = 2, 3
-local EXH_BASE_DY, EXH_DY_SCALE = 0.5, 0.9
-local EXH_LIFE_MIN, EXH_LIFE_RANGE = 6, 10
-local EXH_X_JITTER, EXH_DX_JITTER, EXH_DX_RANGE = 1, 0.6, 0.3
-local EXH_DY_RAND_SCALE = 0.4
-local EXH_COL_Y, EXH_COL_O, EXH_COL_R = 10, 9, 8
+local EXH = {
+	NOZZLE_L=2, NOZZLE_R=3,
+	BASE_DY=0.5, DY_SCALE=0.9,
+	LIFE_MIN=6, LIFE_RANGE=10,
+	X_JITTER=1, DX_JITTER=0.6, DX_RANGE=0.3,
+	DY_RAND_SCALE=0.4,
+	COL_Y=10, COL_O=9, COL_R=8
+}
 
--- exhaust strength presets
-local STRENGTH_HORIZ = 0.6
-local STRENGTH_IDLE  = 0.2
-local STRENGTH_DOWN  = 0.03
-local STRENGTH_UP    = 0.45
-
--- death
+local THRUST = { HORIZ=0.6, IDLE=0.2, DOWN=0.03, UP=0.45 }
 local DEATH_FRAMES = 45 -- ~1.5s at 30fps
 
--- shield constants
-local SHIELD_MAX_POWER = 100
-local SHIELD_DRAIN_RATE = 0.5  -- reduced from 2 (4x longer duration)
-local SHIELD_RECHARGE_RATE = 1.0  -- increased from 0.5 (2x faster recharge)
-local SHIELD_MIN_ACTIVATE = 10  -- minimum power needed to activate
-local SHIELD_RADIUS = 10
-local SHIELD_COLORS = {12, 13, 1}  -- light blue, lavender, dark blue
-local SHIELD_HIT_COST = 15  -- power lost when blocking a hit
-local SHIELD_INVULN_FRAMES = 30  -- 1 second of invulnerability after hit
+local SHIELD = {
+	MAX_POWER=100,
+	DRAIN_RATE=0.5,
+	RECHARGE_RATE=1.0,
+	MIN_ACTIVATE=10,
+	RADIUS=10,
+	COLORS={12,13,1},
+	HIT_COST=15,
+	INVULN_FRAMES=30,
+	CHANNEL=0,          -- dedicate channel 0 for shield loop
+	SFX_ON=30,          -- shield loop/activation
+	SFX_HIT=31,         -- impact tick
+	SFX_OFF=32          -- depletion/power down
+}
 
 -- ship state
 ship = ship or {
@@ -56,9 +56,10 @@ ship = ship or {
 	death_t = 0,
 	-- shield state
 	shield_active = false,
-	shield_power = SHIELD_MAX_POWER,
+	shield_power = SHIELD.MAX_POWER,
 	shield_anim = 0,
-	shield_invuln = 0  -- invulnerability timer
+	shield_invuln = 0,  -- invulnerability timer
+	laser_cd = 0        -- laser cooldown
 }
 
 -- lasers
@@ -72,11 +73,13 @@ local death_fx = {}
 
 local function spawn_laser()
 	-- fire upward from the ship's nose (top-center)
-	local speed = LASER_SPEED
+	local speed = LASER.SPEED
 	local bx = flr(ship.x + ship.w/2) - 1
 	local by = ship.y - 2
-	add(bullets, { x=bx, y=by, dx=0, dy=-speed })
-	sfx(LASER_SFX)
+	-- inherit a little horizontal motion so bolts can drift/tilt
+	local inherit_dx = ship.vx * 0.3
+	add(bullets, { x=bx, y=by, dx=inherit_dx, dy=-speed })
+	sfx(LASER.SFX, LASER.CHANNEL)
 end
 
 local function spawn_exhaust(strength)
@@ -85,29 +88,29 @@ local function spawn_exhaust(strength)
 	if strength <= 0 then return end
 
 	local y = ship.y + ship.h
-	local x1 = ship.x + EXH_NOZZLE_L
-	local x2 = ship.x + ship.w - EXH_NOZZLE_R
+	local x1 = ship.x + EXH.NOZZLE_L
+	local x2 = ship.x + ship.w - EXH.NOZZLE_R
 
 	-- speed/life scale with strength
-	local base_dy = EXH_BASE_DY + EXH_DY_SCALE*strength
-	local life = flr(EXH_LIFE_MIN + EXH_LIFE_RANGE*strength)
+	local base_dy = EXH.BASE_DY + EXH.DY_SCALE*strength
+	local life = flr(EXH.LIFE_MIN + EXH.LIFE_RANGE*strength)
 
 	-- probabilistic spawn per nozzle
 	if rnd(1) < strength then
 		add(exhaust, {
-			x = x1 + rnd(EXH_X_JITTER) - 0.5,
+			x = x1 + rnd(EXH.X_JITTER) - 0.5,
 			y = y,
-			dx = (rnd(EXH_DX_JITTER) - EXH_DX_RANGE) * strength,
-			dy = base_dy + rnd(EXH_DY_RAND_SCALE*strength),
+			dx = (rnd(EXH.DX_JITTER) - EXH.DX_RANGE) * strength,
+			dy = base_dy + rnd(EXH.DY_RAND_SCALE*strength),
 			life = life
 		})
 	end
 	if rnd(1) < strength then
 		add(exhaust, {
-			x = x2 + rnd(EXH_X_JITTER) - 0.5,
+			x = x2 + rnd(EXH.X_JITTER) - 0.5,
 			y = y,
-			dx = (rnd(EXH_DX_JITTER) - EXH_DX_RANGE) * strength,
-			dy = base_dy + rnd(EXH_DY_RAND_SCALE*strength),
+			dx = (rnd(EXH.DX_JITTER) - EXH.DX_RANGE) * strength,
+			dy = base_dy + rnd(EXH.DY_RAND_SCALE*strength),
 			life = life
 		})
 	end
@@ -139,21 +142,25 @@ end
 
 function ship_kill()
 	if ship.dying then return end
+	-- ensure shield loop is stopped on death
+	sfx(-1, SHIELD.CHANNEL)
 	
 	-- check for invulnerability first
 	if ship.shield_invuln > 0 then
-		return  -- still invulnerable, ignore hit
+		return
 	end
 	
 	if ship.shield_active then
 		-- shield blocks the hit, deplete some power instead
-		ship.shield_power = max(0, ship.shield_power - SHIELD_HIT_COST)
-		ship.shield_invuln = SHIELD_INVULN_FRAMES  -- start invulnerability
-		ship.shield_anim = 0  -- reset animation for flash effect
-		sfx(31)  -- shield hit sound (impact)
+		ship.shield_power = max(0, ship.shield_power - SHIELD.HIT_COST)
+		ship.shield_invuln = SHIELD.INVULN_FRAMES
+		ship.shield_anim = 0
+		sfx(SHIELD.SFX_HIT)  -- short impact tick
 		if ship.shield_power <= 0 then
 			ship.shield_active = false
-			sfx(32)  -- shield depletion sound (power down)
+			-- stop loop before power-down sound
+			sfx(-1, SHIELD.CHANNEL)
+			sfx(SHIELD.SFX_OFF)
 		end
 		return  -- blocked the damage
 	end
@@ -185,9 +192,12 @@ function ship_init()
 	ship.death_t = 0
 	-- reset shield
 	ship.shield_active = false
-	ship.shield_power = SHIELD_MAX_POWER
+	ship.shield_power = SHIELD.MAX_POWER
 	ship.shield_anim = 0
 	ship.shield_invuln = 0
+	ship.laser_cd = 0
+	-- make sure shield loop is not lingering on the channel
+	sfx(-1, SHIELD.CHANNEL)
 end
 
 local function update_death_fx()
@@ -262,19 +272,25 @@ function update_ship()
 	if ship.y > maxy then ship.y=maxy if ship.vy>0 then ship.vy=0 end end
 
 	-- exhaust strength rules (shorter trail when moving up)
-	local strength = STRENGTH_HORIZ
+	local strength = THRUST.HORIZ
 	if raw_dx == 0 and raw_dy == 0 then
-		strength = STRENGTH_IDLE
+		strength = THRUST.IDLE
 	elseif raw_dy > 0 then
-		strength = STRENGTH_DOWN
+		strength = THRUST.DOWN
 	elseif raw_dy < 0 then
-		strength = STRENGTH_UP
+		strength = THRUST.UP
 	end
 	spawn_exhaust(strength)
 
-	-- fire on spacebar press (btnp(4))
-	if btnp(4) then
+	-- tick laser cooldown
+	if ship.laser_cd > 0 then
+		ship.laser_cd -= 1
+	end
+
+	-- limit fire rate; allow hold-to-fire at capped rate
+	if ship.laser_cd <= 0 and (btn(4) or btnp(4)) then
 		spawn_laser()
+		ship.laser_cd = LASER.COOLDOWN
 	end
 
 	-- update lasers and cull offscreen
@@ -295,25 +311,29 @@ function update_ship()
 	end
 	
 	-- shield logic (button 5 is X)
-	if btn(5) and ship.shield_power >= SHIELD_MIN_ACTIVATE and not ship.dying then
+	if btn(5) and ship.shield_power >= SHIELD.MIN_ACTIVATE and not ship.dying then
 		if not ship.shield_active then
 			ship.shield_active = true
-			sfx(30)  -- shield activation sound
+			-- play/loop shield on dedicated channel
+			sfx(SHIELD.SFX_ON, SHIELD.CHANNEL)
 		end
 		-- drain shield while active
-		ship.shield_power = max(0, ship.shield_power - SHIELD_DRAIN_RATE)
+		ship.shield_power = max(0, ship.shield_power - SHIELD.DRAIN_RATE)
 		if ship.shield_power <= 0 then
 			ship.shield_active = false
-			sfx(32)  -- shield depletion sound (power down)
+			-- stop loop before depletion sound
+			sfx(-1, SHIELD.CHANNEL)
+			sfx(SHIELD.SFX_OFF)
 		end
 	else
 		if ship.shield_active then
 			ship.shield_active = false
-			sfx(-1, 0)  -- stop sound on channel 0 (where sfx 30 plays)
+			-- stop the shield loop cleanly when releasing
+			sfx(-1, SHIELD.CHANNEL)
 		end
 		-- recharge shield while inactive (and not invulnerable)
-		if ship.shield_power < SHIELD_MAX_POWER and ship.shield_invuln <= 0 then
-			ship.shield_power = min(SHIELD_MAX_POWER, ship.shield_power + SHIELD_RECHARGE_RATE)
+		if ship.shield_power < SHIELD.MAX_POWER and ship.shield_invuln <= 0 then
+			ship.shield_power = min(SHIELD.MAX_POWER, ship.shield_power + SHIELD.RECHARGE_RATE)
 		end
 	end
 	
@@ -327,7 +347,7 @@ function draw_ship()
 	-- draw exhaust behind the ship
 	for p in all(exhaust) do
 		-- fade colors: yellow(10) -> orange(9) -> red(8)
-		local c = p.life > 8 and EXH_COL_Y or (p.life > 4 and EXH_COL_O or EXH_COL_R)
+		local c = p.life > 8 and EXH.COL_Y or (p.life > 4 and EXH.COL_O or EXH.COL_R)
 		pset(flr(p.x), flr(p.y), c)
 	end
 
@@ -347,11 +367,25 @@ function draw_ship()
 		spr(sid, ship.x, ship.y, 1, 1, flip, false)
 	end
 
-	-- draw lasers
+	-- draw lasers (2px segment; bend only on stronger angles)
 	for b in all(bullets) do
-		rectfill(b.x, b.y, b.x+1, b.y+1, EXH_COL_R)
+		local tx, ty = flr(b.x), flr(b.y) -- tip
+		local ratio = abs(b.dx) / max(0.001, abs(b.dy))
+		if ratio < LASER.BEND_THRESHOLD then
+			-- straight up 2px
+			pset(tx, ty, 9)        -- tip (orange)
+			pset(tx, ty-1, 8)      -- tail (red)
+		else
+			-- bent tail opposite velocity
+			local sdx = b.dx > 0 and 1 or -1
+			local sdy = -1 -- traveling upward
+			local bx2 = tx - sdx
+			local by2 = ty - sdy
+			pset(tx, ty, 9)        -- tip (orange)
+			pset(bx2, by2, 8)      -- tail (red)
+		end
 	end
-	
+
 	-- draw shield bubble if active
 	if ship.shield_active and not ship.dying then
 		local cx = ship.x + ship.w/2
@@ -369,8 +403,8 @@ function draw_ship()
 		
 		if visible then
 			for i=1,3 do
-				local r = SHIELD_RADIUS - i + sin(t + i*0.2)*2
-				local c = flash or SHIELD_COLORS[i]
+				local r = SHIELD.RADIUS - i + sin(t + i*0.2)*2
+				local c = flash or SHIELD.COLORS[i]
 				circ(cx, cy, r, c)
 			end
 		end
@@ -389,7 +423,7 @@ end
 
 -- get shield power for HUD
 function ship_get_shield_power()
-	return ship.shield_power, SHIELD_MAX_POWER
+	return ship.shield_power, SHIELD.MAX_POWER
 end
 
 -- allow external forces (e.g., blackholes) to pull exhaust/death particles
