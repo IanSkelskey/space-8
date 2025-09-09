@@ -20,10 +20,6 @@ function hud_add_money(n)
 	money += n or 0
 end
 
-function hud_get_money()
-	return money
-end
-
 -- fuel management functions (for future use)
 function hud_use_fuel(n)
 	fuel = max(0, fuel - (n or 0))
@@ -72,13 +68,17 @@ function draw_hud()
 	-- draw better coin icon ($ symbol in circle)
 	circfill(money_x, 4, 2, 10)  -- gold circle
 	circ(money_x, 4, 2, 9)  -- darker edge
-	-- tiny $ symbol
 	pset(money_x, 2, 0)  -- top
 	pset(money_x-1, 3, 0)  -- middle left
 	pset(money_x, 4, 0)  -- center
 	pset(money_x+1, 5, 0)  -- middle right
 	pset(money_x, 6, 0)  -- bottom
-	print(money, money_x + 5, 2, 10)
+	-- fetch money from global getter if available; fallback to local money
+	local cash = money
+	if type(hud_get_money) == "function" then
+		cash = hud_get_money()
+	end
+	print(cash, money_x + 5, 2, 10)
 	
 	-- RIGHT SIDE: Dual meter system (shield and fuel side by side)
 	-- Shield meter (blue tones)

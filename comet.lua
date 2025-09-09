@@ -12,11 +12,6 @@ local SWAPS = {
 	{9,10}  -- 8->9, 9->10
 }
 
--- aabb
-local function aabb(ax,ay,aw,ah,bx,by,bw,bh)
-	return ax < bx+bw and bx < ax+aw and ay < by+bh and by < ay+ah
-end
-
 -- collect unique colors used by sprite 6 (exclude 0)
 local trail_cols = {}
 local function collect_colors_from_sprite6()
@@ -81,11 +76,6 @@ local function spawn_comet()
 	})
 end
 
-local function spawn_trail(c)
-	-- trail particle with stored color
-	add(parts, c)
-end
-
 function update_comet()
 	-- spawn cadence
 	spawn_t -= 1/30
@@ -127,18 +117,6 @@ function update_comet()
 		end
 
 		-- collide with player using only the "nose" quadrant (4x4)
-		-- default nose is upper-right, adjust based on flips
-		local fx = c.dx < 0  -- flip horizontally if moving left
-		local fy = c.dy > 0  -- flip vertically if moving down
-		
-		-- calculate nose position based on flips
-		-- no flip: upper-right (x+4, y+0)
-		-- fx only: upper-left (x+0, y+0)
-		-- fy only: lower-right (x+4, y+4)
-		-- both: lower-left (x+0, y+4)
-		local nose_x = c.x + (fx and 0 or 4)
-		local nose_y = c.y + (fy and 4 or 0)
-		
 		-- check collision with player
 		if ship and not c.warning and aabb(c.x,c.y,c.w,c.h, ship.x,ship.y,ship.w,ship.h) then
 			if ship_kill then ship_kill() end  -- ship_kill now handles shield check internally

@@ -1,219 +1,202 @@
--- main game loop and logic
-
-game_state = "menu"
-prev_game_state = "menu"
-
--- reserve channels: music on 0-1, sfx on 2-3
-local MUSIC_MASK = 3 -- 0b0011
-
--- mission system
-current_mission = nil
-round_number = 1
-mission_distance = 0
-distance_remaining = 0
-
--- sci-fi name generators
-sci_adj = {"quantum","plasma","ionic","fusion","nano","cyber","holo","cryo","flux","void"}
-sci_noun = {"core","drive","matrix","relay","beacon","module","crystal","reactor","emitter","array"}
-
+-- game
+game_state="menu"
+prev_game_state="menu"
+function aabb(ax,ay,aw,ah,bx,by,bw,bh)
+	return ax<bx+bw and bx<ax+aw and ay<by+bh and by<ay+ah
+end
+local MUSIC_MASK=3
+local FANFARE_LOCK=120
+current_mission=nil
+round_number=1
+mission_distance=0
+distance_remaining=0
+level_fanfare_active=false
+level_fanfare_timer=0
+local MONEY={MIN_BASE=50,BASE_PER_100=5,POINT_RATE=0.1}
+money_total=money_total or 0
+last_pay=last_pay or 0
+last_bonus=last_bonus or 0
+last_points=last_points or 0
+last_payout_ready=last_payout_ready or false
+sci_adj={"quantum","plasma","ionic","fusion","nano","cyber","holo","cryo","flux","void"}
+sci_noun={"core","drive","matrix","relay","beacon","module","crystal","reactor","emitter","array"}
 function generate_mission()
-    local adj = sci_adj[flr(rnd(#sci_adj))+1]
-    local noun = sci_noun[flr(rnd(#sci_noun))+1]
-    current_mission = adj.." "..noun
-    -- increase distance with each round
-    mission_distance = 500 + (round_number * 100)
-    distance_remaining = mission_distance
+	local adj=sci_adj[flr(rnd(#sci_adj))+1]
+	local noun=sci_noun[flr(rnd(#sci_noun))+1]
+	current_mission=adj.." "..noun
+	mission_distance=500+(round_number*100)
+	distance_remaining=mission_distance
 end
-
+local function get_points()
+	if type(hud_get_points)=="function"then return hud_get_points()end
+	if points~=nil then return points end
+	if score~=nil then return score end
+	return 0
+end
+local function reset_points()
+	if type(hud_reset_points)=="function"then hud_reset_points()return end
+	if points~=nil then points=0 end
+	if score~=nil then score=0 end
+end
 function complete_mission()
-    round_number += 1
-    generate_mission()
-    -- reset obstacles for new round
-    moon_init()
-    blackhole_init()
-    comet_init()
-    game_state = "station"
+	local pts=get_points()
+	last_points=pts
+	last_bonus=flr(pts*MONEY.POINT_RATE)
+	last_pay=MONEY.MIN_BASE+flr(mission_distance/100)*MONEY.BASE_PER_100
+	money_total+=last_pay+last_bonus
+	last_payout_ready=true
+	reset_points()
+	round_number+=1
+	generate_mission()
+	moon_init()
+	blackhole_init()
+	comet_init()
+	music(-1,0)
+	music(8,0,MUSIC_MASK)
+	level_fanfare_active=true
+	level_fanfare_timer=FANFARE_LOCK
+	game_state="station"
 end
-
--- reset helper used by obstacles
 function reset_game()
-    music(-1, 0) -- stop any playing music
-    starfield_init()
-    ship_init()
-    moon_init()
-    hud_init()
-    blackhole_init()
-    comet_init()
-    menu_init()
-    game_state = "menu"
-    prev_game_state = "menu"
-    
-    -- reset mission system
-    round_number = 1
-    current_mission = nil
-    mission_distance = 0
-    distance_remaining = 0
-    
-    -- Start menu music (channels 0-1 only)
-    music(0, 0, MUSIC_MASK)
+	music(-1,0)
+	starfield_init()
+	ship_init()
+	moon_init()
+	hud_init()
+	blackhole_init()
+	comet_init()
+	menu_init()
+	game_state="menu"
+	prev_game_state="menu"
+	round_number=1
+	current_mission=nil
+	mission_distance=0
+	distance_remaining=0
+	money_total=0
+	last_pay,last_bonus,last_points=0,0,0
+	last_payout_ready=false
+	music(0,0,MUSIC_MASK)
 end
-
 function _init()
-    starfield_init()
-    ship_init()
-    moon_init()
-    hud_init()
-    blackhole_init()
-    comet_init()
-    menu_init()
-    
-    -- Start menu music (channels 0-1 only)
-    music(0, 0, MUSIC_MASK)
+	starfield_init()
+	ship_init()
+	moon_init()
+	hud_init()
+	blackhole_init()
+	comet_init()
+	menu_init()
+	music(0,0,MUSIC_MASK)
 end
-
 function _update()
-    update_starfield()
-    
-    -- Store the current state before any updates
-    local old_state = game_state
-    
-    -- Simple music state handling
-    if game_state == "game" and prev_game_state == "station" then
-        -- Start gameplay music (pattern 4) on channels 0-1
-        music(-1, 0)
-        music(4, 0, MUSIC_MASK)
-    elseif (game_state == "menu" or game_state == "station") and 
-           prev_game_state != "menu" and prev_game_state != "station" then
-        -- Start menu music (pattern 0) on channels 0-1
-        music(-1, 0)
-        music(0, 0, MUSIC_MASK)
-    elseif (game_state == "controls" or game_state == "gameover") and 
-           (prev_game_state == "game" or prev_game_state == "menu" or prev_game_state == "station") then
-        -- Stop music when entering non-music states
-        music(-1, 0)
-    end
-    
-    if game_state == "menu" then
-        update_menu()
-        -- Check if menu just changed state to "game"
-        if game_state == "game" then
-            -- Intercept and go to station instead
-            game_state = "station"
-            generate_mission()
-        end
-    elseif game_state == "controls" then
-        update_controls()
-    elseif game_state == "station" then
-        -- station update - press z to launch
-        if btnp(4) then
-            game_state = "game"
-            ship_init() -- reset ship for new round
-        end
-    elseif game_state == "game" then
-        update_blackhole()
-        update_moon()
-        update_comet()
-        update_ship()
-        
-        -- update distance
-        if distance_remaining > 0 and not (ship and ship.dying) then
-            distance_remaining -= 1
-            if distance_remaining <= 0 then
-                complete_mission()
-            end
-        end
-        
-        -- transition if ship triggered death internally
-        if ship and ship.dying then 
-            game_state = "dying" 
-        end
-    elseif game_state == "dying" then
-        -- keep background/obstacles moving for drama
-        update_blackhole()
-        update_moon()
-        update_comet()
-        update_ship()
-        if ship_death_done and ship_death_done() then
-            game_state = "gameover"
-        end
-    elseif game_state == "gameover" then
-        -- wait for confirm to return to menu
-        if btnp(4) then
-            reset_game()
-        end
-    end
-    
-    -- Update previous state
-    prev_game_state = old_state
+	update_starfield()
+	if level_fanfare_active then
+		if level_fanfare_timer>0 then
+			level_fanfare_timer-=1
+		else
+			level_fanfare_active=false
+		end
+	end
+	local old_state=game_state
+	if game_state=="game"and prev_game_state=="station"then
+		music(-1,0)
+		music(4,0,MUSIC_MASK)
+	elseif(game_state=="menu"or game_state=="station")and prev_game_state!="menu"and prev_game_state!="station"and not level_fanfare_active then
+		music(-1,0)
+		music(0,0,MUSIC_MASK)
+	elseif(game_state=="controls"or game_state=="gameover")and(prev_game_state=="game"or prev_game_state=="menu"or prev_game_state=="station")then
+		music(-1,0)
+	end
+	if game_state=="menu"then
+		update_menu()
+		if game_state=="game"then
+			game_state="station"
+			generate_mission()
+		end
+	elseif game_state=="controls"then
+		update_controls()
+	elseif game_state=="station"then
+		if btnp(4)and not level_fanfare_active then
+			level_fanfare_active=false
+			level_fanfare_timer=0
+			last_payout_ready=false
+			game_state="game"
+			ship_init()
+		end
+	elseif game_state=="game"then
+		update_blackhole()
+		update_moon()
+		update_comet()
+		update_ship()
+		if distance_remaining>0 and not(ship and ship.dying)then
+			distance_remaining-=1
+			if distance_remaining<=0 then
+				complete_mission()
+			end
+		end
+		if ship and ship.dying then game_state="dying"end
+	elseif game_state=="dying"then
+		update_blackhole()
+		update_moon()
+		update_comet()
+		update_ship()
+		if ship_death_done and ship_death_done()then
+			game_state="gameover"
+		end
+	elseif game_state=="gameover"then
+		if btnp(4)then reset_game()end
+	end
+	prev_game_state=old_state
 end
-
 function draw_station()
-    -- draw space station
-    -- main hub
-    circfill(30, 64, 20, 5)
-    circ(30, 64, 20, 6)
-    
-    -- docking ports
-    rectfill(50, 62, 70, 66, 5)
-    rectfill(68, 60, 72, 68, 6)
-    
-    -- ship docked
-    spr(0, 74, 60)
-    
-    -- mission briefing
-    print("space station", 40, 10, 7)
-    print("round "..round_number, 48, 20, 6)
-    
-    print("delivery mission:", 32, 35, 12)
-    if current_mission then
-        print(current_mission, 64-#current_mission*2, 45, 11)
-        print("distance: "..mission_distance.." units", 28, 55, 6)
-    end
-    
-    print("press z to launch", 32, 100, 10)
+	circfill(30,64,20,5)
+	circ(30,64,20,6)
+	rectfill(50,62,70,66,5)
+	rectfill(68,60,72,68,6)
+	spr(0,74,60)
+	print("station",52,10,7)
+	print("round "..round_number,48,20,6)
+	print("mission:",44,35,12)
+	if current_mission then
+		print(current_mission,64-#current_mission*2,45,11)
+		print("dist: "..mission_distance,40,55,6)
+	end
+	print("$"..money_total,52,68,10)
+	if last_payout_ready then
+		print("+$"..(last_pay+last_bonus),48,78,11)
+	end
+	print("z: launch",44,100,10)
 end
-
+function hud_get_money()return money_total end
 function _draw()
-    cls(0)
-    draw_starfield()
-    if game_state == "menu" then
-        draw_menu()
-    elseif game_state == "controls" then
-        draw_controls()
-    elseif game_state == "station" then
-        draw_station()
-    elseif game_state == "game" or game_state == "dying" then
-        draw_blackhole()
-        draw_moon()
-        draw_comet()
-        draw_ship()
-        draw_hud()
-        
-        -- subtle distance meter: slim bar + destination pin, no labels/numbers
-        if mission_distance > 0 then
-            local frac = (mission_distance - max(0, distance_remaining)) / max(1, mission_distance)
-            frac = mid(0, frac, 1)
-            local w, h = 60, 3
-            local x = flr((128 - w) / 2)
-            local y = 122
-            -- track
-            rectfill(x, y, x+w, y+h, 0)                -- outer (blend with bg)
-            rectfill(x+1, y+1, x+w-1, y+h-1, 1)        -- inner track
-            -- progress fill
-            local filled = flr(frac * (w - 2))
-            if filled > 0 then
-                rectfill(x+1, y+1, x+1+filled, y+h-1, 6) -- subtle light fill
-            end
-            -- destination pin at right end
-            local pinx = x + w - 1
-            circfill(pinx, y-1, 1, 8)                 -- pin head
-            pset(pinx, y+1, 8)                         -- tiny pointer/stem
-        end
-    elseif game_state == "gameover" then
-        draw_hud()
-        local t = "game over"
-        local p = "z: menu"
-        print(t, 40, 54, 7)
-        print(p, 46, 66, 6)
-    end
+	cls(0)
+	draw_starfield()
+	if game_state=="menu"then
+		draw_menu()
+	elseif game_state=="controls"then
+		draw_controls()
+	elseif game_state=="station"then
+		draw_station()
+	elseif game_state=="game"or game_state=="dying"then
+		draw_blackhole()
+		draw_moon()
+		draw_comet()
+		draw_ship()
+		draw_hud()
+		if mission_distance>0 then
+			local frac=(mission_distance-max(0,distance_remaining))/max(1,mission_distance)
+			frac=mid(0,frac,1)
+			local w,h,x,y=60,3,flr((128-60)/2),122
+			rectfill(x,y,x+w,y+h,0)
+			rectfill(x+1,y+1,x+w-1,y+h-1,1)
+			local filled=flr(frac*(w-2))
+			if filled>0 then rectfill(x+1,y+1,x+1+filled,y+h-1,6)end
+			local px=x+w-1
+			circfill(px,y-1,1,8)
+			pset(px,y+1,8)
+		end
+	elseif game_state=="gameover"then
+		draw_hud()
+		print("game over",40,54,7)
+		print("z: menu",46,66,6)
+	end
 end

@@ -3,11 +3,6 @@
 local moons = {}
 local spawn_t = 0.0
 
--- simple aabb overlap
-local function aabb(ax,ay,aw,ah,bx,by,bw,bh)
-	return ax < bx+bw and bx < ax+aw and ay < by+bh and by < ay+ah
-end
-
 -- bullets helper (from ship.lua)
 local function player_bullets()
 	if ship_get_bullets then return ship_get_bullets() end
@@ -40,9 +35,9 @@ local SPR_LARGE_BL = 23  -- bottom left
 local SPR_LARGE_BR = 24  -- bottom right
 
 -- scoring
-local MOON_SCORE  = 100
-local LARGE_MOON_SCORE = 250
-local CHUNK_SCORE = 20
+local MOON_SCORE  = 200        -- was 100; now 2-hit moons pay more
+local LARGE_MOON_SCORE = 300   -- was 250; now 3-hit large moons pay more
+local CHUNK_SCORE = 20         -- chunks stay 1-hit and unchanged
 
 -- harmless dust pixels
 local dust = {}
@@ -103,7 +98,7 @@ local function spawn_child_moons(x, y, w, h)
 			dx = cos(angle) * speed,
 			dy = sin(angle) * speed * 0.5 + 0.9,  -- inherit downward motion
 			spd = 0.9,
-			hp = 1,
+			hp = 2,               -- regular moons now take 2 hits
 			large = false,
 			flash_t = 0
 		})
@@ -132,7 +127,7 @@ local function spawn_moon()
 			w = 16, h = 16,
 			dx = 0, dy = 0,  -- no horizontal drift initially
 			spd = spd * 0.8,  -- slightly slower
-			hp = 2,
+			hp = 3,           -- large moons now take 3 hits
 			large = true,
 			flash_t = 0  -- flash timer when hit
 		})
@@ -143,7 +138,7 @@ local function spawn_moon()
 			w = 8, h = 8,
 			dx = 0, dy = 0,
 			spd = spd,
-			hp = 1,
+			hp = 2,           -- regular moons now take 2 hits
 			large = false,
 			flash_t = 0
 		})
@@ -237,12 +232,26 @@ function update_moon()
 end
 
 function draw_moon()
+	-- helper to render sprites as white while respecting transparency
+	local function begin_white_flash()
+		for i=1,15 do pal(i,7) end -- map all non-zero colors to white
+		palt(0, true)             -- keep color 0 transparent
+	end
+	local function end_white_flash()
+		pal()                     -- reset palette
+		palt()                    -- reset transparency (color 0 transparent)
+	end
+
 	for m in all(moons) do
 		if m.large then
-			-- draw 2x2 moon sprite using specific sprites
 			if m.flash_t > 0 and m.flash_t % 2 == 0 then
-				-- flash white effect
-				rectfill(m.x, m.y, m.x+15, m.y+15, 7)
+				begin_white_flash()
+				-- draw proper 2x2 sprite arrangement (now white where opaque)
+				spr(SPR_LARGE_TL, m.x, m.y)
+				spr(SPR_LARGE_TR, m.x+8, m.y)
+				spr(SPR_LARGE_BL, m.x, m.y+8)
+				spr(SPR_LARGE_BR, m.x+8, m.y+8)
+				end_white_flash()
 			else
 				-- draw proper 2x2 sprite arrangement
 				spr(SPR_LARGE_TL, m.x, m.y)
@@ -252,8 +261,10 @@ function draw_moon()
 			end
 		else
 			if m.flash_t > 0 and m.flash_t % 2 == 0 then
-				-- flash white effect for regular moon
-				rectfill(m.x, m.y, m.x+7, m.y+7, 7)
+				begin_white_flash()
+				-- draw regular moon sprite (now white where opaque)
+				spr(SPR_MOON, m.x, m.y)
+				end_white_flash()
 			else
 				spr(SPR_MOON, m.x, m.y)
 			end
