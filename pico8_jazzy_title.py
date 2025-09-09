@@ -1,6 +1,6 @@
 from midiutil import MIDIFile
 
-# Create a MIDI file with 4 tracks
+# Create a MIDI file with 4 tracks (monophonic for PICO-8)
 midi = MIDIFile(4)
 tempo = 60  # Slower, more contemplative
 for i in range(4):
@@ -32,99 +32,111 @@ for root, dur in bass_roots:
         add(1, 0, root + 7, time + dur * 0.75, dur * 0.25, 60)
     time += dur
 
-# Floating melody (sparse, contemplative)
-melody_notes = [
-    # Opening phrase - long, sustained notes
+# Track 0: Combined melody line (main melody + counter melody in gaps)
+# Using main melody and filling gaps with counter melody
+combined_melody = [
+    # Opening phrase - main melody
     (72, 3), (0, 1),  # C (rest)
     (74, 2), (76, 2),  # D, E
     (77, 6), (0, 2),   # F (long), rest
     
-    # Development
+    # Counter melody enters during rest
+    (65, 3), (0, 1),  # F from counter
+    
+    # Back to main melody development
     (79, 1.5), (77, 0.5), (76, 2),  # G, F, E
+    (67, 2), (69, 2),  # G, A from counter
     (74, 3), (0, 1),  # D, rest
     
-    # Resolution phrase
+    # Counter melody continues
+    (64, 4),  # E (sustained)
+    
+    # Resolution phrase - main melody
     (72, 2), (71, 2),  # C, B
+    (62, 2), (60, 2),  # D, C from counter
     (69, 4),  # A (sustained)
-    (67, 2), (72, 6),  # G, C (final)
+    (67, 2), (72, 6),  # G, C (final with G sustain underneath implied)
 ]
 
 time = 0
-for pitch, dur in melody_notes:
+for pitch, dur in combined_melody:
     if pitch > 0:  # 0 means rest
         add(0, 0, pitch, time, dur * 0.9, 85)
     time += dur
 
-# Lush chord voicings (comping)
-chord_voicings = [
-    # Cmaj9
-    [(60, 64, 67, 71, 74), 4],
-    # Am11
-    [(57, 60, 64, 67, 71), 4],
-    # Fmaj7#11
-    [(53, 57, 60, 64, 66), 4],
-    # Em7
-    [(52, 55, 59, 62, 64), 4],
-    # Dm9
-    [(50, 53, 57, 60, 64), 4],
-    # G13sus
-    [(55, 60, 62, 65, 69), 4],
-    # Cmaj7
-    [(60, 64, 67, 71), 2],
-    # Bbmaj7#11
-    [(58, 62, 65, 69, 72), 2],
+# Track 2: Arpeggiated chords (monophonic, using smart voice leading)
+# Convert lush chord voicings to rolling arpeggios
+chord_arpeggios = [
+    # Cmaj9 - roll through: C-E-G-B-D
+    [(60, 0.5), (64, 0.5), (67, 0.5), (71, 0.5), (74, 0.5), (71, 0.5), (67, 0.5), (64, 0.5)],
+    # Am11 - roll through: A-C-E-G-B
+    [(57, 0.5), (60, 0.5), (64, 0.5), (67, 0.5), (71, 0.5), (67, 0.5), (64, 0.5), (60, 0.5)],
+    # Fmaj7#11 - roll through: F-A-C-E-B
+    [(53, 0.5), (57, 0.5), (60, 0.5), (64, 0.5), (66, 0.5), (64, 0.5), (60, 0.5), (57, 0.5)],
+    # Em7 - roll through: E-G-B-D
+    [(52, 0.5), (55, 0.5), (59, 0.5), (62, 0.5), (64, 0.5), (62, 0.5), (59, 0.5), (55, 0.5)],
+    # Dm9 - roll through: D-F-A-C-E
+    [(50, 0.5), (53, 0.5), (57, 0.5), (60, 0.5), (64, 0.5), (60, 0.5), (57, 0.5), (53, 0.5)],
+    # G13sus - roll through: G-C-D-F-A
+    [(55, 0.5), (60, 0.5), (62, 0.5), (65, 0.5), (69, 0.5), (65, 0.5), (62, 0.5), (60, 0.5)],
+    # Cmaj7 - shorter pattern
+    [(60, 0.5), (64, 0.5), (67, 0.5), (71, 0.5)],
+    # Bbmaj7#11 - shorter pattern
+    [(58, 0.5), (62, 0.5), (65, 0.5), (69, 0.5)],
 ]
 
 time = 0
-for chord, dur in chord_voicings:
-    # Play chord notes slightly staggered for jazz feel
-    offset = 0
-    for note in chord:
-        add(2, 0, note, time + offset, dur - 0.1, 65)
-        offset += 0.05  # Slight roll
-    time += dur
+for arpeggio in chord_arpeggios:
+    for note, dur in arpeggio:
+        add(2, 0, note, time, dur * 0.9, 65)
+        time += dur
 
-# Subtle brushes-style drums
+# Track 3: Simplified drums (monophonic - one hit at a time)
+# Using jazz brush patterns but one sound at a time
 time = 0
 for bar in range(8):
     for beat in range(4):
-        # Soft hi-hat on all beats
-        add(3, 9, 42, time, 0.1, 40)
-        
-        # Kick on 1 and 3, very soft
-        if beat == 0 or beat == 2:
+        # Pattern: hat-kick-hat-snare for basic jazz feel
+        if beat == 0:
+            # Kick on 1
             add(3, 9, 36, time, 0.2, 50)
-        
-        # Brush snare on 2 and 4
-        if beat == 1 or beat == 3:
+            # Hi-hat on off-beats
+            add(3, 9, 42, time + 0.25, 0.1, 40)
+            add(3, 9, 42, time + 0.5, 0.1, 35)
+            add(3, 9, 42, time + 0.75, 0.1, 35)
+        elif beat == 1:
+            # Snare on 2
             add(3, 9, 38, time, 0.15, 45)
-            # Ghost note after
+            # Ghost note
             add(3, 9, 38, time + 0.5, 0.1, 30)
-        
-        # Occasional ride cymbal
-        if (bar % 2 == 0) and beat == 0:
-            add(3, 9, 51, time, 2, 55)
+            # Hi-hats
+            add(3, 9, 42, time + 0.75, 0.1, 35)
+        elif beat == 2:
+            # Kick on 3 (softer)
+            add(3, 9, 36, time, 0.2, 40)
+            # Hi-hats
+            add(3, 9, 42, time + 0.25, 0.1, 35)
+            add(3, 9, 42, time + 0.5, 0.1, 35)
+            add(3, 9, 42, time + 0.75, 0.1, 35)
+        else:  # beat == 3
+            # Snare on 4
+            add(3, 9, 38, time, 0.15, 45)
+            # Fill with hi-hats
+            add(3, 9, 42, time + 0.25, 0.1, 40)
+            add(3, 9, 42, time + 0.5, 0.1, 35)
+            # Occasional ride accent
+            if bar % 2 == 1:
+                add(3, 9, 51, time + 0.75, 0.25, 55)
+            else:
+                add(3, 9, 42, time + 0.75, 0.1, 35)
         
         time += 1
-
-# Add some texture with a second melody line (saxophone-like counter melody)
-counter_melody = [
-    (0, 8),  # Rest for first 8 beats
-    (65, 3), (0, 1),  # F
-    (67, 2), (69, 2),  # G, A
-    (64, 4),  # E (sustained)
-    (62, 2), (60, 2),  # D, C
-    (0, 4),  # Rest
-    (67, 8),  # G (long sustain to end)
-]
-
-time = 0
-for pitch, dur in counter_melody:
-    if pitch > 0:
-        add(0, 1, pitch, time, dur * 0.9, 70)  # Softer than main melody
-    time += dur
 
 with open("pico8_jazzy_title.mid", "wb") as f:
     midi.writeFile(f)
 
-print("Generated pico8_jazzy_title.mid - A contemplative jazz piece inspired by Space Lion")
+print("Generated pico8_jazzy_title.mid - A contemplative jazz piece adapted for PICO-8's 4 monophonic channels")
+print("Track 0: Melody line (combined main and counter melodies)")
+print("Track 1: Walking bass")
+print("Track 2: Arpeggiated chords (implying harmony)")
+print("Track 3: Jazz drums (monophonic pattern)")
