@@ -5,6 +5,7 @@ local opts = {
 		ship_init()
 		moon_init()
 		hud_init()
+		comet_init()
 	end },
 	{ label="controls", action=function()
 		game_state = "controls"
