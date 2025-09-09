@@ -6,6 +6,7 @@ local spawn_t = 0
 local WARNING_TIME = 20  -- frames to show warning
 
 local SWAPS = {
+	{8,9},  -- original colors (no swap)
 	{1,12}, -- 8->1, 9->12
 	{3,11}, -- 8->3, 9->11
 	{9,10}  -- 8->9, 9->10
