@@ -1,6 +1,7 @@
 local sel = 1
 local opts = {
 	{ label="start", action=function()
+		music(-1) -- stop menu music
 		game_state = "game"
 		ship_init()
 		moon_init()
@@ -8,6 +9,7 @@ local opts = {
 		comet_init()
 	end },
 	{ label="controls", action=function()
+		music(-1) -- stop menu music
 		game_state = "controls"
 		controls_init()
 	end },
@@ -18,6 +20,7 @@ local opts = {
 
 function menu_init()
 	sel = 1
+	music(0, 0, 1) -- start playing pattern 0, fade-in 0, channel mask 1 (loop)
 end
 
 function update_menu()
