@@ -9,7 +9,7 @@ local START_X = SCREEN_W/2 - SHIP_W/2
 local START_Y = SCREEN_H/2 - SHIP_H/2
 
 -- group constants to reduce local count
-local LASER = { SPEED=2, SFX=0, COOLDOWN=15, BEND_THRESHOLD=0.3, CHANNEL=1 }
+local LASER = { SPEED=2, SFX=0, COOLDOWN=15, BEND_THRESHOLD=0.3, CHANNEL=2 }  -- changed from 1 to 2
 local OFF_MIN, OFF_MAX = -4, 132
 local FACE_EPS = 0.05
 
@@ -34,7 +34,7 @@ local SHIELD = {
 	COLORS={12,13,1},
 	HIT_COST=15,
 	INVULN_FRAMES=30,
-	CHANNEL=0,          -- dedicate channel 0 for shield loop
+	CHANNEL=3,          -- shield loop now on channel 3 (music uses 0-1, SFX keep to 2-3)
 	SFX_ON=30,          -- shield loop/activation
 	SFX_HIT=31,         -- impact tick
 	SFX_OFF=32          -- depletion/power down
@@ -155,12 +155,12 @@ function ship_kill()
 		ship.shield_power = max(0, ship.shield_power - SHIELD.HIT_COST)
 		ship.shield_invuln = SHIELD.INVULN_FRAMES
 		ship.shield_anim = 0
-		sfx(SHIELD.SFX_HIT)  -- short impact tick
+		sfx(SHIELD.SFX_HIT, 3)  -- use channel 3 for one-shot effects
 		if ship.shield_power <= 0 then
 			ship.shield_active = false
 			-- stop loop before power-down sound
 			sfx(-1, SHIELD.CHANNEL)
-			sfx(SHIELD.SFX_OFF)
+			sfx(SHIELD.SFX_OFF, 3)  -- use channel 3 for one-shot effects
 		end
 		return  -- blocked the damage
 	end
@@ -171,8 +171,8 @@ function ship_kill()
 	exhaust = {}
 	death_fx = {}
 	spawn_death_fx()
-	-- reuse sfx(1) for death for now
-	sfx(1)
+	-- reuse sfx(1) for death, play on channel 3
+	sfx(1, 3)
 	-- move game into dying state
 	game_state = "dying"
 end
@@ -323,7 +323,7 @@ function update_ship()
 			ship.shield_active = false
 			-- stop loop before depletion sound
 			sfx(-1, SHIELD.CHANNEL)
-			sfx(SHIELD.SFX_OFF)
+			sfx(SHIELD.SFX_OFF, 3)  -- use channel 3 for one-shot effects
 		end
 	else
 		if ship.shield_active then

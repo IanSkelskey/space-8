@@ -33,8 +33,15 @@ local SPR_SHARDS = 5
 local SHARDS_SX = (SPR_SHARDS%16)*8
 local SHARDS_SY = flr(SPR_SHARDS/16)*8
 
+-- Large moon sprites (2x2 arrangement)
+local SPR_LARGE_TL = 7   -- top left
+local SPR_LARGE_TR = 8   -- top right
+local SPR_LARGE_BL = 23  -- bottom left
+local SPR_LARGE_BR = 24  -- bottom right
+
 -- scoring
 local MOON_SCORE  = 100
+local LARGE_MOON_SCORE = 250
 local CHUNK_SCORE = 20
 
 -- harmless dust pixels
@@ -76,6 +83,33 @@ local function spawn_moon_debris(x,y)
 	end
 end
 
+-- spawn smaller moons when large moon is destroyed
+local function spawn_child_moons(x, y, w, h)
+	-- spawn 4 regular moons from the large moon's quadrants
+	local positions = {
+		{x + 2, y + 2},      -- top left
+		{x + w - 10, y + 2}, -- top right
+		{x + 2, y + h - 10}, -- bottom left
+		{x + w - 10, y + h - 10} -- bottom right
+	}
+	
+	for i=1,4 do
+		local angle = (i-1) * 0.25 + rnd(0.1) -- spread in 4 directions
+		local speed = 0.4 + rnd(0.3)
+		add(moons, {
+			x = positions[i][1],
+			y = positions[i][2],
+			w = 8, h = 8,
+			dx = cos(angle) * speed,
+			dy = sin(angle) * speed * 0.5 + 0.9,  -- inherit downward motion
+			spd = 0.9,
+			hp = 1,
+			large = false,
+			flash_t = 0
+		})
+	end
+end
+
 function moon_init()
 	moons = {}
 	spawn_t = 0
@@ -87,13 +121,33 @@ local function spawn_moon()
 	-- scroll speed close to near star layer
 	local spd = 0.9
 	local hud_top = HUD_HEIGHT or 0
-	add(moons, {
-		x = flr(rnd(128-8)),
-		y = hud_top - 10,  -- spawn above HUD area
-		w = 8, h = 8,
-		spd = spd,
-		hp = 1
-	})
+	
+	-- 30% chance for large moon
+	local is_large = rnd(1) < 0.3
+	
+	if is_large then
+		add(moons, {
+			x = flr(rnd(128-16)),
+			y = hud_top - 20,  -- spawn above HUD area
+			w = 16, h = 16,
+			dx = 0, dy = 0,  -- no horizontal drift initially
+			spd = spd * 0.8,  -- slightly slower
+			hp = 2,
+			large = true,
+			flash_t = 0  -- flash timer when hit
+		})
+	else
+		add(moons, {
+			x = flr(rnd(128-8)),
+			y = hud_top - 10,  -- spawn above HUD area
+			w = 8, h = 8,
+			dx = 0, dy = 0,
+			spd = spd,
+			hp = 1,
+			large = false,
+			flash_t = 0
+		})
+	end
 end
 
 function update_moon()
@@ -107,16 +161,31 @@ function update_moon()
 	-- update + collisions
 	for m in all(moons) do
 		m.y += m.spd
+		m.x += m.dx
+		
+		-- update flash timer
+		if m.flash_t > 0 then
+			m.flash_t -= 1
+		end
 
-		-- bullet hit destroys the moon
+		-- bullet hit
 		if hit_by_player_bullet(m.x,m.y,m.w,m.h) then
 			m.hp -= 1
 			if m.hp <= 0 then
-				if hud_add_score then hud_add_score(MOON_SCORE) end
-				sfx(1)
-				spawn_moon_debris(m.x, m.y)
+				-- destroyed
+				if m.large then
+					if hud_add_score then hud_add_score(LARGE_MOON_SCORE) end
+					spawn_child_moons(m.x, m.y, m.w, m.h)
+				else
+					if hud_add_score then hud_add_score(MOON_SCORE) end
+					spawn_moon_debris(m.x + (m.w-8)/2, m.y + (m.h-8)/2)
+				end
+				sfx(1, 3)  -- play explosion on channel 3
 				del(moons, m)
 				goto continue
+			else
+				-- damaged but not destroyed - flash white
+				m.flash_t = 6  -- flash for 6 frames
 			end
 		end
 
@@ -126,7 +195,7 @@ function update_moon()
 		end
 
 		-- cull
-		if m.y > 136 then del(moons, m) end
+		if m.y > 136 or m.x < -20 or m.x > 148 then del(moons, m) end
 		::continue::
 	end
 
@@ -169,7 +238,26 @@ end
 
 function draw_moon()
 	for m in all(moons) do
-		spr(SPR_MOON, m.x, m.y)
+		if m.large then
+			-- draw 2x2 moon sprite using specific sprites
+			if m.flash_t > 0 and m.flash_t % 2 == 0 then
+				-- flash white effect
+				rectfill(m.x, m.y, m.x+15, m.y+15, 7)
+			else
+				-- draw proper 2x2 sprite arrangement
+				spr(SPR_LARGE_TL, m.x, m.y)
+				spr(SPR_LARGE_TR, m.x+8, m.y)
+				spr(SPR_LARGE_BL, m.x, m.y+8)
+				spr(SPR_LARGE_BR, m.x+8, m.y+8)
+			end
+		else
+			if m.flash_t > 0 and m.flash_t % 2 == 0 then
+				-- flash white effect for regular moon
+				rectfill(m.x, m.y, m.x+7, m.y+7, 7)
+			else
+				spr(SPR_MOON, m.x, m.y)
+			end
+		end
 	end
 	-- draw debris shards
 	for d in all(debris) do
