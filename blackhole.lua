@@ -5,7 +5,6 @@ local HOLE_WIDTH = 8
 local HOLE_HEIGHT = 8
 local HOLE_HALF_WIDTH = 4
 local HOLE_HALF_HEIGHT = 4
-local HOLE_INIT_Y = -10
 local HOLE_SPEED = 0.8
 local HOLE_RADIUS = 50
 local HOLE_MAX_COUNT = 2
@@ -113,9 +112,10 @@ local function pull_bullets(h)
 end
 
 local function spawn_hole()
+	local hud_top = HUD_HEIGHT or 0
 	add(holes, {
 		x = flr(rnd(SCREEN_WIDTH-HOLE_WIDTH)),
-		y = HOLE_INIT_Y,
+		y = hud_top - 10,  -- spawn above HUD area
 		w = HOLE_WIDTH, h = HOLE_HEIGHT,
 		spd = HOLE_SPEED,
 		r = HOLE_RADIUS,
@@ -272,13 +272,9 @@ function update_blackhole()
 			end
 		end
 
-		-- collide with player -> start death animation
+		-- check collision with player
 		if ship and aabb(h.x,h.y,h.w,h.h, ship.x,ship.y,ship.w,ship.h) then
-			if game_state == "game" and ship_kill then
-				ship_kill()
-				return
-			end
-			-- while dying/gameover, don't exit early; keep updating particles
+			if ship_kill then ship_kill() end  -- ship_kill now handles shield check internally
 		end
 
 		-- cull if offscreen

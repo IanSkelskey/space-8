@@ -50,7 +50,8 @@ local function spawn_comet()
 	-- side choose
 	local left = rnd(1) < 0.5
 	local x = left and -8 or 128
-	local y = flr(rnd(128-8))
+	local hud_top = HUD_HEIGHT or 0
+	local y = hud_top + flr(rnd(128-8-hud_top))  -- spawn within game area only
 
 	-- restrict to diagonals:
 	-- left side -> ±45° (0.125 or 0.875 turns)
@@ -138,9 +139,9 @@ function update_comet()
 		local nose_x = c.x + (fx and 0 or 4)
 		local nose_y = c.y + (fy and 4 or 0)
 		
-		if ship and aabb(nose_x, nose_y, 4, 4, ship.x, ship.y, ship.w, ship.h) then
-			if game_state == "game" and ship_kill then ship_kill() end
-			-- keep comet; death flow handles reset
+		-- check collision with player
+		if ship and not c.warning and aabb(c.x,c.y,c.w,c.h, ship.x,ship.y,ship.w,ship.h) then
+			if ship_kill then ship_kill() end  -- ship_kill now handles shield check internally
 		end
 
 		-- cull offscreen (with some padding)
@@ -168,6 +169,9 @@ function draw_comet()
 			-- rotating circle indicator
 			local cx = c.left and 4 or 123
 			local cy = c.y + 4
+			-- ensure indicator doesn't overlap HUD
+			local hud_top = HUD_HEIGHT or 0
+			if cy < hud_top + 4 then cy = hud_top + 4 end
 			local radius = 3
 			-- rotate based on warning timer (smoother spin)
 			local base_angle = (WARNING_TIME - c.warning_t) * 0.15

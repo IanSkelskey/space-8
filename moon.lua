@@ -86,9 +86,10 @@ end
 local function spawn_moon()
 	-- scroll speed close to near star layer
 	local spd = 0.9
+	local hud_top = HUD_HEIGHT or 0
 	add(moons, {
 		x = flr(rnd(128-8)),
-		y = -10,
+		y = hud_top - 10,  -- spawn above HUD area
 		w = 8, h = 8,
 		spd = spd,
 		hp = 1
@@ -119,10 +120,9 @@ function update_moon()
 			end
 		end
 
-		-- player collision -> start death
+		-- check collision with player
 		if ship and aabb(m.x,m.y,m.w,m.h, ship.x,ship.y,ship.w,ship.h) then
-			if game_state == "game" and ship_kill then ship_kill() end
-			return
+			if ship_kill then ship_kill() end  -- ship_kill now handles shield check internally
 		end
 
 		-- cull

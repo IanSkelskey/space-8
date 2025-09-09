@@ -30,6 +30,16 @@ local STRENGTH_UP    = 0.45
 -- death
 local DEATH_FRAMES = 45 -- ~1.5s at 30fps
 
+-- shield constants
+local SHIELD_MAX_POWER = 100
+local SHIELD_DRAIN_RATE = 0.5  -- reduced from 2 (4x longer duration)
+local SHIELD_RECHARGE_RATE = 1.0  -- increased from 0.5 (2x faster recharge)
+local SHIELD_MIN_ACTIVATE = 10  -- minimum power needed to activate
+local SHIELD_RADIUS = 10
+local SHIELD_COLORS = {12, 13, 1}  -- light blue, lavender, dark blue
+local SHIELD_HIT_COST = 15  -- power lost when blocking a hit
+local SHIELD_INVULN_FRAMES = 30  -- 1 second of invulnerability after hit
+
 -- ship state
 ship = ship or {
 	x = START_X,
@@ -43,7 +53,12 @@ ship = ship or {
 	acc = SHIP_ACC,
 	-- death state
 	dying = false,
-	death_t = 0
+	death_t = 0,
+	-- shield state
+	shield_active = false,
+	shield_power = SHIELD_MAX_POWER,
+	shield_anim = 0,
+	shield_invuln = 0  -- invulnerability timer
 }
 
 -- lasers
@@ -124,6 +139,24 @@ end
 
 function ship_kill()
 	if ship.dying then return end
+	
+	-- check for invulnerability first
+	if ship.shield_invuln > 0 then
+		return  -- still invulnerable, ignore hit
+	end
+	
+	if ship.shield_active then
+		-- shield blocks the hit, deplete some power instead
+		ship.shield_power = max(0, ship.shield_power - SHIELD_HIT_COST)
+		ship.shield_invuln = SHIELD_INVULN_FRAMES  -- start invulnerability
+		ship.shield_anim = 0  -- reset animation for flash effect
+		sfx(31)  -- shield hit sound (impact)
+		if ship.shield_power <= 0 then
+			ship.shield_active = false
+			sfx(32)  -- shield depletion sound (power down)
+		end
+		return  -- blocked the damage
+	end
 	ship.dying = true
 	ship.death_t = 0
 	-- stop moving and clear exhaust
@@ -150,6 +183,11 @@ function ship_init()
 	ship.vx, ship.vy = 0, 0
 	ship.dying = false
 	ship.death_t = 0
+	-- reset shield
+	ship.shield_active = false
+	ship.shield_power = SHIELD_MAX_POWER
+	ship.shield_anim = 0
+	ship.shield_invuln = 0
 end
 
 local function update_death_fx()
@@ -214,9 +252,10 @@ function update_ship()
 	ship.x += ship.vx
 	ship.y += ship.vy
 
-	-- clamp to screen (128x128) and cancel outward velocity on edges
+	-- clamp to screen (128x128) respecting HUD area, and cancel outward velocity on edges
+	local hud_top = HUD_HEIGHT or 0  -- fallback if HUD_HEIGHT not defined
 	local minx, maxx = 0, SCREEN_W - ship.w
-	local miny, maxy = 0, SCREEN_H - ship.h
+	local miny, maxy = hud_top, SCREEN_H - ship.h
 	if ship.x < minx then ship.x=minx if ship.vx<0 then ship.vx=0 end end
 	if ship.x > maxx then ship.x=maxx if ship.vx>0 then ship.vx=0 end end
 	if ship.y < miny then ship.y=miny if ship.vy<0 then ship.vy=0 end end
@@ -249,6 +288,39 @@ function update_ship()
 
 	-- update exhaust
 	update_exhaust()
+	
+	-- update invulnerability timer
+	if ship.shield_invuln > 0 then
+		ship.shield_invuln -= 1
+	end
+	
+	-- shield logic (button 5 is X)
+	if btn(5) and ship.shield_power >= SHIELD_MIN_ACTIVATE and not ship.dying then
+		if not ship.shield_active then
+			ship.shield_active = true
+			sfx(30)  -- shield activation sound
+		end
+		-- drain shield while active
+		ship.shield_power = max(0, ship.shield_power - SHIELD_DRAIN_RATE)
+		if ship.shield_power <= 0 then
+			ship.shield_active = false
+			sfx(32)  -- shield depletion sound (power down)
+		end
+	else
+		if ship.shield_active then
+			ship.shield_active = false
+			sfx(-1, 0)  -- stop sound on channel 0 (where sfx 30 plays)
+		end
+		-- recharge shield while inactive (and not invulnerable)
+		if ship.shield_power < SHIELD_MAX_POWER and ship.shield_invuln <= 0 then
+			ship.shield_power = min(SHIELD_MAX_POWER, ship.shield_power + SHIELD_RECHARGE_RATE)
+		end
+	end
+	
+	-- animate shield
+	if ship.shield_active then
+		ship.shield_anim = (ship.shield_anim + 1) % 30
+	end
 end
 
 function draw_ship()
@@ -279,11 +351,45 @@ function draw_ship()
 	for b in all(bullets) do
 		rectfill(b.x, b.y, b.x+1, b.y+1, EXH_COL_R)
 	end
+	
+	-- draw shield bubble if active
+	if ship.shield_active and not ship.dying then
+		local cx = ship.x + ship.w/2
+		local cy = ship.y + ship.h/2
+		-- animated concentric circles with flash on recent hit
+		local t = ship.shield_anim / 30
+		
+		-- flash white when invulnerable, pulse between visible/invisible
+		local visible = true
+		local flash = nil
+		if ship.shield_invuln > 0 then
+			visible = (ship.shield_invuln % 4) < 2  -- blink every 2 frames
+			flash = ship.shield_invuln > 25 and 7 or nil  -- white flash for first 5 frames
+		end
+		
+		if visible then
+			for i=1,3 do
+				local r = SHIELD_RADIUS - i + sin(t + i*0.2)*2
+				local c = flash or SHIELD_COLORS[i]
+				circ(cx, cy, r, c)
+			end
+		end
+	end
 end
 
 -- expose player bullets for other systems (e.g., moon/hud)
 function ship_get_bullets()
 	return bullets
+end
+
+-- check if shield is active (for collision detection)
+function ship_has_shield()
+	return ship.shield_active
+end
+
+-- get shield power for HUD
+function ship_get_shield_power()
+	return ship.shield_power, SHIELD_MAX_POWER
 end
 
 -- allow external forces (e.g., blackholes) to pull exhaust/death particles
