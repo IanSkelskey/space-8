@@ -3,14 +3,8 @@
 local moons = {}
 local spawn_t = 0.0
 
--- bullets helper (from ship.lua)
-local function player_bullets()
-	if ship_get_bullets then return ship_get_bullets() end
-	return nil
-end
-
 local function hit_by_player_bullet(x,y,w,h)
-	local pb = player_bullets()
+	local pb = ship_get_bullets and ship_get_bullets()
 	if not pb then return false end
 	for b in all(pb) do
 		if aabb(x,y,w,h, b.x,b.y,2,2) then

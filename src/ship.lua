@@ -1,22 +1,28 @@
 local SCR_W,SCR_H,SHIP_W,SHIP_H=128,128,8,8
 local SPR_SHIP,SPR_LEAN,SHIP_SPD,SHIP_ACC=1,4,2.0,0.12
 local START_X,START_Y=SCR_W/2-SHIP_W/2,flr((SCR_H*2)/3 - SHIP_H/2)
-local LASER={SPEED=2,SFX=0,COOLDOWN=15,BEND_TH=0.3,CHANNEL=2}
+local LASER={SPEED=2,SFX=0,COOLDOWN=15,CHANNEL=2}
 local OFF_MIN,OFF_MAX,FACE_EPS=-4,132,0.05
 local EXH={NL=2,NR=3,BDY=0.5,DYS=0.9,LMIN=6,LR=10,XJ=1,DXJ=0.6,DXR=0.3,DYR=0.4,CY=10,CO=9,CR=8}
 local THRUST={H=0.6,I=0.2,D=0.03,U=0.45}
 local DEATH_FR=45
 local SHIELD={MAX=100,DRAIN=0.5,RECHARGE=1.0,MIN=10,RAD=10,COLS={12,13,1},HIT=15,INVULN=30,CH=3,SFX_ON=30,SFX_HIT=31,SFX_OFF=32}
 
-ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,laser_cd=0,fire_rate_level=0,shield_unlocked=false}
+ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false}
 
 local bullets,exhaust,death_fx={},{},{}
 
 local function spawn_laser()
 	local spd=LASER.SPEED
-	local bx,by=flr(ship.x+ship.w/2)-1,ship.y-2
-	local inherit=ship.vx*0.3
-	add(bullets,{x=bx,y=by,dx=inherit,dy=-spd})
+	local cx,by=flr(ship.x+ship.w/2)-1,ship.y-2
+	local iv=ship.vx*0.3
+	local lvl=ship.spread_level or 0
+	local sdx=lvl>1 and 0.7 or 0
+	if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-spd}) end
+	if lvl>=1 then
+		add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-spd})
+		add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-spd})
+	end
 	sfx(LASER.SFX,LASER.CHANNEL)
 end
 
@@ -152,7 +158,7 @@ function update_ship()
 	elseif rdy<0 then str=THRUST.U end
 	spawn_exhaust(str)
 	if ship.laser_cd>0 then ship.laser_cd-=1 end
-	if ship.laser_cd<=0 and(btn(4)or btnp(4))then
+	if ship.laser_cd<=0 and btn(4) then
 		spawn_laser()
 		ship.laser_cd=laser_cooldown()
 	end
@@ -213,17 +219,9 @@ function draw_ship()
 		spr(sid,ship.x,ship.y,1,1,flip,false)
 	end
 	for b in all(bullets) do
-		local tx,ty=flr(b.x),flr(b.y)
-		local ratio=abs(b.dx)/max(0.001,abs(b.dy))
-		if ratio<LASER.BEND_TH then
-			pset(tx,ty,9)
-			pset(tx,ty-1,8)
-		else
-			local sdx=b.dx>0 and 1 or -1
-			local bx2,by2=tx-sdx,ty+1
-			pset(tx,ty,9)
-			pset(bx2,by2,8)
-		end
+		local x,y=flr(b.x),flr(b.y)
+		pset(x,y,9)
+		pset(x,y-1,8)
 	end
 	if ship.shield_active and not ship.dying then
 		local cx,cy=ship.x+ship.w/2,ship.y+ship.h/2
@@ -245,14 +243,6 @@ function draw_ship()
 end
 
 function ship_get_bullets() return bullets end
-function ship_has_shield() return ship.shield_active end
-function ship_get_shield_power() return ship.shield_power,SHIELD.MAX end
-
-function ship_get_fire_rate_level() return ship.fire_rate_level or 0 end
-
-function ship_set_fire_rate_level(lvl) ship.fire_rate_level=max(0,min(3,lvl or 0)) end
-
-function ship_has_shield_unlocked() return ship.shield_unlocked==true end
 
 function ship_unlock_shield()
 	ship.shield_unlocked=true
@@ -261,6 +251,7 @@ end
 
 function ship_reset_upgrades()
 	ship.fire_rate_level=0
+	ship.spread_level=0
 	ship.shield_unlocked=false
 	ship.shield_power=0
 end

@@ -15,13 +15,8 @@ local P_BRIGHT,P_DIM,COL_BRIGHT,COL_MID,COL_DIM=16,8,14,2,1
 
 local parts={}
 
-local function get_pb()
-	if ship_get_bullets then return ship_get_bullets() end
-	return nil
-end
-
 local function pull_bullets(h)
-	local pb=get_pb()
+	local pb=ship_get_bullets and ship_get_bullets()
 	if not pb then return end
 	local cx,cy=h.x+HOLE_HW,h.y+HOLE_HH
 	local r2=h.r*h.r
