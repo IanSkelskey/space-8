@@ -1,6 +1,5 @@
 local stars = {}
 local distant_planets = {}
-local shooting_stars = {}
 local layers = {
 	{ n=40, spd=0.25, col=1 }, -- far
 	{ n=25, spd=0.50, col=5 }, -- mid
@@ -10,7 +9,6 @@ local layers = {
 function starfield_init()
 	stars = {}
 	distant_planets = {}
-	shooting_stars = {}
 	
 	-- regular stars
 	for li=1,#layers do
@@ -59,21 +57,18 @@ function starfield_init()
 end
 
 function update_starfield()
-	-- update regular stars
+	-- update regular stars (move + twinkle)
+	local ssc=ss or 1
 	for s in all(stars) do
-		s.y += s.spd
-		if s.y >= 128 then
-			s.y -= 128
-			s.x = flr(rnd(128))
-		end
+		s.y += s.spd*ssc
+		if s.y >= 128 then s.y -= 128 s.x = flr(rnd(128)) end
+		if s.tw then s.tw=(s.tw+s.twspd)%1 end
 	end
-	
-	-- update twinkle phases on stars
-	for s in all(stars) do if s.tw then s.tw=(s.tw+s.twspd)%1 end end
 	
 	-- update distant planets
 	for p in all(distant_planets) do
-		p.y += p.spd
+		local ssc=ss or 1
+		p.y += p.spd*ssc
 		if p.y - p.r > 128 then
 			p.y = -p.r - 5
 			p.x = 10 + rnd(108)
@@ -91,28 +86,6 @@ function update_starfield()
 			p.ring_angle=rnd(1)
 		end
 	end
-	
-	-- spawn occasional shooting star (very rare)
-	if rnd(1) < 0.003 then
-		add(shooting_stars, {
-			x = rnd(128),
-			y = rnd(60),  -- upper half of screen
-			dx = -0.5 - rnd(1),  -- diagonal movement
-			dy = 0.5 + rnd(1),
-			life = 15 + flr(rnd(10)),
-			max_life = 25
-		})
-	end
-	
-	-- update shooting stars
-	for s in all(shooting_stars) do
-		s.x += s.dx
-		s.y += s.dy
-		s.life -= 1
-		if s.life <= 0 or s.x < -10 or s.y > 138 then
-			del(shooting_stars, s)
-		end
-	end
 end
 
 function draw_starfield()
@@ -120,47 +93,6 @@ function draw_starfield()
 	for p in all(distant_planets) do
 		-- pre-baked planet sprite centered at (x,y)
 		spr(p.sid, p.x-4, p.y-4)
-		
-		-- draw ring if planet has one (only for r=3 now)
-		if p.has_ring then
-			-- draw a thin elliptical ring at an angle
-			local ring_radius = p.r + 2
-			local ellipse_height = 0.3  -- how flat the ellipse is
-			
-			-- use the planet's ring_angle for rotation
-			local rot = p.ring_angle or 0  -- fallback to 0 if not set
-			
-			-- draw the ring using an ellipse equation with rotation
-			-- sample points around the ellipse
-			for i=0,31 do  -- 32 points around the ring
-				local angle = i/32  -- 0 to 1 (full circle)
-				
-				-- create ellipse points before rotation
-				local ex = cos(angle) * ring_radius
-				local ey = sin(angle) * ring_radius * ellipse_height
-				
-				-- rotate the ellipse points by ring_angle
-				local dx = ex * cos(rot) - ey * sin(rot)
-				local dy = ex * sin(rot) + ey * cos(rot)
-				
-				local rx = p.x + dx
-				local ry = p.y + dy
-				
-				-- determine if this part is behind the planet (based on rotated y)
-				local behind = dy < 0
-				
-				-- check if point is visible (not obscured by planet body)
-				-- use distance from center to determine occlusion
-				local dist_from_center = sqrt(dx*dx + dy*dy)
-				local visible = dist_from_center > p.r or not behind
-				
-				if visible and rx >= 0 and rx < 128 and ry >= 0 and ry < 128 then
-					-- use darker colors: dark blue (1) for back, dark gray (5) for front
-					local col = behind and 1 or 5  -- both darker colors now
-					pset(flr(rx), flr(ry), col)
-				end
-			end
-		end
 	end
 	
 	-- draw regular stars with twinkle effect
@@ -171,21 +103,6 @@ function draw_starfield()
 			if b>0.5 then col=6 elseif b<-0.3 then col=1 end
 		end
 		pset(s.x, flr(s.y), col)
-	end
-	
-	-- draw shooting stars (on top)
-	for s in all(shooting_stars) do
-		-- main body
-		local brightness = s.life / s.max_life
-		local col = brightness > 0.7 and 7 or (brightness > 0.4 and 6 or 5)
-		pset(flr(s.x), flr(s.y), col)
-		-- fading trail
-		if s.life > 5 then
-			pset(flr(s.x - s.dx), flr(s.y - s.dy), 5)
-			if s.life > 10 then
-				pset(flr(s.x - s.dx*2), flr(s.y - s.dy*2), 1)
-			end
-		end
 	end
 end
 

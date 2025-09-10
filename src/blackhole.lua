@@ -143,10 +143,14 @@ function blackhole_init()
 end
 
 function update_blackhole()
+    if not round_number or round_number<5 then return end
 	spawn_t-=SPAWN_DEC
-	if spawn_t<=0 and #holes<HOLE_MAX then
+	local hm=HOLE_MAX
+	if round_number<7 then hm=1 end
+	if spawn_t<=0 and #holes<hm then
 		spawn_hole()
-		spawn_t=SPAWN_BASE+rnd(SPAWN_RND)
+		local mul=round_number<7 and 1.5 or 1
+		spawn_t=(SPAWN_BASE+rnd(SPAWN_RND))*mul
 	end
 
 	for h in all(holes) do

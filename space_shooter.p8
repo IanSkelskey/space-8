@@ -8,6 +8,7 @@ __lua__
 #include src/menu.lua
 #include src/starfield.lua
 #include src/ship.lua
+#include src/levels.lua
 #include src/moon.lua
 #include src/hud.lua
 #include src/station.lua

@@ -23,8 +23,9 @@ function generate_mission()
 	local adj=sci_adj[flr(rnd(#sci_adj))+1]
 	local noun=sci_noun[flr(rnd(#sci_noun))+1]
 	current_mission=adj.." "..noun
-	mission_distance=500+(round_number*100)
+	mission_distance=400+(round_number*80)
 	distance_remaining=mission_distance
+ if sl then sl(round_number) end
 end
 function complete_mission()
 	local pts=(type(hud_get_points)=="function" and hud_get_points()) or (points~=nil and points) or (score~=nil and score) or 0
@@ -167,12 +168,9 @@ function _draw()
 			local f=(mission_distance-max(0,distance_remaining))/max(1,mission_distance)
 			f=mid(0,f,1)
 			local w,h,x,y=60,3,34,122
-			rectfill(x,y,x+w,y+h,0)
 			rectfill(x+1,y+1,x+w-1,y+h-1,1)
 			local k=flr(f*(w-2))
 			if k>0 then rectfill(x+1,y+1,x+1+k,y+h-1,6)end
-			local px=x+w-1
-			circfill(px,y-1,1,8) pset(px,y+1,8)
 		end
 	elseif game_state=="gameover"then
 		draw_hud()

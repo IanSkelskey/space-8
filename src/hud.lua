@@ -45,9 +45,7 @@ function draw_hud()
 	print(score,2,2,7)
 	
 	local money_x=32
-	circfill(money_x,4,2,10)
-	circ(money_x,4,2,9)
-	pset(money_x,2,0) pset(money_x-1,3,0) pset(money_x,4,0) pset(money_x+1,5,0) pset(money_x,6,0)
+	-- Removed coin pixel shading
 	local cash=money if type(hud_get_money)=="function" then cash=hud_get_money() end
 	print(cash,money_x+5,2,10)
 	

@@ -1,0 +1,14 @@
+cs,cm,cmin,crng,mspd,mm,msmin,msrng,mlc,ss,ssh=1,1,1.5,1.2,0.9,1,1.8,1.4,0,1,0.003
+function sl(r)
+ cs=0.85+min(0.05*r,0.5)
+ cm=min(4,flr((r+1)/3))
+ cmin=max(0.6,1.5-0.1*r)
+ crng=max(0.4,1.2-0.08*r)
+ mspd=0.9*(0.8+min(0.04*r,0.5))
+ mm=min(4,flr((r+3)/3))
+ msmin=max(0.8,1.8-0.06*r)
+ msrng=max(0.6,1.4-0.05*r)
+ mlc=mid(0.1+0.05*(r-4),0,0.6)
+ ss=0.85+min(0.03*r,0.35)
+ ssh=min(0.003+0.0002*r,0.006)
+end

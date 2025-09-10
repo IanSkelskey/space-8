@@ -50,10 +50,17 @@ local function spawn_comet()
 end
 
 function update_comet()
+	if not round_number or round_number<3 then return end
 	spawn_t -= 1/30
-	if spawn_t <= 0 and #comets < 3 then
+	local mx=cm or 3
+	local mi=cmin or 1.0
+	local rg=crng or 1.2
+	-- keep very sparse in early comet rounds
+	if round_number<5 then mx=min(mx,1) end
+	if spawn_t <= 0 and #comets < mx then
 		spawn_comet()
-		spawn_t = 1.0 + rnd(1.2)
+		local mul=round_number<5 and 1.5 or 1
+		spawn_t = (mi + rnd(rg))*mul
 	end
 
 	-- update comets
@@ -63,9 +70,10 @@ function update_comet()
 			goto continue
 		end
 
-		-- move
-		c.x += c.dx
-		c.y += c.dy
+		-- move (scaled by level comet speed)
+		local s=cs or 1
+		c.x += c.dx*s
+		c.y += c.dy*s
 
 		-- spawn 1-2 trail particles
 		local ux, uy = 0, 0

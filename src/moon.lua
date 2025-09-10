@@ -97,7 +97,7 @@ local function spawn_child_moons(x, y, w, h)
 			w = 8, h = 8,
 			dx = cos(angle) * speed,
 			dy = sin(angle) * speed * 0.5 + 0.9,  -- inherit downward motion
-			spd = 0.9,
+			spd = mspd or 0.9,
 			hp = 2,               -- regular moons now take 2 hits
 			large = false,
 			flash_t = 0
@@ -113,12 +113,12 @@ function moon_init()
 end
 
 local function spawn_moon()
-	-- scroll speed close to near star layer
-	local spd = 0.9
+	-- scroll speed close to near star layer (level-scaled)
+	local spd = mspd or 0.9
 	local hud_top = HUD_HEIGHT or 0
 	
-	-- 30% chance for large moon
-	local is_large = rnd(1) < 0.3
+	-- chance for large moon (level-scaled); locked until round 4
+	local is_large = (round_number and round_number>=4) and (rnd(1) < (mlc or 0.3))
 	
 	if is_large then
 		add(moons, {
@@ -148,9 +148,12 @@ end
 function update_moon()
 	-- spawn cadence (~ every 1.5-3s)
 	spawn_t -= 1/30
-	if spawn_t <= 0 and #moons < 3 then
+	local mmax=mm or 3
+	local msmin=msmin or 1.5
+	local msrng=msrng or 1.5
+	if spawn_t <= 0 and #moons < mmax then
 		spawn_moon()
-		spawn_t = 1.5 + rnd(1.5)
+		spawn_t = msmin + rnd(msrng)
 	end
 
 	-- update + collisions
