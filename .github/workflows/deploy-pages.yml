@@ -4,7 +4,8 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'build/**'
+      - 'build/index.html'
+      - 'build/space_shooter.js'
 
 permissions:
   contents: read
