@@ -1,8 +1,6 @@
--- parallax starfield with enhanced visuals
 local stars = {}
-local twinkle_stars = {}  -- stars that pulse
-local distant_planets = {}  -- subtle background planets
-local shooting_stars = {}  -- occasional meteors
+local distant_planets = {}
+local shooting_stars = {}
 local layers = {
 	{ n=40, spd=0.25, col=1 }, -- far
 	{ n=25, spd=0.50, col=5 }, -- mid
@@ -11,7 +9,6 @@ local layers = {
 
 function starfield_init()
 	stars = {}
-	twinkle_stars = {}
 	distant_planets = {}
 	shooting_stars = {}
 	
@@ -30,11 +27,8 @@ function starfield_init()
 			
 			-- 15% chance to be a twinkling star (only far/mid layers)
 			if li <= 2 and rnd(1) < 0.15 then
-				add(twinkle_stars, {
-					star = star,
-					phase = rnd(1),  -- random starting phase
-					speed = 0.008 + rnd(0.012)  -- much slower twinkle (was 0.02-0.05)
-				})
+				star.tw=rnd(1)
+				star.twspd=0.008+rnd(0.012)
 			end
 		end
 	end
@@ -52,13 +46,14 @@ function starfield_init()
 		end
 		
 		add(distant_planets, {
-			x = 10 + rnd(108),  -- avoid edges
-			y = rnd(128),
-			r = r,
-			spd = 0.08 + rnd(0.04),  -- very slow with slight variation (0.08-0.12)
-			col = 1,  -- all dark blue for distant feel
-			has_ring = r == 3 and rnd(1) < 0.5,  -- 50% chance of ring for medium planets only
-			ring_angle = rnd(1)  -- random angle for ring orientation (0-1 = 0-360 degrees)
+			x=10+rnd(108),
+			y=rnd(128),
+			r=r,
+			sid=15+r, -- 16,17,18
+			spd=0.08+rnd(0.04),
+			col=1,
+			has_ring=r==3 and rnd(1)<0.5,
+			ring_angle=rnd(1)
 		})
 	end
 end
@@ -73,10 +68,8 @@ function update_starfield()
 		end
 	end
 	
-	-- update twinkle phases
-	for t in all(twinkle_stars) do
-		t.phase = (t.phase + t.speed) % 1
-	end
+	-- update twinkle phases on stars
+	for s in all(stars) do if s.tw then s.tw=(s.tw+s.twspd)%1 end end
 	
 	-- update distant planets
 	for p in all(distant_planets) do
@@ -87,19 +80,20 @@ function update_starfield()
 			-- regenerate size
 			local size_roll = rnd(1)
 			if size_roll < 0.5 then
-				p.r = 1
+				p.r=1
 			elseif size_roll < 0.8 then
-				p.r = 2
+				p.r=2
 			else
-				p.r = 3
+				p.r=3
 			end
-			p.has_ring = p.r == 3 and rnd(1) < 0.5
-			p.ring_angle = rnd(1)  -- new random angle for regenerated planet
+			p.sid=15+p.r -- 16,17,18
+			p.has_ring=p.r==3 and rnd(1)<0.5
+			p.ring_angle=rnd(1)
 		end
 	end
 	
 	-- spawn occasional shooting star (very rare)
-	if rnd(1) < 0.003 then  -- ~0.3% chance per frame
+	if rnd(1) < 0.003 then
 		add(shooting_stars, {
 			x = rnd(128),
 			y = rnd(60),  -- upper half of screen
@@ -124,14 +118,8 @@ end
 function draw_starfield()
 	-- draw distant planets first (deepest background)
 	for p in all(distant_planets) do
-		-- draw planet circle
-		circfill(p.x, p.y, p.r, p.col)
-		
-		-- add subtle shading for larger planets
-		if p.r >= 2 then
-			-- tiny highlight to suggest 3D form
-			pset(p.x - flr(p.r/2), p.y - flr(p.r/2), 5)  -- dark gray highlight
-		end
+		-- pre-baked planet sprite centered at (x,y)
+		spr(p.sid, p.x-4, p.y-4)
 		
 		-- draw ring if planet has one (only for r=3 now)
 		if p.has_ring then
@@ -177,19 +165,10 @@ function draw_starfield()
 	
 	-- draw regular stars with twinkle effect
 	for s in all(stars) do
-		local col = s.col
-		-- check if this star twinkles
-		for t in all(twinkle_stars) do
-			if t.star == s then
-				-- pulse brightness using sine wave
-				local brightness = sin(t.phase)
-				if brightness > 0.5 then
-					col = 6  -- light gray instead of white
-				elseif brightness < -0.3 then
-					col = 1  -- dim when in trough
-				end
-				break
-			end
+		local col=s.col
+		if s.tw then
+			local b=sin(s.tw)
+			if b>0.5 then col=6 elseif b<-0.3 then col=1 end
 		end
 		pset(s.x, flr(s.y), col)
 	end

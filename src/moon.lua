@@ -45,7 +45,7 @@ local dust = {}
 -- small dust burst for chunk death
 local function spawn_chunk_dust(x,y)
 	-- 3-5 short-lived pixels
-	local n = 3 + flr(rnd(3))
+	local n=3+flr(rnd(3))
 	for i=1,n do
 		local ang = rnd(1)
 		local sp = 0.6 + rnd(0.6)
@@ -166,7 +166,7 @@ function update_moon()
 		-- bullet hit
 		if hit_by_player_bullet(m.x,m.y,m.w,m.h) then
 			m.hp -= 1
-			if m.hp <= 0 then
+			if m.hp<=0 then
 				-- destroyed
 				if m.large then
 					if hud_add_score then hud_add_score(LARGE_MOON_SCORE) end
@@ -180,7 +180,7 @@ function update_moon()
 				goto continue
 			else
 				-- damaged but not destroyed - flash white
-				m.flash_t = 6  -- flash for 6 frames
+				m.flash_t=6
 			end
 		end
 

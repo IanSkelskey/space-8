@@ -1,7 +1,4 @@
--- station module (shop + launch)
-
--- state
-station_mode = station_mode or "main"  -- "main" | "shop"
+station_mode = station_mode or "main"
 station_confirm = station_confirm or false
 local sel = sel or 1
 local shop_sel = shop_sel or 1
@@ -9,24 +6,13 @@ local shop_msg = ""
 local shop_msg_t = 0
 
 -- shop data
-local FIRE_MAX = 3
-local function fire_cost(level)
-    -- escalating cost: 100, 150, 200
-    return 100 + 50 * level
-end
+local FIRE_MAX=3
+local function fire_cost(lvl) return 100+50*lvl end
+local SHIELD_COST=200
 
-function station_init()
-    station_mode = "main"
-    station_confirm = false
-    sel = 1
-    shop_sel = 1
-    shop_msg = ""
-    shop_msg_t = 0
-end
+function station_init() station_mode="main" station_confirm=false sel=1 shop_sel=1 shop_msg="" shop_msg_t=0 end
 
-local function can_launch()
-    return not level_fanfare_active
-end
+local function can_launch() return level_fanfare_timer<=0 end
 
 local function try_buy_fire_rate()
     local lvl = 0
@@ -50,12 +36,10 @@ local function try_buy_fire_rate()
 end
 
 function update_station()
-    -- decay message timer
-    if shop_msg_t > 0 then shop_msg_t -= 1 if shop_msg_t <= 0 then shop_msg = "" end end
+    if shop_msg_t>0 then shop_msg_t-=1 if shop_msg_t<=0 then shop_msg="" end end
 
     if station_mode == "main" then
         if not station_confirm then
-            -- options: 1=launch, 2=shop
             if btnp(2) then sel -= 1 end -- up
             if btnp(3) then sel += 1 end -- down
             if sel < 1 then sel = 2 end
@@ -68,9 +52,7 @@ function update_station()
                 end
             end
         else
-            -- confirm launch
             if btnp(4) then
-                level_fanfare_active = false
                 level_fanfare_timer = 0
                 last_payout_ready = false
                 game_state = "game"
@@ -80,20 +62,40 @@ function update_station()
                 station_confirm = false
             end
         end
-    else -- shop
-        -- only one item for now; allow back with X
+    else
+        local items_n = 2
+        if btnp(2) then shop_sel -= 1 end -- up
+        if btnp(3) then shop_sel += 1 end -- down
+        if shop_sel < 1 then shop_sel = items_n end
+        if shop_sel > items_n then shop_sel = 1 end
         if btnp(5) then
             station_mode = "main"
             return
         end
         if btnp(4) then
-            try_buy_fire_rate()
+            if shop_sel == 1 then
+                try_buy_fire_rate()
+            else
+                if ship_has_shield_unlocked and ship_has_shield_unlocked() then
+                    shop_msg = "already owned"
+                    shop_msg_t = 60
+                else
+                    if (money_total or 0) < SHIELD_COST then
+                        shop_msg = "not enough $"
+                        shop_msg_t = 60
+                    else
+                        money_total -= SHIELD_COST
+                        if ship_unlock_shield then ship_unlock_shield() end
+                        shop_msg = "purchased!"
+                        shop_msg_t = 60
+                    end
+                end
+            end
         end
     end
 end
 
 function draw_station()
-    -- header & mission info
     print("station",52,10,7)
     print("round "..round_number,48,20,6)
     print("mission:",44,28,12)
@@ -101,7 +103,6 @@ function draw_station()
         print(current_mission,64-#current_mission*2,36,11)
         print("dist: "..mission_distance,40,44,6)
     end
-    -- money
     print("$"..money_total,52,58,10)
     if last_payout_ready then
         print("+$"..(last_pay+last_bonus),48,66,11)
@@ -123,14 +124,26 @@ function draw_station()
             print("z: select  x: back", 28, 120, 5)
         end
     else
-        -- shop screen
         print("shop",58,76,7)
+        local y = 90
         local lvl = ship_get_fire_rate_level and ship_get_fire_rate_level() or 0
-        local cost = (lvl < FIRE_MAX) and fire_cost(lvl) or "-"
-        print("fire rate +20%", 28, 90, 6)
-        print("lvl: "..lvl.."/"..FIRE_MAX.."  $"..cost, 28, 100, 6)
+        local cost1 = (lvl < FIRE_MAX) and ("$"..fire_cost(lvl)) or "owned"
+    local owned_shield = ship_has_shield_unlocked and ship_has_shield_unlocked() or false
+    local cost2 = owned_shield and "owned" or ("$"..SHIELD_COST)
+        for i=1,2 do
+            local c = (i==shop_sel) and 7 or 6
+            if i==shop_sel then print(">", 20, y, c) end
+            if i==1 then
+                print("fire rate +20%", 28, y, c)
+                print("lvl "..lvl.."/"..FIRE_MAX.."  "..cost1, 100, y, c)
+            else
+                print("shield power", 28, y, c)
+                print(cost2, 100, y, c)
+            end
+            y += 10
+        end
         if shop_msg ~= "" then
-            print(shop_msg, 28, 110, 11)
+            print(shop_msg, 28, 120, 11)
         else
             print("z: buy   x: back", 28, 120, 5)
         end

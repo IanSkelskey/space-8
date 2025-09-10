@@ -1,4 +1,3 @@
--- ship
 local SCR_W,SCR_H,SHIP_W,SHIP_H=128,128,8,8
 local SPR_SHIP,SPR_LEAN,SHIP_SPD,SHIP_ACC=1,4,2.0,0.12
 local START_X,START_Y=SCR_W/2-SHIP_W/2,flr((SCR_H*2)/3 - SHIP_H/2)
@@ -9,7 +8,7 @@ local THRUST={H=0.6,I=0.2,D=0.03,U=0.45}
 local DEATH_FR=45
 local SHIELD={MAX=100,DRAIN=0.5,RECHARGE=1.0,MIN=10,RAD=10,COLS={12,13,1},HIT=15,INVULN=30,CH=3,SFX_ON=30,SFX_HIT=31,SFX_OFF=32}
 
-ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=SHIELD.MAX,shield_anim=0,shield_invuln=0,laser_cd=0,fire_rate_level=0}
+ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,laser_cd=0,fire_rate_level=0,shield_unlocked=false}
 
 local bullets,exhaust,death_fx={},{},{}
 
@@ -23,7 +22,6 @@ end
 
 local function laser_cooldown()
 	local lvl=ship.fire_rate_level or 0
-	-- reduce base cooldown by 20% per level, min 3 frames
 	local eff=flr(LASER.COOLDOWN*(1-0.2*lvl)+0.5)
 	if eff<3 then eff=3 end
 	return eff
@@ -87,9 +85,7 @@ function ship_kill()
 	game_state="dying"
 end
 
-function ship_death_done()
-	return ship.dying and ship.death_t>=DEATH_FR
-end
+function ship_death_done() return ship.dying and ship.death_t>=DEATH_FR end
 
 function ship_init()
 bullets,exhaust,death_fx={},{},{}
@@ -98,9 +94,10 @@ ship.vx,ship.vy=0,0
 ship.dying=false
 ship.death_t=0
 ship.shield_active=false
-ship.shield_power=SHIELD.MAX
 ship.shield_anim=0
 ship.shield_invuln=0
+-- if shield is unlocked, refill; otherwise keep power at 0
+ship.shield_power = ship.shield_unlocked and SHIELD.MAX or 0
 ship.laser_cd=0
 sfx(-1,SHIELD.CH)
 end
@@ -166,25 +163,33 @@ function update_ship()
 	end
 	update_exhaust()
 	if ship.shield_invuln>0 then ship.shield_invuln-=1 end
-	if btn(5)and ship.shield_power>=SHIELD.MIN and not ship.dying then
-		if not ship.shield_active then
-			ship.shield_active=true
-			sfx(SHIELD.SFX_ON,SHIELD.CH)
-		end
-		ship.shield_power=max(0,ship.shield_power-SHIELD.DRAIN)
-		if ship.shield_power<=0 then
-			ship.shield_active=false
-			sfx(-1,SHIELD.CH)
-			sfx(SHIELD.SFX_OFF,3)
+	if ship.shield_unlocked then
+		if btn(5)and ship.shield_power>=SHIELD.MIN and not ship.dying then
+			if not ship.shield_active then
+				ship.shield_active=true
+				sfx(SHIELD.SFX_ON,SHIELD.CH)
+			end
+			ship.shield_power=max(0,ship.shield_power-SHIELD.DRAIN)
+			if ship.shield_power<=0 then
+				ship.shield_active=false
+				sfx(-1,SHIELD.CH)
+				sfx(SHIELD.SFX_OFF,3)
+			end
+		else
+			if ship.shield_active then
+				ship.shield_active=false
+				sfx(-1,SHIELD.CH)
+			end
+			if ship.shield_power<SHIELD.MAX and ship.shield_invuln<=0 then
+				ship.shield_power=min(SHIELD.MAX,ship.shield_power+SHIELD.RECHARGE)
+			end
 		end
 	else
 		if ship.shield_active then
 			ship.shield_active=false
 			sfx(-1,SHIELD.CH)
 		end
-		if ship.shield_power<SHIELD.MAX and ship.shield_invuln<=0 then
-			ship.shield_power=min(SHIELD.MAX,ship.shield_power+SHIELD.RECHARGE)
-		end
+		ship.shield_power=0
 	end
 	if ship.shield_active then ship.shield_anim=(ship.shield_anim+1)%30 end
 end
@@ -243,12 +248,21 @@ function ship_get_bullets() return bullets end
 function ship_has_shield() return ship.shield_active end
 function ship_get_shield_power() return ship.shield_power,SHIELD.MAX end
 
-function ship_get_fire_rate_level()
-	return ship.fire_rate_level or 0
+function ship_get_fire_rate_level() return ship.fire_rate_level or 0 end
+
+function ship_set_fire_rate_level(lvl) ship.fire_rate_level=max(0,min(3,lvl or 0)) end
+
+function ship_has_shield_unlocked() return ship.shield_unlocked==true end
+
+function ship_unlock_shield()
+	ship.shield_unlocked=true
+	ship.shield_power=SHIELD.MAX
 end
 
-function ship_set_fire_rate_level(lvl)
-	ship.fire_rate_level=max(0, min(3, lvl or 0))
+function ship_reset_upgrades()
+	ship.fire_rate_level=0
+	ship.shield_unlocked=false
+	ship.shield_power=0
 end
 
 function ship_trails_pull(cx,cy,r,str)
