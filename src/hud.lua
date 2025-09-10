@@ -33,6 +33,16 @@ function hud_get_fuel()
 	return fuel, max_fuel
 end
 
+-- get current points (score)
+function hud_get_points()
+	return score
+end
+
+-- reset points (score)
+function hud_reset_points()
+	score = 0
+end
+
 -- helper to draw a compact meter
 local function draw_meter(x, y, w, h, value, max_value, col_full, col_mid, col_low)
 	-- background (darker version)

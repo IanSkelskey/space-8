@@ -2,17 +2,17 @@ pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
 -- space shooter with delivery missions
--- all game logic in separate file
+-- all game logic in separate files
 
-#include controls.lua
-#include menu.lua
-#include starfield.lua
-#include ship.lua
-#include moon.lua
-#include hud.lua
-#include blackhole.lua
-#include comet.lua
-#include game.lua
+#include src/controls.lua
+#include src/menu.lua
+#include src/starfield.lua
+#include src/ship.lua
+#include src/moon.lua
+#include src/hud.lua
+#include src/blackhole.lua
+#include src/comet.lua
+#include src/game.lua
 
 __gfx__
 00000000001661000444441000eee000001661000440041000008888000004444410000000000000000000000000000000000000000000000000000000000000
