@@ -4,8 +4,6 @@ local sel = sel or 1
 
 function station_init() station_mode="main" station_confirm=false sel=1 if shop_init then shop_init() end end
 
-local function can_launch() return level_fanfare_timer<=0 end
-
 function update_station()
 
     if station_mode == "main" then
@@ -16,7 +14,7 @@ function update_station()
             if sel > 2 then sel = 1 end
             if btnp(4) then
                 if sel == 1 then
-                    if can_launch() then station_confirm = true end
+                    if level_fanfare_timer<=0 then station_confirm = true end
                 else
                     station_mode = "shop"
                 end
@@ -49,23 +47,22 @@ function draw_station()
         end
         print("$"..money_total,52,58,10)
         if last_payout_ready then
-            print("pay $"..last_pay,48,64,11)
-            print("bonus $"..last_bonus,44,72,12)
-            print("total +$"..(last_pay+last_bonus),40,80,7)
+            print("pay$"..last_pay,48,64,11)
+            print("bonus$"..last_bonus,44,72,12)
+            print("+$"..(last_pay+last_bonus),40,80,7)
         end
         if station_confirm then
             print("launch mission?",36,100,7)
             print("z: yes   x: no",40,110,6)
         else
             local y = 90
-            local opts = {"launch mission", "shop"}
-            for i=1,#opts do
+            for i=1,2 do
                 local c = (i==sel) and 7 or 6
                 if i==sel then print(">",28,y,c) end
-                print(opts[i], 36, y, c)
+                print(i==1 and "launch mission" or "shop",36,y,c)
                 y += 10
             end
-            print("z: select  x: back", 28, 120, 5)
+            print("z: select  x: back",28,120,5)
         end
     else
         if shop_draw then shop_draw() else print("shop",58,76,7) end

@@ -16,10 +16,9 @@ local MB,B100,PR=35,4,0.03
 money_total=money_total or 0
 last_pay=last_pay or 0
 last_bonus=last_bonus or 0
-last_points=last_points or 0
 last_payout_ready=last_payout_ready or false
-sci_adj={"quantum","plasma","ionic","fusion","nano","cyber","holo","cryo","flux","void"}
-sci_noun={"core","drive","matrix","relay","beacon","module","crystal","reactor","emitter","array"}
+sci_adj={"quantum","plasma","ionic","fusion","nano","void"}
+sci_noun={"core","drive","matrix","relay","reactor","array"}
 function generate_mission()
 	local adj=sci_adj[flr(rnd(#sci_adj))+1]
 	local noun=sci_noun[flr(rnd(#sci_noun))+1]
@@ -30,7 +29,6 @@ function generate_mission()
 end
 function complete_mission()
 	local pts=(hud_get_points and hud_get_points()) or 0
-	last_points=pts
 	last_bonus=flr(pts*PR)
 	last_pay=MB+flr(mission_distance/100)*B100
 	money_total+=last_pay+last_bonus
@@ -168,14 +166,7 @@ function _draw()
 		draw_comet()
 		draw_ship()
 		draw_hud()
-		if mission_distance>0 then
-			local f=(mission_distance-max(0,distance_remaining))/max(1,mission_distance)
-			f=mid(0,f,1)
-			local w,h,x,y=60,3,34,122
-			rectfill(x+1,y+1,x+w-1,y+h-1,1)
-			local k=flr(f*(w-2))
-			if k>0 then rectfill(x+1,y+1,x+1+k,y+h-1,6)end
-		end
+
 	elseif game_state=="gameover"then
 		draw_hud()
 		print("game over",40,54,7)

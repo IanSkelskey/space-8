@@ -18,9 +18,9 @@ end
 -- debris from destroyed moons (4x4 shards from sprite 5)
 local debris = {}
 local SPR_MOON = 2
+local SPR_MOON_A = 26
 local SPR_SHARDS = 5
-local SHARDS_SX = (SPR_SHARDS%16)*8
-local SHARDS_SY = flr(SPR_SHARDS/16)*8
+local SPR_SHARDS_A = 27
 
 -- Large moon sprites (2x2 arrangement)
 local SPR_LARGE_TL = 7   -- top left
@@ -47,22 +47,17 @@ local function spawn_chunk_dust(x,y)
 	end
 end
 
-local function spawn_moon_debris(x,y)
+local function spawn_moon_debris(x,y,alt)
 	-- 4 quadrants: tl,tr,bl,br (4x4 each)
-	local quads = {
-		{ sx=SHARDS_SX+0, sy=SHARDS_SY+0, ox=0, oy=0 },
-		{ sx=SHARDS_SX+4, sy=SHARDS_SY+0, ox=4, oy=0 },
-		{ sx=SHARDS_SX+0, sy=SHARDS_SY+4, ox=0, oy=4 },
-		{ sx=SHARDS_SX+4, sy=SHARDS_SY+4, ox=4, oy=4 }
-	}
-	for q in all(quads) do
-		local a = rnd(1)
-		local sp = 0.5 + rnd(1.2)
-		add(debris, {
-			x = x + q.ox, y = y + q.oy,
-			dx = cos(a)*sp, dy = sin(a)*sp,
-			sx = q.sx, sy = q.sy
-		})
+	local base = alt and SPR_SHARDS_A or SPR_SHARDS
+	local sx_base = (base%16)*8
+	local sy_base = flr(base/16)*8
+	for i=0,3 do
+		local ox=(i%2==0) and 0 or 4
+		local oy=(i<2) and 0 or 4
+		local a=rnd(1)
+		local sp=0.5+rnd(1.2)
+		add(debris,{x=x+ox,y=y+oy,dx=cos(a)*sp,dy=sin(a)*sp,sx=sx_base+ox,sy=sy_base+oy})
 	end
 	-- spawn 8 single-pixel dust particles (no damage)
 	for i=1,8 do
@@ -73,29 +68,14 @@ local function spawn_moon_debris(x,y)
 end
 
 -- spawn smaller moons when large moon is destroyed
-local function spawn_child_moons(x, y, w, h)
-	-- spawn 4 regular moons from the large moon's quadrants
-	local positions = {
-		{x + 2, y + 2},      -- top left
-		{x + w - 10, y + 2}, -- top right
-		{x + 2, y + h - 10}, -- bottom left
-		{x + w - 10, y + h - 10} -- bottom right
-	}
-	
-	for i=1,4 do
-		local angle = (i-1) * 0.25 + rnd(0.1) -- spread in 4 directions
-		local speed = 0.4 + rnd(0.3)
-		add(moons, {
-			x = positions[i][1],
-			y = positions[i][2],
-			w = 8, h = 8,
-			dx = cos(angle) * speed,
-			dy = sin(angle) * speed * 0.5 + 0.9,  -- inherit downward motion
-			spd = mspd or 0.9,
-			hp = 2,               -- regular moons now take 2 hits
-			large = false,
-			flash_t = 0
-		})
+local function spawn_child_moons(x,y,w,h,a)
+	-- spawn 2 small moons (top corners)
+	for i=0,1 do
+		local px=(i%2==0) and (x+2) or (x+w-10)
+		local py=y+2
+		local ag=i*0.25+rnd(0.1)
+		local sp=0.4+rnd(0.3)
+		add(moons,{x=px,y=py,w=8,h=8,dx=cos(ag)*sp,dy=sin(ag)*sp*0.5+0.9,spd=mspd or 0.9,hp=a and 4 or 2,large=false,alt=a,flash_t=0})
 	end
 end
 
@@ -109,45 +89,21 @@ end
 local function spawn_moon()
 	-- scroll speed close to near star layer (level-scaled)
 	local spd = mspd or 0.9
-	local hud_top = HUD_HEIGHT or 0
-	
-	-- chance for large moon (level-scaled); locked until round 4
-	local is_large = (round_number and round_number>=4) and (rnd(1) < (mlc or 0.3))
-	
-	if is_large then
-		add(moons, {
-			x = flr(rnd(128-16)),
-			y = hud_top - 20,  -- spawn above HUD area
-			w = 16, h = 16,
-			dx = 0, dy = 0,  -- no horizontal drift initially
-			spd = spd * 0.8,  -- slightly slower
-			hp = 3,           -- large moons now take 3 hits
-			large = true,
-			flash_t = 0  -- flash timer when hit
-		})
+	-- alt variant appears after round 10 with rising chance
+	local alt = (round_number or 0)>10 and rnd(1)<min(0.1+0.04*(round_number-10),0.5)
+	if (round_number and round_number>=4) and (rnd(1) < (mlc or 0.3)) then
+		add(moons,{x=flr(rnd(128-16)),y=(HUD_HEIGHT or 0)-20,w=16,h=16,dx=0,dy=0,spd=spd*0.8,hp=alt and 6 or 3,large=true,alt=alt,flash_t=0})
 	else
-		add(moons, {
-			x = flr(rnd(128-8)),
-			y = hud_top - 10,  -- spawn above HUD area
-			w = 8, h = 8,
-			dx = 0, dy = 0,
-			spd = spd,
-			hp = 2,           -- regular moons now take 2 hits
-			large = false,
-			flash_t = 0
-		})
+		add(moons,{x=flr(rnd(128-8)),y=(HUD_HEIGHT or 0)-10,w=8,h=8,dx=0,dy=0,spd=spd,hp=alt and 4 or 2,large=false,alt=alt,flash_t=0})
 	end
 end
 
 function update_moon()
 	-- spawn cadence (~ every 1.5-3s)
 	spawn_t -= 1/30
-	local mmax=mm or 3
-	local msmin=msmin or 1.5
-	local msrng=msrng or 1.5
-	if spawn_t <= 0 and #moons < mmax then
+	if spawn_t <= 0 and #moons < (mm or 3) then
 		spawn_moon()
-		spawn_t = msmin + rnd(msrng)
+		spawn_t = (msmin or 1.5) + rnd(msrng or 1.5)
 	end
 
 	-- update + collisions
@@ -167,10 +123,12 @@ function update_moon()
 				-- destroyed
 				if m.large then
 					if hud_add_score then hud_add_score(LARGE_MOON_SCORE) end
-					spawn_child_moons(m.x, m.y, m.w, m.h)
+					spawn_child_moons(m.x,m.y,m.w,m.h,m.alt)
+					-- central 4-chunk debris burst
+					spawn_moon_debris(m.x+4,m.y+4,m.alt)
 				else
 					if hud_add_score then hud_add_score(MOON_SCORE) end
-					spawn_moon_debris(m.x + (m.w-8)/2, m.y + (m.h-8)/2)
+					spawn_moon_debris(m.x + (m.w-8)/2, m.y + (m.h-8)/2, m.alt)
 				end
 				sfx(1, 3)  -- play explosion on channel 3
 				del(moons, m)
@@ -250,11 +208,12 @@ function draw_moon()
 				spr(SPR_LARGE_BR, m.x+8, m.y+8)
 				end_white_flash()
 			else
-				-- draw proper 2x2 sprite arrangement
-				spr(SPR_LARGE_TL, m.x, m.y)
-				spr(SPR_LARGE_TR, m.x+8, m.y)
-				spr(SPR_LARGE_BL, m.x, m.y+8)
-				spr(SPR_LARGE_BR, m.x+8, m.y+8)
+				-- choose tile set by variant via +5 offset for alt tiles
+				local o=m.alt and 5 or 0
+				spr(SPR_LARGE_TL+o, m.x, m.y)
+				spr(SPR_LARGE_TR+o, m.x+8, m.y)
+				spr(SPR_LARGE_BL+o, m.x, m.y+8)
+				spr(SPR_LARGE_BR+o, m.x+8, m.y+8)
 			end
 		else
 			if m.flash_t > 0 and m.flash_t % 2 == 0 then
@@ -263,7 +222,7 @@ function draw_moon()
 				spr(SPR_MOON, m.x, m.y)
 				end_white_flash()
 			else
-				spr(SPR_MOON, m.x, m.y)
+				spr(m.alt and SPR_MOON_A or SPR_MOON, m.x, m.y)
 			end
 		end
 	end

@@ -1,10 +1,9 @@
-local score,money,fuel,max_fuel=0,0,100,100
+local score,money=0,0
 HUD_HEIGHT=10
 
 function hud_init()
 	score = 0
 	money = 0
-	fuel = max_fuel
 end
 
 function hud_add_score(n) score += n or 0 end
@@ -37,8 +36,5 @@ function draw_hud()
 	spr(10,x,2)
 	local p=ship and ship.shield_power or 0
 	dm(x+7,3,20,3,p,100,12,13,8)
-	
-	local fx=100
-	spr(9,fx,2)
-	dm(fx+7,3,20,3,fuel,max_fuel,10,9,8)
+
 end

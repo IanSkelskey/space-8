@@ -7,8 +7,8 @@ end
 function draw_controls()
 	print("controls",48,20,7)
 	local y=40
-	print("arrow keys: move",24,y,6) y+=10
+	print("arrows: move",24,y,6) y+=10
 	print("z: fire",24,y,6) y+=10
-	print("x: shield (hold)",24,y,6) y+=10
+	print("x: shield(hold)",24,y,6) y+=10
 	print("x: back",24,y+10,6) y+=10
 end
