@@ -14,6 +14,14 @@ A retro-inspired space shooter game built with PICO-8 fantasy console. Blast ast
 - X/V/M: Use your shield
 - Avoid obstacles and collect power-ups to survive longer
 
+## Obstacles
+
+| Sprite                       | Name     | Description                                                                                                 |
+| ---------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| ![Medium](asteroid-md.png) ![Large](asteroid-lg.png) | Asteroid | Large space rock that moves slowly. Can be destroyed with multiple hits. Breaks into chunks when destroyed. |
+| ![Orange Comet](comet-orange.png) ![Green Comet](comet-green.png) ![Blue Comet](comet-blue.png) ![Red Comet](comet-red.png) | Comet    | Fast-moving space debris that cannot be destroyed. Must be avoided to prevent damage.                       |
+| ![Black Hole](black-hole.gif) | Black Hole | A dangerous space anomaly that pulls the player in. Avoid getting too close or you'll be sucked in! |
+
 ## Development
 - All source code is in Lua, designed for PICO-8
 - Music and sound created with PICO-8 tools
@@ -23,7 +31,7 @@ A retro-inspired space shooter game built with PICO-8 fantasy console. Blast ast
 1. Open PICO-8
 2. Run `load space_shooter.p8` to load the game
 3. Run `run space_shooter.p8` to start playing
-4. To export for web: `pico8 -export build/index.html space_shooter.p8`
+4. To export for web: `export -f space_shooter.html`
 
 ## Credits
 - Game by Ian Skelskey
