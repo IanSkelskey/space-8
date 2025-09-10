@@ -10,6 +10,7 @@ __lua__
 #include src/ship.lua
 #include src/moon.lua
 #include src/hud.lua
+#include src/station.lua
 #include src/blackhole.lua
 #include src/comet.lua
 #include src/game.lua

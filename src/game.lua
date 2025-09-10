@@ -14,7 +14,6 @@ level_fanfare_active=false
 level_fanfare_timer=0
 ship_departing=false
 ship_depart_timer=0
-station_confirm=false
 local MONEY={MIN_BASE=50,BASE_PER_100=5,POINT_RATE=0.1}
 money_total=money_total or 0
 last_pay=last_pay or 0
@@ -23,6 +22,11 @@ last_points=last_points or 0
 last_payout_ready=last_payout_ready or false
 sci_adj={"quantum","plasma","ionic","fusion","nano","cyber","holo","cryo","flux","void"}
 sci_noun={"core","drive","matrix","relay","beacon","module","crystal","reactor","emitter","array"}
+
+-- forward declarations (defined in station.lua)
+if not station_init then function station_init() end end
+if not update_station then function update_station() end end
+if not draw_station then function draw_station() end end
 function generate_mission()
 	local adj=sci_adj[flr(rnd(#sci_adj))+1]
 	local noun=sci_noun[flr(rnd(#sci_noun))+1]
@@ -70,6 +74,7 @@ function reset_game()
 	hud_init()
 	blackhole_init()
 	comet_init()
+	station_init()
 	menu_init()
 	game_state="menu"
 	prev_game_state="menu"
@@ -89,6 +94,7 @@ function _init()
 	hud_init()
 	blackhole_init()
 	comet_init()
+	station_init()
 	menu_init()
 	music(0,0,MUSIC_MASK)
 end
@@ -137,23 +143,7 @@ function _update()
 	elseif game_state=="controls"then
 		update_controls()
 	elseif game_state=="station"then
-			if not station_confirm then
-				if btnp(4) and not level_fanfare_active then
-					station_confirm=true
-				end
-			else
-				-- confirmation prompt
-				if btnp(4) then
-					level_fanfare_active=false
-					level_fanfare_timer=0
-					last_payout_ready=false
-					game_state="game"
-					ship_init()
-					station_confirm=false
-				elseif btnp(5) then
-					station_confirm=false
-				end
-			end
+			update_station()
 	elseif game_state=="game"then
 		update_blackhole()
 		update_moon()
@@ -179,26 +169,7 @@ function _update()
 	end
 	prev_game_state=old_state
 end
-function draw_station()
-	-- simplified station screen: no decorative station drawing
-	print("station",52,10,7)
-	print("round "..round_number,48,20,6)
-	print("mission:",44,35,12)
-	if current_mission then
-		print(current_mission,64-#current_mission*2,45,11)
-		print("dist: "..mission_distance,40,55,6)
-	end
-	print("$"..money_total,52,68,10)
-	if last_payout_ready then
-		print("+$"..(last_pay+last_bonus),48,78,11)
-	end
-if station_confirm then
-	print("launch mission?",36,90,7)
-	print("z: yes   x: no",40,100,6)
-else
-	print("z: launch",44,100,10)
-end
-end
+-- draw_station moved to station.lua
 function hud_get_money()return money_total end
 function _draw()
 	cls(0)

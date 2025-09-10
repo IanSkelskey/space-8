@@ -9,7 +9,7 @@ local THRUST={H=0.6,I=0.2,D=0.03,U=0.45}
 local DEATH_FR=45
 local SHIELD={MAX=100,DRAIN=0.5,RECHARGE=1.0,MIN=10,RAD=10,COLS={12,13,1},HIT=15,INVULN=30,CH=3,SFX_ON=30,SFX_HIT=31,SFX_OFF=32}
 
-ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=SHIELD.MAX,shield_anim=0,shield_invuln=0,laser_cd=0}
+ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=SHIELD.MAX,shield_anim=0,shield_invuln=0,laser_cd=0,fire_rate_level=0}
 
 local bullets,exhaust,death_fx={},{},{}
 
@@ -19,6 +19,14 @@ local function spawn_laser()
 	local inherit=ship.vx*0.3
 	add(bullets,{x=bx,y=by,dx=inherit,dy=-spd})
 	sfx(LASER.SFX,LASER.CHANNEL)
+end
+
+local function laser_cooldown()
+	local lvl=ship.fire_rate_level or 0
+	-- reduce base cooldown by 20% per level, min 3 frames
+	local eff=flr(LASER.COOLDOWN*(1-0.2*lvl)+0.5)
+	if eff<3 then eff=3 end
+	return eff
 end
 
 local function spawn_exhaust(str)
@@ -149,7 +157,7 @@ function update_ship()
 	if ship.laser_cd>0 then ship.laser_cd-=1 end
 	if ship.laser_cd<=0 and(btn(4)or btnp(4))then
 		spawn_laser()
-		ship.laser_cd=LASER.COOLDOWN
+		ship.laser_cd=laser_cooldown()
 	end
 	for b in all(bullets) do
 		b.x+=b.dx
@@ -234,6 +242,14 @@ end
 function ship_get_bullets() return bullets end
 function ship_has_shield() return ship.shield_active end
 function ship_get_shield_power() return ship.shield_power,SHIELD.MAX end
+
+function ship_get_fire_rate_level()
+	return ship.fire_rate_level or 0
+end
+
+function ship_set_fire_rate_level(lvl)
+	ship.fire_rate_level=max(0, min(3, lvl or 0))
+end
 
 function ship_trails_pull(cx,cy,r,str)
 	local r2=r*r
