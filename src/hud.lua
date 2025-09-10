@@ -52,15 +52,11 @@ function draw_hud()
 	if ship_get_shield_power then
 		local power,max_power=ship_get_shield_power()
 		local icon_x=72
-		pset(icon_x-1,2,12) pset(icon_x,2,12) pset(icon_x+1,2,12)
-		pset(icon_x-1,3,12) pset(icon_x,3,13) pset(icon_x+1,3,12)
-		pset(icon_x-1,4,12) pset(icon_x,4,13) pset(icon_x+1,4,12)
-		pset(icon_x,5,12)
-		draw_meter(icon_x+4,3,20,3,power,max_power,12,13,8)
+		spr(10,icon_x,2)
+		draw_meter(icon_x+7,3,20,3,power,max_power,12,13,8)
 	end
 	
 	local fuel_icon_x=100
-	pset(fuel_icon_x,2,10) pset(fuel_icon_x-1,3,9) pset(fuel_icon_x,3,10) pset(fuel_icon_x+1,3,9)
-	pset(fuel_icon_x-1,4,11) pset(fuel_icon_x,4,11) pset(fuel_icon_x+1,4,11) pset(fuel_icon_x,5,11)
-	draw_meter(fuel_icon_x+4,3,20,3,fuel,max_fuel,11,10,8)
+	spr(9,fuel_icon_x,2)
+	draw_meter(fuel_icon_x+7,3,20,3,fuel,max_fuel,10,9,8)
 end
