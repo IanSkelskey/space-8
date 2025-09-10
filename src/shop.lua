@@ -65,7 +65,7 @@ function shop_draw()
     for i=1,3 do
         local c = (i==sel) and 7 or 6
         if i==sel then print(">", 4, y, c) end
-        local icon = (i==1) and 11 or (i==2 and 9 or 25)
+        local icon = (i==1) and 11 or (i==2 and 10 or 25)
         local sx,sy=(icon%16)*8,flr(icon/16)*8
         sspr(sx, sy, 5, 5, 10, y, 5, 5)
         if i==1 then

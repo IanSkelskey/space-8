@@ -9,6 +9,6 @@ function sl(r)
  msmin=max(0.8,1.8-0.06*r)
  msrng=max(0.6,1.4-0.05*r)
  mlc=mid(0.1+0.05*(r-4),0,0.6)
- ss=0.85+min(0.03*r,0.35)
+ ss=0.85+min(0.01*r,0.08)
  ssh=min(0.003+0.0002*r,0.006)
 end

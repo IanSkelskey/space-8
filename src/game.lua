@@ -11,7 +11,8 @@ mission_distance=0
 distance_remaining=0
 level_fanfare_timer=0
 ship_departing=false
-local MB,B100,PR=50,5,0.1
+-- payout tuning: modest earnings with smaller point bonus
+local MB,B100,PR=35,4,0.03
 money_total=money_total or 0
 last_pay=last_pay or 0
 last_bonus=last_bonus or 0
@@ -28,13 +29,13 @@ function generate_mission()
  if sl then sl(round_number) end
 end
 function complete_mission()
-	local pts=(type(hud_get_points)=="function" and hud_get_points()) or (points~=nil and points) or (score~=nil and score) or 0
+	local pts=(hud_get_points and hud_get_points()) or 0
 	last_points=pts
 	last_bonus=flr(pts*PR)
 	last_pay=MB+flr(mission_distance/100)*B100
 	money_total+=last_pay+last_bonus
 	last_payout_ready=true
-	if type(hud_reset_points)=="function"then hud_reset_points() elseif points~=nil then points=0 elseif score~=nil then score=0 end
+	if hud_reset_points then hud_reset_points() end
 	round_number+=1
 	generate_mission()
 	moon_init()

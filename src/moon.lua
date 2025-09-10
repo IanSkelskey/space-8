@@ -29,9 +29,9 @@ local SPR_LARGE_BL = 23  -- bottom left
 local SPR_LARGE_BR = 24  -- bottom right
 
 -- scoring
-local MOON_SCORE  = 200        -- was 100; now 2-hit moons pay more
-local LARGE_MOON_SCORE = 300   -- was 250; now 3-hit large moons pay more
-local CHUNK_SCORE = 20         -- chunks stay 1-hit and unchanged
+local MOON_SCORE  = 120        -- reduced to slow point growth
+local LARGE_MOON_SCORE = 200   -- reduced to slow point growth
+local CHUNK_SCORE = 12         -- reduced to slow point growth
 
 -- harmless dust pixels
 local dust = {}

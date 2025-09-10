@@ -10,6 +10,10 @@ end
 function hud_add_score(n) score += n or 0 end
 function hud_add_money(n) money += n or 0 end
 
+-- minimal accessors for mission bonus calc
+function hud_get_points() return score end
+function hud_reset_points() score=0 end
+
 -- helper to draw a compact meter
 local function dm(x,y,w,h,v,m,cf,cm,cl)
 	rectfill(x,y,x+w-1,y+h-1,0)

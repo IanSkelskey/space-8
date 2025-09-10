@@ -49,20 +49,22 @@ function draw_station()
         end
         print("$"..money_total,52,58,10)
         if last_payout_ready then
-            print("+$"..(last_pay+last_bonus),48,66,11)
-        end
-        local y = 86
-        local opts = {"launch mission", "shop"}
-        for i=1,#opts do
-            local c = (i==sel) and 7 or 6
-            if i==sel then print(">",28,y,c) end
-            print(opts[i], 36, y, c)
-            y += 10
+            print("pay $"..last_pay,48,64,11)
+            print("bonus $"..last_bonus,44,72,12)
+            print("total +$"..(last_pay+last_bonus),40,80,7)
         end
         if station_confirm then
-            print("launch mission?",36,102,7)
+            print("launch mission?",36,100,7)
             print("z: yes   x: no",40,110,6)
         else
+            local y = 90
+            local opts = {"launch mission", "shop"}
+            for i=1,#opts do
+                local c = (i==sel) and 7 or 6
+                if i==sel then print(">",28,y,c) end
+                print(opts[i], 36, y, c)
+                y += 10
+            end
             print("z: select  x: back", 28, 120, 5)
         end
     else
