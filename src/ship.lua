@@ -1,7 +1,7 @@
 -- ship
 local SCR_W,SCR_H,SHIP_W,SHIP_H=128,128,8,8
 local SPR_SHIP,SPR_LEAN,SHIP_SPD,SHIP_ACC=1,4,2.0,0.12
-local START_X,START_Y=SCR_W/2-SHIP_W/2,SCR_H/2-SHIP_H/2
+local START_X,START_Y=SCR_W/2-SHIP_W/2,flr((SCR_H*2)/3 - SHIP_H/2)
 local LASER={SPEED=2,SFX=0,COOLDOWN=15,BEND_TH=0.3,CHANNEL=2}
 local OFF_MIN,OFF_MAX,FACE_EPS=-4,132,0.05
 local EXH={NL=2,NR=3,BDY=0.5,DYS=0.9,LMIN=6,LR=10,XJ=1,DXJ=0.6,DXR=0.3,DYR=0.4,CY=10,CO=9,CR=8}
@@ -84,16 +84,17 @@ function ship_death_done()
 end
 
 function ship_init()
-	bullets,exhaust,death_fx={},{},{}
-	ship.vx,ship.vy=0,0
-	ship.dying=false
-	ship.death_t=0
-	ship.shield_active=false
-	ship.shield_power=SHIELD.MAX
-	ship.shield_anim=0
-	ship.shield_invuln=0
-	ship.laser_cd=0
-	sfx(-1,SHIELD.CH)
+bullets,exhaust,death_fx={},{},{}
+ship.x,ship.y=START_X,START_Y
+ship.vx,ship.vy=0,0
+ship.dying=false
+ship.death_t=0
+ship.shield_active=false
+ship.shield_power=SHIELD.MAX
+ship.shield_anim=0
+ship.shield_invuln=0
+ship.laser_cd=0
+sfx(-1,SHIELD.CH)
 end
 
 local function update_death_fx()

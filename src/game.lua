@@ -12,6 +12,9 @@ mission_distance=0
 distance_remaining=0
 level_fanfare_active=false
 level_fanfare_timer=0
+ship_departing=false
+ship_depart_timer=0
+station_confirm=false
 local MONEY={MIN_BASE=50,BASE_PER_100=5,POINT_RATE=0.1}
 money_total=money_total or 0
 last_pay=last_pay or 0
@@ -55,7 +58,9 @@ function complete_mission()
 	music(8,0,MUSIC_MASK)
 	level_fanfare_active=true
 	level_fanfare_timer=FANFARE_LOCK
-	game_state="station"
+	ship_departing=true
+	ship_depart_timer=0
+	game_state="fanfare_depart"
 end
 function reset_game()
 	music(-1,0)
@@ -96,6 +101,23 @@ function _update()
 			level_fanfare_active=false
 		end
 	end
+
+	if game_state=="fanfare_depart" then
+		-- animate ship flying up
+		if ship_departing then
+			ship.y-=1.5
+			ship_depart_timer+=1
+			if ship.y+ship.h<0 then
+				ship_departing=false
+			end
+		end
+		if not ship_departing and not level_fanfare_active then
+			ship_init() -- reset ship for next round
+			game_state="station"
+		end
+		prev_game_state="fanfare_depart"
+		return
+	end
 	local old_state=game_state
 	if game_state=="game"and prev_game_state=="station"then
 		music(-1,0)
@@ -115,13 +137,23 @@ function _update()
 	elseif game_state=="controls"then
 		update_controls()
 	elseif game_state=="station"then
-		if btnp(4)and not level_fanfare_active then
-			level_fanfare_active=false
-			level_fanfare_timer=0
-			last_payout_ready=false
-			game_state="game"
-			ship_init()
-		end
+			if not station_confirm then
+				if btnp(4) and not level_fanfare_active then
+					station_confirm=true
+				end
+			else
+				-- confirmation prompt
+				if btnp(4) then
+					level_fanfare_active=false
+					level_fanfare_timer=0
+					last_payout_ready=false
+					game_state="game"
+					ship_init()
+					station_confirm=false
+				elseif btnp(5) then
+					station_confirm=false
+				end
+			end
 	elseif game_state=="game"then
 		update_blackhole()
 		update_moon()
@@ -148,11 +180,7 @@ function _update()
 	prev_game_state=old_state
 end
 function draw_station()
-	circfill(30,64,20,5)
-	circ(30,64,20,6)
-	rectfill(50,62,70,66,5)
-	rectfill(68,60,72,68,6)
-	spr(0,74,60)
+	-- simplified station screen: no decorative station drawing
 	print("station",52,10,7)
 	print("round "..round_number,48,20,6)
 	print("mission:",44,35,12)
@@ -164,7 +192,12 @@ function draw_station()
 	if last_payout_ready then
 		print("+$"..(last_pay+last_bonus),48,78,11)
 	end
+if station_confirm then
+	print("launch mission?",36,90,7)
+	print("z: yes   x: no",40,100,6)
+else
 	print("z: launch",44,100,10)
+end
 end
 function hud_get_money()return money_total end
 function _draw()
@@ -176,6 +209,12 @@ function _draw()
 		draw_controls()
 	elseif game_state=="station"then
 		draw_station()
+	elseif game_state=="fanfare_depart" then
+		draw_blackhole()
+		draw_moon()
+		draw_comet()
+		draw_ship()
+		draw_hud()
 	elseif game_state=="game"or game_state=="dying"then
 		draw_blackhole()
 		draw_moon()
