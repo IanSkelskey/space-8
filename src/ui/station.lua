@@ -1,6 +1,10 @@
 station_mode = station_mode or "main"
 station_confirm = station_confirm or false
 local sel = sel or 1
+SFX_CURSOR=SFX_CURSOR or 44
+SFX_ERR=SFX_ERR or 45
+SFX_OK=SFX_OK or 46
+UI_CH=UI_CH or 3
 
 function station_init() station_mode="main" station_confirm=false sel=1 if shop_init then shop_init() end end
 
@@ -8,19 +12,20 @@ function update_station()
 
     if station_mode == "main" then
         if not station_confirm then
-            if btnp(2) then sel -= 1 end -- up
-            if btnp(3) then sel += 1 end -- down
+            if btnp(2) then sel -= 1 sfx(SFX_CURSOR,UI_CH) end -- up
+            if btnp(3) then sel += 1 sfx(SFX_CURSOR,UI_CH) end -- down
             if sel < 1 then sel = 2 end
             if sel > 2 then sel = 1 end
             if btnp(4) then
                 if sel == 1 then
-                    if level_fanfare_timer<=0 then station_confirm = true end
+                    if level_fanfare_timer<=0 then station_confirm = true sfx(SFX_OK,UI_CH) end
                 else
-                    station_mode = "shop"
+                    station_mode = "shop" sfx(SFX_OK,UI_CH)
                 end
             end
         else
             if btnp(4) then
+                sfx(SFX_OK,UI_CH)
                 level_fanfare_timer = 0
                 last_payout_ready = false
                 game_state = "game"
@@ -28,7 +33,7 @@ function update_station()
                 ship_init()
                 station_confirm = false
             elseif btnp(5) then
-                station_confirm = false
+                station_confirm = false sfx(SFX_CURSOR,UI_CH)
             end
         end
     else

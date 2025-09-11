@@ -5,47 +5,51 @@ local shop_msg_t = 0
 local FM=3
 local SC=120
 local SM=2
+SFX_CURSOR=SFX_CURSOR or 44
+SFX_ERR=SFX_ERR or 45
+SFX_OK=SFX_OK or 46
+UI_CH=UI_CH or 3
 
 function shop_init() sel=1 shop_msg="" shop_msg_t=0 end
 
 local function buy_fr()
     local lvl = ship.fire_rate_level or 0
-    if lvl >= FM then shop_msg="max level" shop_msg_t=60 return end
+    if lvl >= FM then shop_msg="max level" shop_msg_t=60 sfx(SFX_ERR,UI_CH) return end
     local cost = 100+50*lvl
-    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 return end
+    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 sfx(SFX_ERR,UI_CH) return end
     money_total -= cost
     lvl += 1
-    ship.fire_rate_level=lvl shop_msg="bought!" shop_msg_t=60 smc=11
+    ship.fire_rate_level=lvl shop_msg="bought!" shop_msg_t=60 smc=11 sfx(SFX_OK,UI_CH)
 end
 
 local function buy_sh()
     local lvl=ship.shield_level or 0
     local maxl=3
-    if lvl>=maxl then shop_msg="max level" shop_msg_t=60 return end
+    if lvl>=maxl then shop_msg="max level" shop_msg_t=60 sfx(SFX_ERR,UI_CH) return end
     local cost = ship.shield_unlocked and (SC+80*lvl) or SC
-    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 return end
+    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 sfx(SFX_ERR,UI_CH) return end
     money_total-=cost
     if not ship.shield_unlocked then if ship_unlock_shield then ship_unlock_shield() end else ship.shield_level=lvl+1 end
-    shop_msg="bought!" shop_msg_t=60 smc=11
+    shop_msg="bought!" shop_msg_t=60 smc=11 sfx(SFX_OK,UI_CH)
 end
 
 local function buy_sp()
     local lvl = ship.spread_level or 0
-    if lvl >= SM then shop_msg="max level" shop_msg_t=60 return end
+    if lvl >= SM then shop_msg="max level" shop_msg_t=60 sfx(SFX_ERR,UI_CH) return end
     local cost = 150+100*lvl
-    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 return end
+    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 sfx(SFX_ERR,UI_CH) return end
     money_total -= cost
     lvl += 1
-    ship.spread_level=lvl shop_msg="bought!" shop_msg_t=60 smc=11
+    ship.spread_level=lvl shop_msg="bought!" shop_msg_t=60 smc=11 sfx(SFX_OK,UI_CH)
 end
 
 function shop_update()
     if shop_msg_t>0 then shop_msg_t-=1 if shop_msg_t<=0 then shop_msg="" end end
-    if btnp(2) then sel -= 1 end
-    if btnp(3) then sel += 1 end
+    if btnp(2) then sel -= 1 sfx(SFX_CURSOR,UI_CH) end
+    if btnp(3) then sel += 1 sfx(SFX_CURSOR,UI_CH) end
     if sel < 1 then sel = 3 end
     if sel > 3 then sel = 1 end
-    if btnp(5) then station_mode = "main" return end
+    if btnp(5) then sfx(SFX_OK,UI_CH) station_mode = "main" return end
     if btnp(4) then
         if sel==1 then buy_fr() elseif sel==2 then buy_sh() else buy_sp() end
     end

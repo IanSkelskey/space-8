@@ -1,9 +1,17 @@
 local sel=1
+-- ui sfx indices
+-- use globals (no 'local') to avoid exhausting local variable slots across files
+SFX_CURSOR=SFX_CURSOR or 44
+SFX_ERR=SFX_ERR or 45
+SFX_OK=SFX_OK or 46
+UI_CH=UI_CH or 3
 local opts={
 	{label="start",action=function()
 		music(-1)
 		game_state="game"
 		ship_init() moon_init() hud_init() comet_init()
+		-- play select sfx AFTER init (ship_init clears channel 3)
+		sfx(SFX_OK,UI_CH)
 	end},
 	{label="controls",action=function()
 		music(-1)
@@ -17,11 +25,19 @@ local opts={
 function menu_init() sel=1 music(0,0,1) end
 
 function update_menu()
-	if btnp(2) then sel-=1 end
-	if btnp(3) then sel+=1 end
+	if btnp(2) then sel-=1 sfx(SFX_CURSOR,UI_CH) end
+	if btnp(3) then sel+=1 sfx(SFX_CURSOR,UI_CH) end
 	if sel<1 then sel=#opts end
 	if sel>#opts then sel=1 end
-	if btnp(4) then local a=opts[sel].action if a then a() end end
+	if btnp(4) then
+		if sel==1 then
+			-- start option handles its own sfx after music(-1)
+			local a=opts[sel].action if a then a() end
+		else
+			sfx(SFX_OK,UI_CH)
+			local a=opts[sel].action if a then a() end
+		end
+	end
 end
 
 function draw_menu()
