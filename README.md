@@ -25,9 +25,9 @@ A retro-inspired space shooter game built with PICO-8 fantasy console. Blast ast
 
 | Sprite                                                                                                                      | Name       | Description                                                                                                 |
 | --------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
-| ![Medium](preview/asteroid-md.png) ![Large](preview/asteroid-lg.png)                                                                        | Asteroid   | Large space rock that moves slowly. Can be destroyed with multiple hits. Breaks into chunks when destroyed. |
-| ![Orange Comet](preview/comet-orange.png) ![Green Comet](preview/comet-green.png) ![Blue Comet](preview/comet-blue.png) ![Red Comet](preview/comet-red.png) | Comet      | Fast-moving space debris that cannot be destroyed. Must be avoided to prevent damage.                       |
-| ![Black Hole](preview/black-hole.gif)                                                                                               | Black Hole | A dangerous space anomaly that pulls the player in. Avoid getting too close or you'll be sucked in!         |
+| ![Medium](preview/entities/asteroid-md.png) ![Large](preview/entities/asteroid-lg.png)                                                                        | Asteroid   | Large space rock that moves slowly. Can be destroyed with multiple hits. Breaks into chunks when destroyed. |
+| ![Orange Comet](preview/entities/comet-orange.png) ![Green Comet](preview/entities/comet-green.png) ![Blue Comet](preview/entities/comet-blue.png) ![Red Comet](preview/entities/comet-red.png) | Comet      | Fast-moving space debris that cannot be destroyed. Must be avoided to prevent damage.                       |
+| ![Black Hole](preview/entities/black-hole.gif)                                                                                               | Black Hole | A dangerous space anomaly that pulls the player in. Avoid getting too close or you'll be sucked in!         |
 
 ## Upgrades & Power-ups
 | Name   | Description                                                                                                                                     |
