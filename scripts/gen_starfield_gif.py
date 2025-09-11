@@ -275,13 +275,24 @@ def main() -> None:
     planets: List[Planet] = init_planets_loop_friendly(seed, width, height) if args.planets else []
 
     # Loop design: by default ssc=2 so the layer speeds align in 256 frames for height=128.
-    # For arbitrary heights, --auto-ssc solves spd_min * ssc * frames = 1 * height so everything closes.
+    # For arbitrary heights, compute ssc so that spd_min * ssc * frames = height (perfect time loop).
+    # If --auto-ssc is off but the current parameters won’t loop, auto-correct ssc (when default ssc is used).
+    min_spd = 0.25  # far layer and also planet min choice
+    auto_fix = False
     if args.auto_ssc:
-        min_spd = min(s.spd for s in stars) if stars else 0.25
-        # Avoid divide-by-zero if frames is zero (shouldn't happen due to arg type), fall back to 2.0
         ssc = (height / max(1, frames)) / max(1e-9, min_spd)
+        auto_fix = True
     else:
         ssc = float(args.ssc)
+        # Check loop closure: (min_spd * ssc * frames) must be an integer multiple of height.
+        cycles = (min_spd * ssc * frames) / max(1, height)
+        def _is_int(x: float, tol: float = 1e-9) -> bool:
+            return abs(x - round(x)) <= tol
+        if not _is_int(cycles):
+            # If user didn’t explicitly change ssc (still default 2.0), auto-correct to perfect loop.
+            if abs(ssc - 2.0) <= 1e-12:
+                ssc = (height / max(1, frames)) / max(1e-9, min_spd)
+                auto_fix = True
 
     pal_img = build_palette_image(bg_index)
 
@@ -305,7 +316,7 @@ def main() -> None:
         for i, im in enumerate(images):
             images[i] = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE, colors=16)
     images[0].save(args.out, **save_kwargs)
-    suffix = " [auto-ssc]" if args.auto_ssc else ""
+    suffix = " [auto-ssc]" if args.auto_ssc else (" [auto-fix ssc]" if auto_fix else "")
     print(f"Wrote {args.out} ({frames} frames @ {fps} fps, size {width}x{height}, ssc={ssc:.6g}){suffix}")
 
 
