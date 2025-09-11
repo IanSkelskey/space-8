@@ -1,13 +1,14 @@
 local comets,parts = {},{}
-local SIDS={6,20,21,22}
+local SIDS={48,49,50,51,52} -- red, pink, yellow, green, blue
 local spawn_t = 0
 local WARNING_TIME = 20
 
 local SWAPS = {
-	{8,9},  -- original colors (no swap)
-	{9,10},  -- 8->9, 9->10
-	{3,11}, -- 8->3, 9->11
-	{1,12} -- 8->1, 9->12
+	{8,9},  -- red
+	{2,14}, -- pink
+	{10,9}, -- yellow
+	{3,11}, -- green
+	{1,12}  -- blue
 }
 
 -- removed unused trail sampler to save tokens
