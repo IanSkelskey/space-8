@@ -6,7 +6,7 @@ local OFF_MIN,OFF_MAX,FACE_EPS=-4,132,0.05
 local X={NL=2,NR=3,BDY=0.5,DYS=0.9,LMIN=6,LR=10,XJ=1,DXJ=0.6,DXR=0.3,DYR=0.4,CY=10,CO=9,CR=8}
 local T={H=0.6,I=0.2,D=0.03,U=0.45}
 local DEATH_FR=45
-local SH={MAX=100,MIN=10,RAD=10,COLS={12,13,1},INVULN=30,CH=3,SFX_ON=30,SFX_HIT=31,SFX_OFF=32,COOL=60}
+local SH={MAX=100,MIN=10,RAD=10,COLS={12,13,1},INVULN=30,CH=3,SFX_ON=30,SFX_HIT=31,SFX_OFF=43,COOL=60}
 
 ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false}
 
@@ -56,6 +56,15 @@ local function spawn_exhaust(str)
 	end
 end
 
+local function ship_break_shield()
+	ship.shield_active = false
+	ship.shield_cool = SH.COOL
+	ship.shield_invuln = SH.INVULN
+	ship.shield_anim = 0
+	sfx(-1, SH.CH)
+	sfx(SH.SFX_OFF, 3)
+end
+
 local function update_exhaust()
 	for p in all(exhaust) do
 		p.x+=p.dx
@@ -79,14 +88,12 @@ function ship_kill()
 	if ship.shield_invuln>0 then return end
 	if ship.shield_active then
 		local _,_,hit=sh_stats()
-		ship.shield_power=max(0,ship.shield_power-hit)
-		ship.shield_invuln=SH.INVULN
-		ship.shield_anim=0
-		sfx(SH.SFX_HIT,3)
-		if ship.shield_power<=0 then
-			ship.shield_active=false
-			sfx(-1,SH.CH)
-			sfx(SH.SFX_OFF,3)
+		ship.shield_power = max(0, ship.shield_power - hit)
+		ship.shield_invuln = SH.INVULN
+		ship.shield_anim = 0
+		sfx(SH.SFX_HIT, 3)
+		if ship.shield_power <= 0 then
+			ship_break_shield()
 		end
 		return
 	end
@@ -181,23 +188,27 @@ function update_ship()
 	if ship.shield_invuln>0 then ship.shield_invuln-=1 end
 	if ship.shield_unlocked then
 		local drain,rech=sh_stats()
-		if btn(5)and ship.shield_power>=SH.MIN and ship.shield_cool<=0 and not ship.dying then
-			if not ship.shield_active then
-				ship.shield_active=true
-				sfx(SH.SFX_ON,SH.CH)
+		-- Check if shield is depleted while active
+		if ship.shield_active then
+			ship.shield_power = max(0, ship.shield_power - drain)
+			if ship.shield_power <= 0 then
+				ship_break_shield()
 			end
-			ship.shield_power=max(0,ship.shield_power-drain)
-			if ship.shield_power<=0 then
-				ship.shield_active=false
-				ship.shield_cool=SH.COOL
-				sfx(-1,SH.CH)
-				sfx(SH.SFX_OFF,3)
-			end
-		else
-			if ship.shield_active then
-				ship.shield_active=false
-				sfx(-1,SH.CH)
-			end
+		end
+		
+		-- Handle shield activation/deactivation
+		if btn(5) and ship.shield_power>=SH.MIN and ship.shield_cool<=0 and not ship.dying and not ship.shield_active then
+			-- Activate shield
+			ship.shield_active=true
+			sfx(SH.SFX_ON,SH.CH)
+		elseif not btn(5) and ship.shield_active then
+			-- Manual deactivation (no cooldown)
+			ship.shield_active=false
+			sfx(-1,SH.CH)
+		end
+		
+		-- Handle recharge and cooldown (only when shield is off)
+		if not ship.shield_active then
 			if ship.shield_cool>0 then
 				ship.shield_cool-=1
 			elseif ship.shield_power<SH.MAX and ship.shield_invuln<=0 then
