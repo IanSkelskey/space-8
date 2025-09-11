@@ -27,15 +27,15 @@ local function dm(x,y,w,h,v,m,cf,cm,cl)
 end
 
 function draw_hud()
-	rectfill(0,0,127,HUD_HEIGHT-1,0)
-	line(0,HUD_HEIGHT-1,127,HUD_HEIGHT-1,1)
+	-- no HUD background/border for seamless fullscreen
 	print(score,2,2,7)
-	
-	print(money_total or money,37,2,10)
-	
-	local x=72
+	-- right-align cash
+	local t="$"..((money_total) or money)
+	local tx=127-#t*4-2
+	print(t,tx,2,10)
+	-- center the shield meter block at top
+	local x=50
 	spr(10,x,2)
 	local p=ship and ship.shield_power or 0
 	dm(x+7,3,20,3,p,100,12,13,8)
-
 end
