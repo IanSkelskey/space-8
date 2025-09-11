@@ -14,13 +14,20 @@ A retro-inspired space shooter game built with PICO-8 fantasy console. Blast ast
 - X/V/M: Use your shield
 - Avoid obstacles and collect power-ups to survive longer
 
+## Screenshots
+
+![Controls](preview/screenshots/controls.png)
+![Early Gameplay](preview/screenshots/early_gameplay.png)
+![Shop](preview/screenshots/shop.png)
+![Station](preview/screenshots/station.png)
+
 ## Obstacles
 
 | Sprite                                                                                                                      | Name       | Description                                                                                                 |
 | --------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
-| ![Medium](asteroid-md.png) ![Large](asteroid-lg.png)                                                                        | Asteroid   | Large space rock that moves slowly. Can be destroyed with multiple hits. Breaks into chunks when destroyed. |
-| ![Orange Comet](comet-orange.png) ![Green Comet](comet-green.png) ![Blue Comet](comet-blue.png) ![Red Comet](comet-red.png) | Comet      | Fast-moving space debris that cannot be destroyed. Must be avoided to prevent damage.                       |
-| ![Black Hole](black-hole.gif)                                                                                               | Black Hole | A dangerous space anomaly that pulls the player in. Avoid getting too close or you'll be sucked in!         |
+| ![Medium](preview/asteroid-md.png) ![Large](preview/asteroid-lg.png)                                                                        | Asteroid   | Large space rock that moves slowly. Can be destroyed with multiple hits. Breaks into chunks when destroyed. |
+| ![Orange Comet](preview/comet-orange.png) ![Green Comet](preview/comet-green.png) ![Blue Comet](preview/comet-blue.png) ![Red Comet](preview/comet-red.png) | Comet      | Fast-moving space debris that cannot be destroyed. Must be avoided to prevent damage.                       |
+| ![Black Hole](preview/black-hole.gif)                                                                                               | Black Hole | A dangerous space anomaly that pulls the player in. Avoid getting too close or you'll be sucked in!         |
 
 ## Upgrades & Power-ups
 | Name   | Description                                                                                                                                     |
