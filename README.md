@@ -16,11 +16,18 @@ A retro-inspired space shooter game built with PICO-8 fantasy console. Blast ast
 
 ## Obstacles
 
-| Sprite                       | Name     | Description                                                                                                 |
-| ---------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
-| ![Medium](asteroid-md.png) ![Large](asteroid-lg.png) | Asteroid | Large space rock that moves slowly. Can be destroyed with multiple hits. Breaks into chunks when destroyed. |
-| ![Orange Comet](comet-orange.png) ![Green Comet](comet-green.png) ![Blue Comet](comet-blue.png) ![Red Comet](comet-red.png) | Comet    | Fast-moving space debris that cannot be destroyed. Must be avoided to prevent damage.                       |
-| ![Black Hole](black-hole.gif) | Black Hole | A dangerous space anomaly that pulls the player in. Avoid getting too close or you'll be sucked in! |
+| Sprite                                                                                                                      | Name       | Description                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| ![Medium](asteroid-md.png) ![Large](asteroid-lg.png)                                                                        | Asteroid   | Large space rock that moves slowly. Can be destroyed with multiple hits. Breaks into chunks when destroyed. |
+| ![Orange Comet](comet-orange.png) ![Green Comet](comet-green.png) ![Blue Comet](comet-blue.png) ![Red Comet](comet-red.png) | Comet      | Fast-moving space debris that cannot be destroyed. Must be avoided to prevent damage.                       |
+| ![Black Hole](black-hole.gif)                                                                                               | Black Hole | A dangerous space anomaly that pulls the player in. Avoid getting too close or you'll be sucked in!         |
+
+## Upgrades & Power-ups
+| Name   | Description                                                                                                                                     |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Shield | Grants a temporary shield that prevents all damage. If you take too much damage while shielded, the shield will break and need to be recharged. |
+| Fire Rate | Increases your ship's firing rate, allowing you to shoot more frequently.                                                  |
+| Spread Shot | Allows your ship to fire multiple projectiles in a spread pattern, increasing your chances of hitting targets. |
 
 ## Development
 - All source code is in Lua, designed for PICO-8

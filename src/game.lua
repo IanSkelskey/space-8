@@ -63,6 +63,7 @@ function reset_game()
 	mission_distance=0
 	distance_remaining=0
 	money_total=0
+	ts=0
 	last_pay,last_bonus,last_points=0,0,0
 	last_payout_ready=false
 	music(0,0,MM)
@@ -169,7 +170,11 @@ function _draw()
 
 	elseif game_state=="gameover"then
 		draw_hud()
-		print("game over",40,54,7)
-		print("z: menu",46,66,6)
+		print("game over",40,52,7)
+		local m=money_total or 0
+		print("round "..(round_number or 1),44,64,6)
+		print("cash $"..m,44,72,10)
+		print("total "..(ts or 0),44,80,7)
+		print("z: menu",46,96,6)
 	end
 end

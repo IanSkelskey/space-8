@@ -1,4 +1,5 @@
 local score,money=0,0
+ts=ts or 0
 HUD_HEIGHT=10
 
 function hud_init()
@@ -6,7 +7,7 @@ function hud_init()
 	money = 0
 end
 
-function hud_add_score(n) score += n or 0 end
+function hud_add_score(n) score += n or 0 ts += n or 0 end
 function hud_add_money(n) money += n or 0 end
 
 -- minimal accessors for mission bonus calc
