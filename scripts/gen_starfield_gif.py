@@ -18,17 +18,21 @@ Loop-safe tweaks (to ensure a time loop when desired):
 - Distant planets are OFF by default. You can enable loop-friendly planets with --planets; they use
     modulo wrapping instead of respawn and discrete speeds.
 
+New in this version for non-square heights:
+- --auto-ssc computes a speed scale that guarantees a perfect time loop for ANY height/frames by
+  solving spd_min * ssc * frames = 1 * height (with spd_min = 0.25). This removes the old
+  restriction that height should divide 128 for a perfect loop.
+
 Notes for non-square output:
 - Width and height can be set independently with --width and --height. The previous --size option
     still works and sets both dimensions equally.
-- For a perfect time loop of vertical motion with the defaults (frames=256, ssc=2), choose a canvas
-    height that divides 128 (e.g., 128, 64, 32, ...). Otherwise the animation will still loop, but a
-    single cycle may not return every star to its exact starting y in the final frame.
+- For an exact time loop at arbitrary heights, use --auto-ssc. It selects ssc so that all layers
+    return to their starting y on the last frame, regardless of height.
 
 Usage (PowerShell):
     python .\gen_starfield_gif.py --out build\\starfield.gif --frames 256 --fps 15
     # non-square example
-    python .\gen_starfield_gif.py --out build\\starfield_256x144.gif --width 256 --height 144
+    python .\gen_starfield_gif.py --out build\\starfield_256x144.gif --width 256 --height 144 --auto-ssc
   
 Optional flags:
     --size 128            Square output (sets both width and height). Default 128.
@@ -40,6 +44,7 @@ Optional flags:
     --planets             Include distant planets in a loop-friendly way.
     --no-dither           Disable GIF dithering (defaults to enabled for better gradients).
     --bg 0                Background PICO-8 color index (default 0 = black).
+    --auto-ssc            Auto-compute speed scale so the animation time-loops perfectly for any height.
 
 Output is an animated GIF that tiles in space and is designed to loop well in time.
 """
@@ -78,6 +83,7 @@ PICO8_PALETTE = [
 class Star:
     x: int
     y: float
+    y0: float
     spd: float
     col_index: int  # base color index (1, 5, 13)
     layer: int      # 1=far, 2=mid, 3=near
@@ -89,6 +95,7 @@ class Star:
 class Planet:
     x: float
     y: float
+    y0: float
     r: int
     spd: float
     has_ring: bool
@@ -127,7 +134,7 @@ def init_stars(seed: int | None, width: int, height: int) -> List[Star]:
         for _ in range(l["n"]):
             x = int(math.floor(random.random() * width))
             y = random.random() * height
-            s = Star(x=x, y=y, spd=l["spd"], col_index=l["col"], layer=l["li"], tw=None, twspd_k=None)
+            s = Star(x=x, y=y, y0=y, spd=l["spd"], col_index=l["col"], layer=l["li"], tw=None, twspd_k=None)
             # 15% twinkle chance for far/mid only
             if l["li"] <= 2 and random.random() < 0.15:
                 k = random.choice([3, 4, 5])  # integer cycles over the full animation
@@ -160,20 +167,26 @@ def init_planets_loop_friendly(seed: int | None, width: int, height: int) -> Lis
         spd = random.choice([0.25, 0.5])
         has_ring = (r == 3) and (random.random() < 0.5)
         ring_angle = random.random()
-        planets.append(Planet(x=x, y=y, r=r, spd=spd, has_ring=has_ring, ring_angle=ring_angle))
+        planets.append(Planet(x=x, y=y, y0=y, r=r, spd=spd, has_ring=has_ring, ring_angle=ring_angle))
     return planets
 
 
 def update_stars(stars: List[Star], height: int, ssc: float, frame_idx: int, frames: int) -> None:
+    """Update star positions and twinkle.
+
+    Uses a non-accumulating position update (based on initial y0) to avoid floating-point drift, so
+    exact time loops are preserved when spd*ssc*frames is a multiple of height.
+    """
     for s in stars:
-        s.y = (s.y + s.spd * ssc) % height
+        # Non-accumulating update ensures y exactly returns to start when configured for a perfect loop.
+        s.y = (s.y0 + s.spd * ssc * frame_idx) % height
         if s.tw is not None and s.twspd_k is not None:
             s.tw = (s.tw + (s.twspd_k / frames)) % 1.0
 
 
-def update_planets(planets: List[Planet], height: int, ssc: float) -> None:
+def update_planets(planets: List[Planet], height: int, ssc: float, frame_idx: int) -> None:
     for p in planets:
-        p.y = (p.y + p.spd * ssc) % height
+        p.y = (p.y0 + p.spd * ssc * frame_idx) % height
 
 
 def _bbox_intersects_frame(bbox: tuple[int, int, int, int], width: int, height: int) -> bool:
@@ -237,6 +250,7 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--frames", type=int, default=256, help="Number of frames (default: 256 for seamless loop)")
     ap.add_argument("--fps", type=int, default=15, help="Frames per second for playback (default: 15; matches in-game speed with ssc=2)")
     ap.add_argument("--ssc", type=float, default=2.0, help="Speed scale per frame (default: 2.0; choose with frames to close the loop)")
+    ap.add_argument("--auto-ssc", action="store_true", help="Auto-compute speed scale for a perfect time loop for the given height and frames")
     ap.add_argument("--seed", type=int, default=42, help="RNG seed for reproducibility (default: 42)")
     ap.add_argument("--planets", action="store_true", help="Include loop-friendly distant planets (optional)")
     ap.add_argument("--no-dither", action="store_true", help="Disable GIF dithering (enabled by default)")
@@ -256,13 +270,18 @@ def main() -> None:
     dither = not args.no_dither
     bg_index = args.bg
 
-    # Loop design: by default ssc=2 so the layer speeds align in 256 frames and visual speed matches in-game at ~15 fps.
-    # You can override with --ssc (ensure spd*ssc*frames is a multiple of 128 for exact closure).
-    ssc = float(args.ssc)
-
-    # Initialize entities
+    # Initialize entities (independent of ssc)
     stars = init_stars(seed, width, height)
     planets: List[Planet] = init_planets_loop_friendly(seed, width, height) if args.planets else []
+
+    # Loop design: by default ssc=2 so the layer speeds align in 256 frames for height=128.
+    # For arbitrary heights, --auto-ssc solves spd_min * ssc * frames = 1 * height so everything closes.
+    if args.auto_ssc:
+        min_spd = min(s.spd for s in stars) if stars else 0.25
+        # Avoid divide-by-zero if frames is zero (shouldn't happen due to arg type), fall back to 2.0
+        ssc = (height / max(1, frames)) / max(1e-9, min_spd)
+    else:
+        ssc = float(args.ssc)
 
     pal_img = build_palette_image(bg_index)
 
@@ -272,7 +291,7 @@ def main() -> None:
         # Update positions
         update_stars(stars, height, ssc=ssc, frame_idx=f, frames=frames)
         if planets:
-            update_planets(planets, height, ssc=ssc)
+            update_planets(planets, height, ssc=ssc, frame_idx=f)
 
         # Draw frame
         img = draw_frame(width, height, stars, planets, bg_index, pal_img)
@@ -286,7 +305,8 @@ def main() -> None:
         for i, im in enumerate(images):
             images[i] = im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE, colors=16)
     images[0].save(args.out, **save_kwargs)
-    print(f"Wrote {args.out} ({frames} frames @ {fps} fps, size {width}x{height})")
+    suffix = " [auto-ssc]" if args.auto_ssc else ""
+    print(f"Wrote {args.out} ({frames} frames @ {fps} fps, size {width}x{height}, ssc={ssc:.6g}){suffix}")
 
 
 if __name__ == "__main__":
