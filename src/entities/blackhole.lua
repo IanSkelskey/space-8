@@ -152,9 +152,6 @@ function update_blackhole()
 		h.y+=h.spd
 		h.spin_t=(h.spin_t+1)%(SPIN_STEP*4)
 
-		if starfield_pull then
-			starfield_pull(h.x+HOLE_HW,h.y+HOLE_HH,h.r,STAR_STR,STAR_SW)
-		end
 		if moon_debris_pull then
 			moon_debris_pull(h.x+HOLE_HW,h.y+HOLE_HH,h.r,MOON_STR)
 		end
