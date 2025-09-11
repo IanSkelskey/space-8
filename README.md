@@ -2,6 +2,8 @@
 
 A retro-inspired space shooter game built with PICO-8 fantasy console. Blast asteroids, dodge comets, and survive as long as you can!
 
+ 
+
 ## Features
 - Classic arcade-style gameplay
 - Power-ups, score, and fuel management
@@ -16,10 +18,12 @@ A retro-inspired space shooter game built with PICO-8 fantasy console. Blast ast
 
 ## Screenshots
 
+![Shop](preview/screenshots/shop.png)
+![Late Gameplay](preview/screenshots/late_gameplay.png)
 ![Controls](preview/screenshots/controls.png)
 ![Early Gameplay](preview/screenshots/early_gameplay.png)
-![Shop](preview/screenshots/shop.png)
 ![Station](preview/screenshots/station.png)
+![Game Over](preview/screenshots/game_over.png)
 
 ## Obstacles
 

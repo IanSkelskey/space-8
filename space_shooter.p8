@@ -4,17 +4,17 @@ __lua__
 -- space shooter with delivery missions
 -- all game logic in separate files
 
-#include src/controls.lua
-#include src/menu.lua
+#include src/ui/controls.lua
+#include src/ui/menu.lua
 #include src/starfield.lua
-#include src/ship.lua
+#include src/entities/ship.lua
 #include src/levels.lua
-#include src/moon.lua
-#include src/hud.lua
-#include src/shop.lua
-#include src/station.lua
-#include src/blackhole.lua
-#include src/comet.lua
+#include src/entities/moon.lua
+#include src/ui/hud.lua
+#include src/ui/shop.lua
+#include src/ui/station.lua
+#include src/entities/blackhole.lua
+#include src/entities/comet.lua
 #include src/game.lua
 
 __gfx__

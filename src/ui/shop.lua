@@ -73,7 +73,7 @@ function shop_draw()
             print("shield upgrade",20,y,c)
             if ship.shield_unlocked then print("lvl "..max(1,shl).."/3",96,y,c) end
         else
-            print("bullet spread +1",20,y,c)
+            print("phaser spread +1",20,y,c)
             print("lvl "..spread_lvl.."/"..SM,96,y,c)
         end
         y += 12
@@ -84,6 +84,7 @@ function shop_draw()
     else
     local sel_cost=(sel==1 and (lvl<FM and ("$"..(100+50*lvl)) or "owned")) or (sel==2 and ((ship.shield_unlocked and (max(1,shl)<3) and ("$"..(SC+80*shl))) or (ship.shield_unlocked and "owned") or ("$"..SC)) or (spread_lvl<SM and ("$"..(150+100*spread_lvl)) or "owned"))
         print("cost: "..sel_cost,1,116,12)
-    print("z: buy   x: back",74,116,5)
+    local controls_txt="z: buy   x: back"
+    print(controls_txt, max(0, 127-#controls_txt*4-2), 116, 5)
     end
 end
