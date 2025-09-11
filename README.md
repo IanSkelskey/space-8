@@ -1,8 +1,8 @@
+![Banner](preview/itch/banner.gif)
+
 # Space Shooter (PICO-8)
 
 A retro-inspired space shooter game built with PICO-8 fantasy console. Blast asteroids, dodge comets, and survive as long as you can!
-
- 
 
 ## Features
 - Classic arcade-style gameplay
