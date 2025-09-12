@@ -57,38 +57,43 @@ end
 
 function shop_draw()
     cls()
-    print("shop",58,8,7)
-    print("$"..(money_total or 0), 100, 16, 10)
-    line(0,24,127,24,1)
+    -- header bar to match station
+    rectfill(0,0,127,15,1)
+    print("shop",4,4,7)
+    print("$"..(money_total or 0),100,4,10)
+    -- main panel (taller to fit message line under buttons)
+    rect(2,18,125,121,1)
     local lvl = ship.fire_rate_level or 0
     local spread_lvl = ship.spread_level or 0
     local shl = ship.shield_level or 0
-    local y = 34
+    local y = 26
     for i=1,3 do
-        local c = (i==sel) and 7 or 6
-    if i==sel then print(">",4,y,c) end
-    local icon = (i==1) and 11 or (i==2 and 10 or 25)
+        local c = (i==sel) and 7 or 5
+        if i==sel then rectfill(6,y-2,121,y+6,1) end
+        local icon = (i==1) and 11 or (i==2 and 10 or 25)
         local sx,sy=(icon%16)*8,flr(icon/16)*8
-    sspr(sx,sy,5,5,10,y,5,5)
+        sspr(sx,sy,5,5,10,y,5,5)
         if i==1 then
             print("fire rate +20%",20,y,c)
-            print("lvl "..lvl.."/"..FM,96,y,c)
+            print("lvl"..lvl.."/"..FM,96,y,c)
         elseif i==2 then
             print("shield upgrade",20,y,c)
-            if ship.shield_unlocked then print("lvl "..max(1,shl).."/3",96,y,c) end
+            if ship.shield_unlocked then print("lvl"..max(1,shl).."/3",96,y,c) end
         else
             print("phaser spread +1",20,y,c)
-            print("lvl "..spread_lvl.."/"..SM,96,y,c)
+            print("lvl"..spread_lvl.."/"..SM,96,y,c)
         end
-        y += 12
+        y += 14
     end
-    line(0,110,127,110,1)
-    if shop_msg ~= "" then
-        print(shop_msg,24,116,smc or 11)
-    else
+    -- footer area inside panel (always show buttons; message below)
     local sel_cost=(sel==1 and (lvl<FM and ("$"..(100+50*lvl)) or "owned")) or (sel==2 and ((ship.shield_unlocked and (max(1,shl)<3) and ("$"..(SC+80*shl))) or (ship.shield_unlocked and "owned") or ("$"..SC)) or (spread_lvl<SM and ("$"..(150+100*spread_lvl)) or "owned"))
-        print("cost: "..sel_cost,1,116,12)
-    local controls_txt="z: buy   x: back"
-    print(controls_txt, max(0, 127-#controls_txt*4-2), 116, 5)
+    -- expanded footer panel
+    rect(6,72,121,118,1)
+    print("cost "..sel_cost,10,78,12)
+    local desc=(sel==1 and "+ faster shots") or (sel==2 and (ship.shield_unlocked and "+ more shield" or "+ adds shield")) or "+ wider spread"
+    print(desc,10,86,11)
+    print("z buy  x back",10,96,6)
+    if shop_msg ~= "" then
+        print(shop_msg,10,106,smc or 11)
     end
 end
