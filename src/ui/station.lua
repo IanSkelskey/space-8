@@ -79,16 +79,19 @@ function draw_station()
         rect(2,56,125,121,1)
         if station_confirm then
             print("launch mission?",10,64,7)
-            print("z yes  x no",12,76,6)
+            print("🅾️ yes  ❎ no",12,76,6)
         else
             local y = 64
             for i=1,2 do
                 local c = (i==sel) and 7 or 5
                 if i==sel then rectfill(6,y-2,121,y+6,1) end
-                print(i==1 and "launch mission" or "shop",10,y,c)
+                local icon = (i==1) and 6 or 22
+                local sx,sy=(icon%16)*8,flr(icon/16)*8
+                sspr(sx,sy,5,5,10,y,5,5)
+                print(i==1 and "launch mission" or "shop",18,y,c)
                 y += 12
             end
-            print("z sel  x back",10,108,6)
+            print("🅾️ sel  ❎ back",8,108,6)
         end
     else
         if shop_draw then shop_draw() else print("shop",58,76,7) end

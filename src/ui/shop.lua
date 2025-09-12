@@ -56,7 +56,6 @@ function shop_update()
 end
 
 function shop_draw()
-    cls()
     -- header bar to match station
     rectfill(0,0,127,15,1)
     print("shop",4,4,7)
@@ -92,7 +91,7 @@ function shop_draw()
     print("cost "..sel_cost,10,78,12)
     local desc=(sel==1 and "+ faster shots") or (sel==2 and (ship.shield_unlocked and "+ more shield" or "+ adds shield")) or "+ wider spread"
     print(desc,10,86,11)
-    print("z buy  x back",10,96,6)
+    print("🅾️ buy  ❎ back",8,96,6)
     if shop_msg ~= "" then
         print(shop_msg,10,106,smc or 11)
     end

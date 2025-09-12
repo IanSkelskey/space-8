@@ -1,19 +1,14 @@
 function controls_init() end
-
-SFX_CURSOR=SFX_CURSOR or 44
-SFX_ERR=SFX_ERR or 45
-SFX_OK=SFX_OK or 63
-UI_CH=UI_CH or 3
+SFX_OK=SFX_OK or 63 UI_CH=UI_CH or 3
 
 function update_controls()
-	if btnp(4) or btnp(5) then sfx(SFX_OK,UI_CH) game_state="menu" menu_init() end
+ if btnp(4) or btnp(5) then sfx(SFX_OK,UI_CH) game_state="menu" menu_init() end
 end
 
 function draw_controls()
-	print("controls",48,20,7)
-	local y=40
-	print("arrows: move",24,y,6) y+=10
-	print("z: fire",24,y,6) y+=10
-	print("x: shield(hold)",24,y,6) y+=10
-	print("x: back",24,y+10,6) y+=10
+ rectfill(0,0,127,15,1)
+ print("help",4,4,7)
+	rect(1,17,126,118,1)
+	print("\fcloop\f6:\n  deliver tech>cash>upgrade\n  launch>survive>return\n\n\fccontrols\f6:\n  move pad  shoot 🅾️\n  shield ❎ hold\n\n\fcupgrades\f6:\n  fire+ faster\n  shield+ stronger\n  spread +bolts",6,20,6)
+ print("❎ back",52,120,5)
 end

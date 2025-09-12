@@ -182,6 +182,6 @@ function _draw()
 		print("round "..(round_number or 1),44,64,6)
 		print("cash $"..m,44,72,10)
 		print("total "..(ts or 0),44,80,7)
-		print("z: menu",46,96,6)
+		print("🅾️ menu",50,96,6)
 	end
 end
