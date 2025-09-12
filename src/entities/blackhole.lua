@@ -1,4 +1,3 @@
--- blackhole
 local HOLE_W,HOLE_H,HOLE_HW,HOLE_HH=8,8,4,4
 local HOLE_SPD,HOLE_R,HOLE_MAX,HOLE_SPR=0.8,50,2,3
 local SPAWN_BASE,SPAWN_RND,SPAWN_DEC=3,3,1/30
@@ -9,9 +8,6 @@ local P_BSPD,P_SVAR,P_RNDVAR,P_KICK=0.45,0.45,0.2,0.08
 local P_LIFE,P_LVAR=20,10
 local MIN_D2,RAD_GAIN,SWIRL_GAIN,MIN_SWIRL=0.1,0.30,0.80,0.20
 local CORE_PROX,OUT_BIAS,VEL_ZERO=2.2,0.20,0.01
-
--- Spaghettification effect parameters
-
 local STAR_STR,STAR_SW,MOON_STR,SHIP_TR,SHIP_STR=0.10,0.20,0.35,0.22,0.6
 local SCR_W,SCR_H,OFF_Y=128,128,136
 local P_BRIGHT,P_DIM,COL_BRIGHT,COL_MID,COL_DIM=16,8,14,2,1
@@ -167,10 +163,9 @@ function update_blackhole()
 			local dx,dy=cx-ship.x-ship.w/2,cy-ship.y-ship.h/2
 			local d2=dx*dx+dy*dy
 			local r2=h.r*h.r
-			-- Increase pull strength
 			if d2<r2 and d2>0 then
 				local invd=1/sqrt(d2)
-				local str=(SHIP_STR*1.25)*(1-d2/r2)  -- 25% stronger pull
+				local str=(SHIP_STR*1.25)*(1-d2/r2)
 				ship.x+=dx*invd*str
 				ship.y+=dy*invd*str
 				if ship.x<0 then ship.x=0 end
@@ -181,10 +176,9 @@ function update_blackhole()
 
 		end
 
-		-- Kill ship regardless of shield
 		if ship and aabb(h.x,h.y,h.w,h.h,ship.x,ship.y,ship.w,ship.h) then
 			if ship.dying~=true and ship_kill then
-				ship.shield_power = 0 -- forcibly break shield
+				ship.shield_power = 0
 				ship.shield_active = false
 				ship_kill()
 			end

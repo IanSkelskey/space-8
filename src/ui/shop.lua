@@ -7,7 +7,7 @@ local SC=120
 local SM=2
 SFX_CURSOR=SFX_CURSOR or 44
 SFX_ERR=SFX_ERR or 45
-SFX_OK=SFX_OK or 46
+SFX_OK=SFX_OK or 63
 UI_CH=UI_CH or 3
 
 function shop_init() sel=1 shop_msg="" shop_msg_t=0 end

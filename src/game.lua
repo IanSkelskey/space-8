@@ -11,7 +11,6 @@ mission_distance=0
 distance_remaining=0
 level_fanfare_timer=0
 ship_departing=false
--- payout tuning: modest earnings with smaller point bonus
 local MB,B100,PR=35,4,0.03
 money_total=money_total or 0
 last_pay=last_pay or 0
@@ -107,15 +106,23 @@ function _update()
 	music(9,0,MM)
 	elseif(game_state=="menu"or game_state=="station")and prev_game_state!="menu"and prev_game_state!="station"and level_fanfare_timer<=0 then
 		music(-1,0)
-	music(0,0,MM)
+		-- menu keeps pattern 0; station (and its shop sub-mode) now uses new pattern 10
+		if game_state=="station" then
+			music(10,0,MM)
+		else
+			music(0,0,MM)
+		end
 	elseif(game_state=="controls"or game_state=="gameover")and(prev_game_state=="game"or prev_game_state=="menu"or prev_game_state=="station")then
 		music(-1,0)
 	end
 	if game_state=="menu"then
 		update_menu()
 		if game_state=="game"then
+			-- starting a new game: immediately enter station and play station music (pattern 10)
 			game_state="station"
 			generate_mission()
+			music(-1,0)
+			music(10,0,MM)
 		end
 	elseif game_state=="controls"then
 		update_controls()

@@ -10,11 +10,9 @@ end
 function hud_add_score(n) score += n or 0 ts += n or 0 end
 function hud_add_money(n) money += n or 0 end
 
--- minimal accessors for mission bonus calc
 function hud_get_points() return score end
 function hud_reset_points() score=0 end
 
--- helper to draw a compact meter
 local function dm(x,y,w,h,v,m,cf,cm,cl)
 	rectfill(x,y,x+w-1,y+h-1,0)
 	local fw=flr((v/m)*w)
@@ -27,13 +25,10 @@ local function dm(x,y,w,h,v,m,cf,cm,cl)
 end
 
 function draw_hud()
-	-- no HUD background/border for seamless fullscreen
 	print(score,2,2,7)
-	-- right-align cash
 	local t="$"..((money_total) or money)
 	local tx=127-#t*4-2
 	print(t,tx,2,10)
-	-- center the shield meter block at top
 	local x=50
 	spr(10,x,2)
 	local p=ship and ship.shield_power or 0

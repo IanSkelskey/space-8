@@ -1,7 +1,7 @@
 local SCR_W,SCR_H,SHIP_W,SHIP_H=128,128,8,8
 local SPR_SHIP,SPR_LEAN,SHIP_SPD,SHIP_ACC=1,4,2.0,0.12
 local START_X,START_Y=SCR_W/2-SHIP_W/2,flr((SCR_H*2)/3 - SHIP_H/2)
-local L={SPEED=2,SFX=0,COOLDOWN=15,CHANNEL=2}
+local L={SPEED=2,SFX=62,COOLDOWN=15,CHANNEL=2}
 local OFF_MIN,OFF_MAX,FACE_EPS=-4,132,0.05
 local X={NL=2,NR=3,BDY=0.5,DYS=0.9,LMIN=6,LR=10,XJ=1,DXJ=0.6,DXR=0.3,DYR=0.4,CY=10,CO=9,CR=8}
 local T={H=0.6,I=0.2,D=0.03,U=0.45}
@@ -12,12 +12,11 @@ ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=fals
 
 local bullets,exhaust,death_fx={},{},{}
 
--- level-scaled shield stats
 local function sh_stats()
  local l=ship.shield_level or 0
- if l<=1 then return 1.0,0.7,22 end -- drain,recharge,hit (weak)
+ if l<=1 then return 1.0,0.7,22 end
  if l==2 then return 0.6,0.9,18 end
- return 0.4,1.2,12 -- lvl3+
+ return 0.4,1.2,12
 end
 
 local function spawn_laser()
@@ -119,7 +118,6 @@ ship.shield_active=false
 ship.shield_anim=0
 ship.shield_invuln=0
 ship.shield_cool=0
--- if shield is unlocked, refill; otherwise keep power at 0
 ship.shield_power = ship.shield_unlocked and SH.MAX or 0
 ship.laser_cd=0
 sfx(-1,SH.CH)
@@ -188,7 +186,6 @@ function update_ship()
 	if ship.shield_invuln>0 then ship.shield_invuln-=1 end
 	if ship.shield_unlocked then
 		local drain,rech=sh_stats()
-		-- Check if shield is depleted while active
 		if ship.shield_active then
 			ship.shield_power = max(0, ship.shield_power - drain)
 			if ship.shield_power <= 0 then
@@ -196,18 +193,14 @@ function update_ship()
 			end
 		end
 		
-		-- Handle shield activation/deactivation
 		if btn(5) and ship.shield_power>=SH.MIN and ship.shield_cool<=0 and not ship.dying and not ship.shield_active then
-			-- Activate shield
 			ship.shield_active=true
 			sfx(SH.SFX_ON,SH.CH)
 		elseif not btn(5) and ship.shield_active then
-			-- Manual deactivation (no cooldown)
 			ship.shield_active=false
 			sfx(-1,SH.CH)
 		end
 		
-		-- Handle recharge and cooldown (only when shield is off)
 		if not ship.shield_active then
 			if ship.shield_cool>0 then
 				ship.shield_cool-=1

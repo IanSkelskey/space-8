@@ -1,9 +1,8 @@
 function controls_init() end
 
--- reuse same indices (define if not already global)
 SFX_CURSOR=SFX_CURSOR or 44
 SFX_ERR=SFX_ERR or 45
-SFX_OK=SFX_OK or 46
+SFX_OK=SFX_OK or 63
 UI_CH=UI_CH or 3
 
 function update_controls()

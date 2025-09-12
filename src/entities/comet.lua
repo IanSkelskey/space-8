@@ -1,17 +1,15 @@
 local comets,parts = {},{}
-local SIDS={48,49,50,51,52} -- red, pink, yellow, green, blue
+local SIDS={48,49,50,51,52}
 local spawn_t = 0
 local WARNING_TIME = 20
 
 local SWAPS = {
-	{8,9},  -- red
-	{2,14}, -- pink
-	{10,9}, -- yellow
-	{3,11}, -- green
-	{1,12}  -- blue
+	{8,9},
+	{2,14},
+	{10,9},
+	{3,11},
+	{1,12}
 }
-
--- removed unused trail sampler to save tokens
 
 function comet_init()
 	comets = {}
@@ -32,7 +30,6 @@ local function spawn_comet()
 		ang = (rnd(1) < 0.5) and 0.375 or 0.625
 	end
 
-	-- speed and velocity
 	local spd = 1.2 + rnd(0.9)
 	local dx = cos(ang) * spd
 	local dy = sin(ang) * spd
@@ -56,7 +53,7 @@ function update_comet()
 	local mx=cm or 3
 	local mi=cmin or 1.0
 	local rg=crng or 1.2
-	-- keep very sparse in early comet rounds
+
 	if round_number<5 then mx=min(mx,1) end
 	if spawn_t <= 0 and #comets < mx then
 		spawn_comet()
@@ -64,19 +61,16 @@ function update_comet()
 		spawn_t = (mi + rnd(rg))*mul
 	end
 
-	-- update comets
 	for c in all(comets) do
 		if c.warning_t > 0 then
 			c.warning_t -= 1
 			goto continue
 		end
 
-		-- move (scaled by level comet speed)
 		local s=cs or 1
 		c.x += c.dx*s
 		c.y += c.dy*s
 
-		-- spawn 1-2 trail particles
 		local ux, uy = 0, 0
 		local spd = sqrt(c.dx*c.dx + c.dy*c.dy)
 		if spd > 0 then ux, uy = c.dx/spd, c.dy/spd end
@@ -102,7 +96,6 @@ function update_comet()
 		::continue::
 	end
 
-	-- update trail particles
 	for p in all(parts) do
 		p.x += p.dx
 		p.y += p.dy

@@ -3,7 +3,7 @@ station_confirm = station_confirm or false
 local sel = sel or 1
 SFX_CURSOR=SFX_CURSOR or 44
 SFX_ERR=SFX_ERR or 45
-SFX_OK=SFX_OK or 46
+SFX_OK=SFX_OK or 63
 UI_CH=UI_CH or 3
 
 function station_init() station_mode="main" station_confirm=false sel=1 if shop_init then shop_init() end end
