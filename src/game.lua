@@ -104,7 +104,7 @@ function _update()
 	elseif game_state=="dying" and prev_game_state=="game" then
 		music(-1,0)
 	music(9,0,MM)
-	elseif(game_state=="menu"or game_state=="station")and prev_game_state!="menu"and prev_game_state!="station"and level_fanfare_timer<=0 then
+	elseif(game_state=="menu"or game_state=="station")and prev_game_state!="menu"and prev_game_state!="station" and prev_game_state!="controls" and level_fanfare_timer<=0 then
 		music(-1,0)
 		-- menu keeps pattern 0; station (and its shop sub-mode) now uses new pattern 10
 		if game_state=="station" then
@@ -112,7 +112,7 @@ function _update()
 		else
 			music(0,0,MM)
 		end
-	elseif(game_state=="controls"or game_state=="gameover")and(prev_game_state=="game"or prev_game_state=="menu"or prev_game_state=="station")then
+	elseif(game_state=="gameover")and(prev_game_state=="game"or prev_game_state=="menu"or prev_game_state=="station")then
 		music(-1,0)
 	end
 	if game_state=="menu"then

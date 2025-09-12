@@ -43,32 +43,47 @@ end
 
 function draw_station()
     if station_mode == "main" then
-        print("station",52,10,7)
-        print("round "..round_number,48,20,6)
-        print("mission:",44,28,12)
+        -- header bar
+        rectfill(0,0,127,15,1)
+        print("station",4,4,7)
+        print("round"..round_number,92,4,6)
+
+        -- mission panel
+        rect(2,18,85,55,1)
+        print("mission",6,20,12)
         if current_mission then
-            print(current_mission,64-#current_mission*2,36,11)
-            print("dist: "..mission_distance,40,44,6)
-        end
-        print("$"..money_total,52,58,10)
-        if last_payout_ready then
-            print("pay$"..last_pay,48,64,11)
-            print("bonus$"..last_bonus,44,72,12)
-            print("+$"..(last_pay+last_bonus),40,80,7)
-        end
-        if station_confirm then
-            print("launch mission?",36,100,7)
-            print("z: yes   x: no",40,110,6)
+            print(current_mission,6,30,11)
+            print("dist:"..mission_distance,6,38,6)
         else
-            local y = 90
+            print("pending",6,30,5)
+        end
+
+        -- money / payout panel
+        rect(88,18,125,71,1)
+        print("$"..money_total,92,22,10)
+        if last_payout_ready then
+            print("pay"..last_pay,92,34,11)
+            print("bn+"..last_bonus,92,42,12)
+            print("+"..(last_pay+last_bonus),92,50,7)
+        end
+
+        -- actions panel (expanded to bottom now that footer removed)
+        rect(2,58,85,121,1)
+        if station_confirm then
+            print("launch mission?",8,66,7)
+            print("z yes  x no",10,78,6)
+        else
+            local y = 64
             for i=1,2 do
-                local c = (i==sel) and 7 or 6
-                if i==sel then print(">",28,y,c) end
-                print(i==1 and "launch mission" or "shop",36,y,c)
+                local c = (i==sel) and 7 or 5
+                if i==sel then rectfill(6,y-2,82,y+6,1) end
+                if i==sel then print(i==1 and "launch mission" or "shop",8,y,c) else print(i==1 and "launch mission" or "shop",8,y,c) end
                 y += 10
             end
-            print("z: select  x: back",28,120,5)
+            print("z sel  x back",10,108,6)
         end
+
+        -- removed footer; space reclaimed by actions panel
     else
         if shop_draw then shop_draw() else print("shop",58,76,7) end
     end
