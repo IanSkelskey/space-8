@@ -9,7 +9,7 @@ local DEATH_FR=45
 local SH={MAX=100,MIN=10,RAD=10,COLS={12,13,1},INVULN=30,CH=3,SFX_ON=30,SFX_HIT=31,SFX_OFF=43,COOL=60}
 local HULL={MAX=2,INVULN=60}
 
-ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=HULL.MAX,hull_invuln=0,hull_level=0}
+ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=HULL.MAX,hull_invuln=0,hull_level=0,thruster_level=0}
 
 local bullets,exhaust,death_fx={},{},{}
 
@@ -157,8 +157,11 @@ function update_ship()
 	if ship.vx<-FACE_EPS or(ship.vx==0 and dx<0)then ship.flipx=true end
 	if ship.vx>FACE_EPS or(ship.vx==0 and dx>0)then ship.flipx=false end
 	local tx,ty=dx*ship.spd,dy*ship.spd
-	ship.vx+=mid(-ship.acc,tx-ship.vx,ship.acc)
-	ship.vy+=mid(-ship.acc,ty-ship.vy,ship.acc)
+	-- Apply thruster boost to acceleration
+	local thr_boost=1+0.15*(ship.thruster_level or 0)
+	local eff_acc=ship.acc*thr_boost
+	ship.vx+=mid(-eff_acc,tx-ship.vx,eff_acc)
+	ship.vy+=mid(-eff_acc,ty-ship.vy,eff_acc)
 	ship.x+=ship.vx
 	ship.y+=ship.vy
 	local ht=HUD_HEIGHT or 0
@@ -281,7 +284,7 @@ function ship_unlock_shield()
 end
 
 function ship_reset_upgrades()
-	ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level=0,0,false,0,0,0,0
+	ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level,ship.thruster_level=0,0,false,0,0,0,0,0
 	ship.hull=HULL.MAX  -- Reset hull only on full game reset
 end
 
