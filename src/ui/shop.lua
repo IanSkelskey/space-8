@@ -2,97 +2,100 @@ local sel = sel or 1
 local shop_msg = ""
 local shop_msg_t = 0
 
-local FM=3
-local SC=120
-local SM=2
+local FM,SC,SM=3,120,2
 SFX_CURSOR=SFX_CURSOR or 44
 SFX_ERR=SFX_ERR or 45
 SFX_OK=SFX_OK or 63
 UI_CH=UI_CH or 3
 
-function shop_init() sel=1 shop_msg="" shop_msg_t=0 end
+function shop_init() sel,shop_msg,shop_msg_t=1,"",0 end
 
-local function buy_fr()
-    local lvl = ship.fire_rate_level or 0
-    if lvl >= FM then shop_msg="max level" shop_msg_t=60 snd_sfx(SFX_ERR,UI_CH) return end
-    local cost = 100+50*lvl
-    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 snd_sfx(SFX_ERR,UI_CH) return end
-    money_total -= cost
-    lvl += 1
-    ship.fire_rate_level=lvl shop_msg="bought!" shop_msg_t=60 smc=11 snd_sfx(SFX_OK,UI_CH)
-end
+local function msg(t,s,c) shop_msg,shop_msg_t,smc=t,60,c snd_sfx(s,UI_CH) end
 
-local function buy_sh()
-    local lvl=ship.shield_level or 0
-    local maxl=3
-    if lvl>=maxl then shop_msg="max level" shop_msg_t=60 snd_sfx(SFX_ERR,UI_CH) return end
-    local cost = ship.shield_unlocked and (SC+80*lvl) or SC
-    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 snd_sfx(SFX_ERR,UI_CH) return end
-    money_total-=cost
-    if not ship.shield_unlocked then if ship_unlock_shield then ship_unlock_shield() end else ship.shield_level=lvl+1 end
-    shop_msg="bought!" shop_msg_t=60 smc=11 snd_sfx(SFX_OK,UI_CH)
-end
-
-local function buy_sp()
-    local lvl = ship.spread_level or 0
-    if lvl >= SM then shop_msg="max level" shop_msg_t=60 snd_sfx(SFX_ERR,UI_CH) return end
-    local cost = 150+100*lvl
-    if (money_total or 0) < cost then shop_msg="not enough $$$!" shop_msg_t=60 smc=8 snd_sfx(SFX_ERR,UI_CH) return end
-    money_total -= cost
-    lvl += 1
-    ship.spread_level=lvl shop_msg="bought!" shop_msg_t=60 smc=11 snd_sfx(SFX_OK,UI_CH)
+local function buy(id)
+    local mt=money_total or 0
+    local fr,sh,sp,hl,hu=ship.fire_rate_level or 0,ship.shield_level or 0,ship.spread_level or 0,ship.hull_level or 0,ship_get_hull and ship_get_hull() or 2
+    local mh=ship_get_max_hull and ship_get_max_hull() or 2
+    
+    if id==1 then
+        if fr>=FM then msg("max level",SFX_ERR,8) return end
+        local c=100+50*fr
+        if mt<c then msg("not enough $$$!",SFX_ERR,8) return end
+        money_total-=c ship.fire_rate_level=fr+1
+    elseif id==2 then
+        if sh>=3 then msg("max level",SFX_ERR,8) return end
+        local c=ship.shield_unlocked and (SC+80*sh) or SC
+        if mt<c then msg("not enough $$$!",SFX_ERR,8) return end
+        money_total-=c
+        if ship.shield_unlocked then ship.shield_level=sh+1 else ship_unlock_shield() end
+    elseif id==3 then
+        if sp>=SM then msg("max level",SFX_ERR,8) return end
+        local c=150+100*sp
+        if mt<c then msg("not enough $$$!",SFX_ERR,8) return end
+        money_total-=c ship.spread_level=sp+1
+    elseif id==4 then
+        if hl>=2 then msg("max level",SFX_ERR,8) return end
+        local c=200+150*hl
+        if mt<c then msg("not enough $$$!",SFX_ERR,8) return end
+        money_total-=c ship.hull_level=hl+1 ship.hull=mh+1
+    else
+        if hu>=mh then msg("hull full",SFX_ERR,8) return end
+        if mt<50 then msg("not enough $$$!",SFX_ERR,8) return end
+        money_total-=50 ship.hull=hu+1
+    end
+    msg(id==5 and "repaired!" or "bought!",SFX_OK,11)
 end
 
 function shop_update()
     if shop_msg_t>0 then shop_msg_t-=1 if shop_msg_t<=0 then shop_msg="" end end
-    if btnp(2) then sel -= 1 snd_sfx(SFX_CURSOR,UI_CH) end
-    if btnp(3) then sel += 1 snd_sfx(SFX_CURSOR,UI_CH) end
-    if sel < 1 then sel = 3 end
-    if sel > 3 then sel = 1 end
-    if btnp(5) then snd_sfx(SFX_OK,UI_CH) station_mode = "main" return end
-    if btnp(4) then
-        if sel==1 then buy_fr() elseif sel==2 then buy_sh() else buy_sp() end
-    end
+    if btnp(2) then sel=sel>1 and sel-1 or 5 snd_sfx(SFX_CURSOR,UI_CH) end
+    if btnp(3) then sel=sel<5 and sel+1 or 1 snd_sfx(SFX_CURSOR,UI_CH) end
+    if btnp(5) then snd_sfx(SFX_OK,UI_CH) station_mode="main" end
+    if btnp(4) then buy(sel) end
 end
 
 function shop_draw()
-    -- header bar to match station
     rectfill(0,0,127,15,1)
     print("shop",4,4,7)
     print("$"..(money_total or 0),100,4,10)
-    -- main panel (taller to fit message line under buttons)
     rect(2,18,125,121,1)
-    local lvl = ship.fire_rate_level or 0
-    local spread_lvl = ship.spread_level or 0
-    local shl = ship.shield_level or 0
-    local y = 26
-    for i=1,3 do
-        local c = (i==sel) and 7 or 5
-        if i==sel then rectfill(6,y-2,121,y+6,1) end
-        local icon = (i==1) and 11 or (i==2 and 10 or 25)
-        local sx,sy=(icon%16)*8,flr(icon/16)*8
-        sspr(sx,sy,5,5,10,y,5,5)
-        if i==1 then
-            print("fire rate +20%",20,y,c)
-            print("lvl"..lvl.."/"..FM,96,y,c)
-        elseif i==2 then
-            print("shield upgrade",20,y,c)
-            if ship.shield_unlocked then print("lvl"..max(1,shl).."/3",96,y,c) end
-        else
-            print("phaser spread +1",20,y,c)
-            print("lvl"..spread_lvl.."/"..SM,96,y,c)
-        end
-        y += 14
+    
+    local fr,sp,sh,hl=ship.fire_rate_level or 0,ship.spread_level or 0,ship.shield_level or 0,ship.hull_level or 0
+    local hu,mh=ship_get_hull and ship_get_hull() or 2,ship_get_max_hull and ship_get_max_hull() or 2
+    local items=split"fire rate +20%,shield upgrade,phaser spread +1,hull +1 segment,repair hull"
+    local icons=split"11,10,25,38,54"
+    local stats={
+        "lvl"..fr.."/"..FM,
+        ship.shield_unlocked and ("lvl"..max(1,sh).."/3") or "",
+        "lvl"..sp.."/"..SM,
+        "lvl"..hl.."/2",
+        hu.."/"..mh
+    }
+    local costs={
+        fr<FM and 100+50*fr or -1,
+        ship.shield_unlocked and (sh<3 and SC+80*sh or -1) or SC,
+        sp<SM and 150+100*sp or -1,
+        hl<2 and 200+150*hl or -1,
+        hu<mh and 50 or 0
+    }
+    
+    for i=1,5 do
+        local y,c=26+(i-1)*11,i==sel and 7 or 5
+        if i==sel then rectfill(8,y-2,119,y+6,1) end
+        local ic=icons[i]
+        sspr((ic%16)*8,flr(ic/16)*8,5,5,12,y,5,5)
+        print(items[i],22,y,c)
+        if stats[i]~="" then print(stats[i],94,y,c) end
     end
-    -- footer area inside panel (always show buttons; message below)
-    local sel_cost=(sel==1 and (lvl<FM and ("$"..(100+50*lvl)) or "owned")) or (sel==2 and ((ship.shield_unlocked and (max(1,shl)<3) and ("$"..(SC+80*shl))) or (ship.shield_unlocked and "owned") or ("$"..SC)) or (spread_lvl<SM and ("$"..(150+100*spread_lvl)) or "owned"))
-    -- expanded footer panel
-    rect(6,72,121,118,1)
-    print("cost "..sel_cost,10,78,12)
-    local desc=(sel==1 and "+ faster shots") or (sel==2 and (ship.shield_unlocked and "+ more shield" or "+ adds shield")) or "+ wider spread"
-    print(desc,10,86,11)
-    print("🅾️ buy  ❎ back",8,96,6)
-    if shop_msg ~= "" then
-        print(shop_msg,10,106,smc or 11)
-    end
+    
+    local cost=costs[sel]
+    local cstr=cost<0 and "owned" or (cost==0 and "n/a" or "$"..cost)
+    local descs=split"+ faster shots,+ more shield,+ wider spread,+ more hull,+ restore 1 hull"
+    if sel==2 and not ship.shield_unlocked then descs[2]="+ adds shield" end
+    
+    rect(8,84,119,116,1)
+    print("cost "..cstr,12,87,12)
+    print(descs[sel],12,94,11)
+    print("🅾️ buy  ❎ back",12,102,6)
+    if shop_msg~="" then print(shop_msg,12,110,smc or 11) end
 end

@@ -7,8 +7,9 @@ local X={NL=2,NR=3,BDY=0.5,DYS=0.9,LMIN=6,LR=10,XJ=1,DXJ=0.6,DXR=0.3,DYR=0.4,CY=
 local T={H=0.6,I=0.2,D=0.03,U=0.45}
 local DEATH_FR=45
 local SH={MAX=100,MIN=10,RAD=10,COLS={12,13,1},INVULN=30,CH=3,SFX_ON=30,SFX_HIT=31,SFX_OFF=43,COOL=60}
+local HULL={MAX=2,INVULN=60}
 
-ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false}
+ship=ship or{x=START_X,y=START_Y,w=SHIP_W,h=SHIP_H,spr=1,spd=SHIP_SPD,flipx=false,vx=0,vy=0,acc=SHIP_ACC,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=HULL.MAX,hull_invuln=0,hull_level=0}
 
 local bullets,exhaust,death_fx={},{},{}
 
@@ -82,7 +83,7 @@ end
 function ship_kill()
 	if ship.dying then return end
 	snd_stop_sfx(FX_CH)
-	if ship.shield_invuln>0 then return end
+	if ship.shield_invuln>0 or ship.hull_invuln>0 then return end
 	if ship.shield_active then
 		local _,_,hit=sh_stats()
 		ship.shield_power = max(0, ship.shield_power - hit)
@@ -94,14 +95,19 @@ function ship_kill()
 		end
 		return
 	end
-	ship.dying=true
-	ship.death_t=0
-	ship.vx,ship.vy=0,0
-	exhaust={}
-	death_fx={}
-	spawn_death_fx()
+	-- hull damage
+	ship.hull-=1
+	ship.hull_invuln=HULL.INVULN
 	snd_sfx(SFX_EXPLODE,FX_CH)
-	game_state="dying"
+	if ship.hull<=0 then
+		ship.dying=true
+		ship.death_t=0
+		ship.vx,ship.vy=0,0
+		exhaust={}
+		death_fx={}
+		spawn_death_fx()
+		game_state="dying"
+	end
 end
 
 function ship_death_done() return ship.dying and ship.death_t>=DEATH_FR end
@@ -113,6 +119,9 @@ function ship_init()
 	ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool=false,0,0,0
 	ship.shield_power=ship.shield_unlocked and SH.MAX or 0
 	ship.laser_cd=0
+	-- Don't reset hull here - it persists between rounds
+	-- ship.hull=ship_get_max_hull()
+	ship.hull_invuln=0
 	snd_stop_sfx(FX_CH)
 end
 
@@ -134,6 +143,8 @@ function update_ship()
 		upd_bullets()
 		return
 	end
+	
+	if ship.hull_invuln>0 then ship.hull_invuln-=1 end
 
 	local dx,dy=0,0
 	if btn(0) then dx-=1 end
@@ -221,12 +232,19 @@ function draw_ship()
 			pset(flr(p.x),flr(p.y),c)
 		end
 	else
-		local sid,flip=SPR_SHIP,false
-		if abs(ship.vx)>FACE_EPS then
-			sid=SPR_LEAN
-			flip=ship.vx>0
+		-- hull invuln flashing
+		local vis=true
+		if ship.hull_invuln>0 then
+			vis=(ship.hull_invuln%4)<2
 		end
-		spr(sid,ship.x,ship.y,1,1,flip,false)
+		if vis then
+			local sid,flip=SPR_SHIP,false
+			if abs(ship.vx)>FACE_EPS then
+				sid=SPR_LEAN
+				flip=ship.vx>0
+			end
+			spr(sid,ship.x,ship.y,1,1,flip,false)
+		end
 	end
 	for b in all(bullets) do
 		local x,y=flr(b.x),flr(b.y)
@@ -253,6 +271,8 @@ function draw_ship()
 end
 
 function ship_get_bullets() return bullets end
+function ship_get_hull() return ship.hull end
+function ship_get_max_hull() return HULL.MAX+(ship.hull_level or 0) end
 
 function ship_unlock_shield()
 	ship.shield_unlocked=true
@@ -261,7 +281,8 @@ function ship_unlock_shield()
 end
 
 function ship_reset_upgrades()
-	ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool=0,0,false,0,0,0
+	ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level=0,0,false,0,0,0,0
+	ship.hull=HULL.MAX  -- Reset hull only on full game reset
 end
 
 function ship_trails_pull(cx,cy,r,str)

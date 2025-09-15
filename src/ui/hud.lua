@@ -24,12 +24,31 @@ local function dm(x,y,w,h,v,m,cf,cm,cl)
 	rect(x,y,x+w-1,y+h-1,5)
 end
 
+local function draw_segmented_bar(x,y,w,h,segments,max_segments,col)
+	rectfill(x,y,x+w-1,y+h-1,0)
+	local seg_w=w/max_segments
+	for i=1,segments do
+		local sx=(i-1)*seg_w
+		rectfill(x+sx,y,x+sx+seg_w-2,y+h-1,col)
+	end
+	rect(x,y,x+w-1,y+h-1,5)
+end
+
 function draw_hud()
 	print(score,2,2,7)
 	local t="$"..((money_total) or money)
 	local tx=127-#t*4-2
 	print(t,tx,2,10)
-	local x=50
+	
+	-- hull bar
+	local x=30
+	spr(38,x,2)
+	local hull=ship_get_hull and ship_get_hull() or 2
+	local max_hull=ship_get_max_hull and ship_get_max_hull() or 2
+	draw_segmented_bar(x+7,3,min(20,max_hull*10),3,hull,max_hull,11)
+	
+	-- shield bar
+	x=58
 	spr(10,x,2)
 	local p=ship and ship.shield_power or 0
 	dm(x+7,3,20,3,p,100,12,13,8)
