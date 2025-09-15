@@ -33,11 +33,12 @@ local function spawn_laser()
 	sfx(L.SFX,L.CHANNEL)
 end
 
-local function laser_cooldown()
-	local lvl=ship.fire_rate_level or 0
-	local eff=flr(L.COOLDOWN*(1-0.2*lvl)+0.5)
-	if eff<3 then eff=3 end
-	return eff
+-- replace duplicate bullet loops with a helper
+local function upd_bullets()
+	for b in all(bullets) do
+		b.x+=b.dx b.y+=b.dy
+		if b.x<OFF_MIN or b.x>OFF_MAX or b.y<OFF_MIN or b.y>OFF_MAX then del(bullets,b) end
+	end
 end
 
 local function spawn_exhaust(str)
@@ -47,21 +48,18 @@ local function spawn_exhaust(str)
 	local x1,x2=ship.x+X.NL,ship.x+ship.w-X.NR
 	local bdy=X.BDY+X.DYS*str
 	local life=flr(X.LMIN+X.LR*str)
-	if rnd(1)<str then
-		add(exhaust,{x=x1+rnd(X.XJ)-0.5,y=y,dx=(rnd(X.DXJ)-X.DXR)*str,dy=bdy+rnd(X.DYR*str),life=life})
-	end
-	if rnd(1)<str then
-		add(exhaust,{x=x2+rnd(X.XJ)-0.5,y=y,dx=(rnd(X.DXJ)-X.DXR)*str,dy=bdy+rnd(X.DYR*str),life=life})
+	-- two jets, same payload
+	for i=1,2 do
+		if rnd(1)<str then
+			local x=(i==1 and x1 or x2)+rnd(X.XJ)-0.5
+			add(exhaust,{x=x,y=y,dx=(rnd(X.DXJ)-X.DXR)*str,dy=bdy+rnd(X.DYR*str),life=life})
+		end
 	end
 end
 
 local function ship_break_shield()
-	ship.shield_active = false
-	ship.shield_cool = SH.COOL
-	ship.shield_invuln = SH.INVULN
-	ship.shield_anim = 0
-	sfx(-1, SH.CH)
-	sfx(SH.SFX_OFF, 3)
+	ship.shield_active,ship.shield_cool,ship.shield_invuln,ship.shield_anim=false,SH.COOL,SH.INVULN,0
+	sfx(-1, SH.CH) sfx(SH.SFX_OFF, 3)
 end
 
 local function update_exhaust()
@@ -109,18 +107,13 @@ end
 function ship_death_done() return ship.dying and ship.death_t>=DEATH_FR end
 
 function ship_init()
-bullets,exhaust,death_fx={},{},{}
-ship.x,ship.y=START_X,START_Y
-ship.vx,ship.vy=0,0
-ship.dying=false
-ship.death_t=0
-ship.shield_active=false
-ship.shield_anim=0
-ship.shield_invuln=0
-ship.shield_cool=0
-ship.shield_power = ship.shield_unlocked and SH.MAX or 0
-ship.laser_cd=0
-sfx(-1,SH.CH)
+	bullets,exhaust,death_fx={},{},{}
+	ship.x,ship.y,ship.vx,ship.vy=START_X,START_Y,0,0
+	ship.dying,ship.death_t=false,0
+	ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool=false,0,0,0
+	ship.shield_power=ship.shield_unlocked and SH.MAX or 0
+	ship.laser_cd=0
+	sfx(-1,SH.CH)
 end
 
 local function update_death_fx()
@@ -138,11 +131,7 @@ function update_ship()
 	if ship.dying then
 		ship.death_t+=1
 		update_death_fx()
-		for b in all(bullets) do
-			b.x+=b.dx
-			b.y+=b.dy
-			if b.x<OFF_MIN or b.x>OFF_MAX or b.y<OFF_MIN or b.y>OFF_MAX then del(bullets,b) end
-		end
+		upd_bullets()
 		return
 	end
 
@@ -172,17 +161,20 @@ function update_ship()
 	elseif rdy>0 then str=T.D
 	elseif rdy<0 then str=T.U end
 	spawn_exhaust(str)
+
 	if ship.laser_cd>0 then ship.laser_cd-=1 end
 	if ship.laser_cd<=0 and btn(4) then
 		spawn_laser()
-		ship.laser_cd=laser_cooldown()
+		-- inline cooldown: min 3 frames
+		local lvl=ship.fire_rate_level or 0
+		local eff=flr(L.COOLDOWN*(1-0.2*lvl)+0.5)
+		if eff<3 then eff=3 end
+		ship.laser_cd=eff
 	end
-	for b in all(bullets) do
-		b.x+=b.dx
-		b.y+=b.dy
-		if b.x<OFF_MIN or b.x>OFF_MAX or b.y<OFF_MIN or b.y>OFF_MAX then del(bullets,b) end
-	end
+
+	upd_bullets()
 	update_exhaust()
+
 	if ship.shield_invuln>0 then ship.shield_invuln-=1 end
 	if ship.shield_unlocked then
 		local drain,rech=sh_stats()
@@ -265,17 +257,11 @@ function ship_get_bullets() return bullets end
 function ship_unlock_shield()
 	ship.shield_unlocked=true
 	ship.shield_level=max(1,ship.shield_level or 1)
-	ship.shield_power=SH.MAX
-	ship.shield_cool=0
+	ship.shield_power,ship.shield_cool=SH.MAX,0
 end
 
 function ship_reset_upgrades()
-	ship.fire_rate_level=0
-	ship.spread_level=0
-	ship.shield_unlocked=false
-	ship.shield_level=0
-	ship.shield_power=0
-	ship.shield_cool=0
+	ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool=0,0,false,0,0,0
 end
 
 function ship_trails_pull(cx,cy,r,str)
