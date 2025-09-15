@@ -7,6 +7,7 @@ __lua__
 #include src/ui/hud.lua
 #include src/ui/shop.lua
 #include src/ui/station.lua
+#include src/ui/gameover.lua
 #include src/starfield.lua
 #include src/entities/ship.lua
 #include src/levels.lua
