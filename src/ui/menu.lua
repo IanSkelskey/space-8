@@ -7,7 +7,7 @@ local opts={
 	{label="start",action=function()
 		music(-1)
 		game_state="game"
-		ship_init() moon_init() hud_init() comet_init()
+		ship_init() asteroid_init() hud_init() comet_init()
 		sfx(SFX_OK,UI_CH)
 	end},
 	{label="help",action=function()
@@ -15,7 +15,7 @@ local opts={
 		game_state="controls" controls_init()
 	end},
 	{label="exit",action=function()
-		if extcmd then stop("Thanks for playing!") end
+		if extcmd then stop("thanks for playing!") end
 	end}
 }
 

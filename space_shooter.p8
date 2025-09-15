@@ -9,7 +9,7 @@ poke(0x5600,unpack(split"8,8,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 #include src/starfield.lua
 #include src/entities/ship.lua
 #include src/levels.lua
-#include src/entities/moon.lua
+#include src/entities/asteroid.lua
 #include src/ui/hud.lua
 #include src/ui/shop.lua
 #include src/ui/station.lua

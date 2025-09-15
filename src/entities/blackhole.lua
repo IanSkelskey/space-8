@@ -8,7 +8,7 @@ local P_BSPD,P_SVAR,P_RNDVAR,P_KICK=0.45,0.45,0.2,0.08
 local P_LIFE,P_LVAR=20,10
 local MIN_D2,RAD_GAIN,SWIRL_GAIN,MIN_SWIRL=0.1,0.30,0.80,0.20
 local CORE_PROX,OUT_BIAS,VEL_ZERO=2.2,0.20,0.01
-local STAR_STR,STAR_SW,MOON_STR,SHIP_TR,SHIP_STR=0.10,0.20,0.35,0.22,0.6
+local STAR_STR,STAR_SW,ASTEROID_STR,SHIP_TR,SHIP_STR=0.10,0.20,0.35,0.22,0.6
 local SCR_W,SCR_H,OFF_Y=128,128,136
 local P_BRIGHT,P_DIM,COL_BRIGHT,COL_MID,COL_DIM=16,8,14,2,1
 
@@ -157,6 +157,9 @@ function update_blackhole()
 		if ship_trails_pull then
 			ship_trails_pull(h.x+HOLE_HW,h.y+HOLE_HH,h.r,SHIP_TR)
 		end
+		if asteroid_debris_pull then
+			asteroid_debris_pull(h.x+HOLE_HW,h.y+HOLE_HH,h.r,ASTEROID_STR)
+		end
 
 		if ship then
 			local cx,cy=h.x+HOLE_HW,h.y+HOLE_HH
@@ -191,6 +194,9 @@ function update_blackhole()
 		end
 		if ship_trails_absorb then
 			ship_trails_absorb(h.x,h.y,h.w,h.h)
+		end
+		if asteroid_absorb then
+			asteroid_absorb(h.x,h.y,h.w,h.h)
 		end
 
 		spawn_particles(h)

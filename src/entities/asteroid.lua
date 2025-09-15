@@ -1,4 +1,4 @@
-local moons = {}
+local asteroids = {}
 local spawn_t = 0.0
 
 local function hit_by_player_bullet(x,y,w,h)
@@ -14,8 +14,8 @@ local function hit_by_player_bullet(x,y,w,h)
 end
 
 local debris = {}
-local SPR_MOON = 2
-local SPR_MOON_A = 26
+local SPR_ASTEROID = 2
+local SPR_ASTEROID_A = 26
 local SPR_SHARDS = 5
 local SPR_SHARDS_A = 27
 
@@ -24,8 +24,8 @@ local SPR_LARGE_TR = 8
 local SPR_LARGE_BL = 23
 local SPR_LARGE_BR = 24
 
-local MOON_SCORE  = 120
-local LARGE_MOON_SCORE = 200   
+local ASTEROID_SCORE  = 120
+local LARGE_ASTEROID_SCORE = 200   
 local CHUNK_SCORE = 12         
 
 local dust = {}
@@ -39,7 +39,7 @@ local function spawn_chunk_dust(x,y)
 	end
 end
 
-local function spawn_moon_debris(x,y,alt)
+local function spawn_asteroid_debris(x,y,alt)
 	local base = alt and SPR_SHARDS_A or SPR_SHARDS
 	local sx_base = (base%16)*8
 	local sy_base = flr(base/16)*8
@@ -57,41 +57,41 @@ local function spawn_moon_debris(x,y,alt)
 	end
 end
 
-local function spawn_child_moons(x,y,w,h,a)
+local function spawn_child_asteroids(x,y,w,h,a)
 	for i=0,1 do
 		local px=(i%2==0) and (x+2) or (x+w-10)
 		local py=y+2
 		local ag=i*0.25+rnd(0.1)
 		local sp=0.4+rnd(0.3)
-		add(moons,{x=px,y=py,w=8,h=8,dx=cos(ag)*sp,dy=sin(ag)*sp*0.5+0.9,spd=mspd or 0.9,hp=a and 4 or 2,large=false,alt=a,flash_t=0})
+		add(asteroids,{x=px,y=py,w=8,h=8,dx=cos(ag)*sp,dy=sin(ag)*sp*0.5+0.9,spd=mspd or 0.9,hp=a and 4 or 2,large=false,alt=a,flash_t=0})
 	end
 end
 
-function moon_init()
-	moons = {}
+function asteroid_init()
+	asteroids = {}
 	spawn_t = 0
 	debris = {}
 	dust = {}
 end
 
-local function spawn_moon()
+local function spawn_asteroid()
 	local spd = mspd or 0.9
 	local alt = (round_number or 0)>10 and rnd(1)<min(0.1+0.04*(round_number-10),0.5)
 	if (round_number and round_number>=4) and (rnd(1) < (mlc or 0.3)) then
-		add(moons,{x=flr(rnd(128-16)),y=(HUD_HEIGHT or 0)-20,w=16,h=16,dx=0,dy=0,spd=spd*0.8,hp=alt and 6 or 3,large=true,alt=alt,flash_t=0})
+		add(asteroids,{x=flr(rnd(128-16)),y=(HUD_HEIGHT or 0)-20,w=16,h=16,dx=0,dy=0,spd=spd*0.8,hp=alt and 6 or 3,large=true,alt=alt,flash_t=0})
 	else
-		add(moons,{x=flr(rnd(128-8)),y=(HUD_HEIGHT or 0)-10,w=8,h=8,dx=0,dy=0,spd=spd,hp=alt and 4 or 2,large=false,alt=alt,flash_t=0})
+		add(asteroids,{x=flr(rnd(128-8)),y=(HUD_HEIGHT or 0)-10,w=8,h=8,dx=0,dy=0,spd=spd,hp=alt and 4 or 2,large=false,alt=alt,flash_t=0})
 	end
 end
 
-function update_moon()
+function update_asteroid()
 	spawn_t -= 1/30
-	if spawn_t <= 0 and #moons < (mm or 3) then
-		spawn_moon()
+	if spawn_t <= 0 and #asteroids < (mm or 3) then
+		spawn_asteroid()
 		spawn_t = (msmin or 1.5) + rnd(msrng or 1.5)
 	end
 
-	for m in all(moons) do
+	for m in all(asteroids) do
 		m.y += m.spd
 		m.x += m.dx
 		
@@ -103,15 +103,15 @@ function update_moon()
 			m.hp -= 1
 			if m.hp<=0 then
 				if m.large then
-					if hud_add_score then hud_add_score(LARGE_MOON_SCORE) end
-					spawn_child_moons(m.x,m.y,m.w,m.h,m.alt)
-					spawn_moon_debris(m.x+4,m.y+4,m.alt)
+					if hud_add_score then hud_add_score(LARGE_ASTEROID_SCORE) end
+					spawn_child_asteroids(m.x,m.y,m.w,m.h,m.alt)
+					spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
 				else
-					if hud_add_score then hud_add_score(MOON_SCORE) end
-					spawn_moon_debris(m.x + (m.w-8)/2, m.y + (m.h-8)/2, m.alt)
+					if hud_add_score then hud_add_score(ASTEROID_SCORE) end
+					spawn_asteroid_debris(m.x + (m.w-8)/2, m.y + (m.h-8)/2, m.alt)
 				end
 				sfx(1, 3)
-				del(moons, m)
+				del(asteroids, m)
 				goto continue
 			else
 				m.flash_t=6
@@ -122,7 +122,7 @@ function update_moon()
 			if ship_kill then ship_kill() end
 		end
 
-		if m.y > 136 or m.x < -20 or m.x > 148 then del(moons, m) end
+		if m.y > 136 or m.x < -20 or m.x > 148 then del(asteroids, m) end
 		::continue::
 	end
 
@@ -157,7 +157,7 @@ function update_moon()
 	end
 end
 
-function draw_moon()
+function draw_asteroid()
 	local function begin_white_flash()
 		for i=1,15 do pal(i,7) end
 		palt(0, true)
@@ -167,7 +167,7 @@ function draw_moon()
 		palt()
 	end
 
-	for m in all(moons) do
+	for m in all(asteroids) do
 		if m.large then
 			if m.flash_t > 0 and m.flash_t % 2 == 0 then
 				begin_white_flash()
@@ -186,10 +186,10 @@ function draw_moon()
 		else
 			if m.flash_t > 0 and m.flash_t % 2 == 0 then
 				begin_white_flash()
-				spr(SPR_MOON, m.x, m.y)
+				spr(SPR_ASTEROID, m.x, m.y)
 				end_white_flash()
 			else
-				spr(m.alt and SPR_MOON_A or SPR_MOON, m.x, m.y)
+				spr(m.alt and SPR_ASTEROID_A or SPR_ASTEROID, m.x, m.y)
 			end
 		end
 	end
@@ -202,10 +202,10 @@ function draw_moon()
 	end
 end
 
-function moon_absorb(hx,hy,hw,hh)
-	for m in all(moons) do
+function asteroid_absorb(hx,hy,hw,hh)
+	for m in all(asteroids) do
 		if aabb(m.x,m.y,m.w,m.h, hx,hy,hw,hh) then
-			del(moons, m)
+			del(asteroids, m)
 		end
 	end
 	for d in all(debris) do
@@ -216,7 +216,7 @@ function moon_absorb(hx,hy,hw,hh)
 	end
 end
 
-function moon_debris_pull(cx,cy,r,strength)
+function asteroid_debris_pull(cx,cy,r,strength)
 	local r2 = r*r
 	for d in all(debris) do
 		local dx = cx - (d.x+2)
