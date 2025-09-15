@@ -1,9 +1,5 @@
 local sel,page,shop_msg,shop_msg_t=1,1,"",0
-local FM,SC,SM,TM,smc=3,120,2,3,11
-SFX_CURSOR=SFX_CURSOR or 44
-SFX_ERR=SFX_ERR or 45
-SFX_OK=SFX_OK or 63
-UI_CH=UI_CH or 3
+local FM,SC,SM,TM,smc,HRC=3,120,2,3,11,200
 
 -- item data: icon,max,cost_base,cost_inc,stat_field,unlock_field,desc
 local items={
@@ -11,7 +7,7 @@ local items={
  {10,3,SC,80,"shield_level","shield_unlocked","shield upgrade","+ more shield"},
  {25,SM,150,100,"spread_level",nil,"phaser spread +1","+ wider spread"},
  {38,2,200,150,"hull_level",nil,"hull +1 segment","+ more hull"},
- {54,99,200,0,nil,nil,"repair hull","+ restore 1 hull"},
+ {54,99,HRC,0,nil,nil,"repair hull","+ restore 1 hull"},
  {55,TM,80,60,"thruster_level",nil,"thruster boost","+ faster accel"}
 }
 
@@ -27,8 +23,8 @@ local function buy(id)
  if id==5 then -- repair
   local hu,mh=ship_get_hull(),ship_get_max_hull()
   if hu>=mh then msg("hull full",SFX_ERR,8) return end
-  if mt<50 then msg("not enough $$$!",SFX_ERR,8) return end
-  money_total-=50 ship.hull=hu+1
+  if mt<HRC then msg("not enough $$$!",SFX_ERR,8) return end
+  money_total-=HRC ship.hull=hu+1
  elseif id==2 and not ul then -- unlock shield
   if mt<SC then msg("not enough $$$!",SFX_ERR,8) return end
   money_total-=SC ship_unlock_shield()
@@ -88,18 +84,16 @@ function shop_draw()
  
  -- cost/desc for selected
  local sit=items[page==1 and sel or 6]
- local cost,cstr=-1,""
- if sel==5 and page==1 then -- repair
-  local hu,mh=ship_get_hull(),ship_get_max_hull()
-  cost=hu<mh and 50 or 0
-  cstr=cost==0 and "n/a" or "$50"
+ local cstr=""
+ if sel==5 and page==1 then -- repair - always show price
+  cstr="$"..HRC
  else
   local lv=sit[5] and (ship[sit[5]] or 0) or 0
   local ul=sit[6] and ship[sit[6]]
   if page==1 and sel==2 and not ul then
-   cost,cstr=SC,"$"..SC
+   cstr="$"..SC
   elseif lv<sit[2] then
-   cost=sit[3]+sit[4]*lv
+   local cost=sit[3]+sit[4]*lv
    cstr="$"..cost
   else
    cstr="owned"
