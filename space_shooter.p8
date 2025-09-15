@@ -1,6 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
+#include src/util/sound.lua
 #include src/ui/font.lua
 #include src/ui/controls.lua
 #include src/ui/menu.lua

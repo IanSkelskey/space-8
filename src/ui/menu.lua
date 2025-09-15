@@ -5,10 +5,9 @@ SFX_OK=SFX_OK or 63
 UI_CH=UI_CH or 3
 local opts={
 	{label="start",action=function()
-		music(-1)
 		game_state="game"
 		ship_init() asteroid_init() hud_init() comet_init()
-		sfx(SFX_OK,UI_CH)
+		snd_sfx(SFX_OK,UI_CH)
 	end},
 	{label="help",action=function()
 		-- don't restart music; just switch to controls
@@ -22,15 +21,15 @@ local opts={
 function menu_init() sel=1 end
 
 function update_menu()
-	if btnp(2) then sel-=1 sfx(SFX_CURSOR,UI_CH) end
-	if btnp(3) then sel+=1 sfx(SFX_CURSOR,UI_CH) end
+	if btnp(2) then sel-=1 snd_sfx(SFX_CURSOR,UI_CH) end
+	if btnp(3) then sel+=1 snd_sfx(SFX_CURSOR,UI_CH) end
 	if sel<1 then sel=#opts end
 	if sel>#opts then sel=1 end
 	if btnp(4) then
 		if sel==1 then
 			local a=opts[sel].action if a then a() end
 		else
-			sfx(SFX_OK,UI_CH)
+			snd_sfx(SFX_OK,UI_CH)
 			local a=opts[sel].action if a then a() end
 		end
 	end

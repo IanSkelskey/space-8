@@ -80,7 +80,7 @@ function update_asteroid()
 					if hud_add_score then hud_add_score(120) end
 					spawn_asteroid_debris(m.x+(m.w-8)/2,m.y+(m.h-8)/2,m.alt)
 				end
-				sfx(1,3)
+				snd_sfx(SFX_EXPLODE,FX_CH)
 				del(asteroids,m)
 				goto continue
 			else

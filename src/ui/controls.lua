@@ -1,8 +1,7 @@
 function controls_init() end
-SFX_OK=SFX_OK or 63 UI_CH=UI_CH or 3
 
 function update_controls()
- if btnp(4) or btnp(5) then sfx(SFX_OK,UI_CH) game_state="menu" menu_init() end
+ if btnp(4) or btnp(5) then snd_sfx(SFX_OK,UI_CH) game_state="menu" menu_init() end
 end
 
 function draw_controls()

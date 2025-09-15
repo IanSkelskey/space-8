@@ -30,7 +30,7 @@ local function spawn_laser()
 		add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-spd})
 		add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-spd})
 	end
-	sfx(L.SFX,L.CHANNEL)
+	snd_sfx(SFX_LASER,LASER_CH)
 end
 
 -- replace duplicate bullet loops with a helper
@@ -59,7 +59,7 @@ end
 
 local function ship_break_shield()
 	ship.shield_active,ship.shield_cool,ship.shield_invuln,ship.shield_anim=false,SH.COOL,SH.INVULN,0
-	sfx(-1, SH.CH) sfx(SH.SFX_OFF, 3)
+	snd_stop_sfx(FX_CH) snd_sfx(SFX_SHIELD_OFF,FX_CH)
 end
 
 local function update_exhaust()
@@ -81,14 +81,14 @@ end
 
 function ship_kill()
 	if ship.dying then return end
-	sfx(-1,SH.CH)
+	snd_stop_sfx(FX_CH)
 	if ship.shield_invuln>0 then return end
 	if ship.shield_active then
 		local _,_,hit=sh_stats()
 		ship.shield_power = max(0, ship.shield_power - hit)
 		ship.shield_invuln = SH.INVULN
 		ship.shield_anim = 0
-		sfx(SH.SFX_HIT, 3)
+		snd_sfx(SFX_SHIELD_HIT,FX_CH)
 		if ship.shield_power <= 0 then
 			ship_break_shield()
 		end
@@ -100,7 +100,7 @@ function ship_kill()
 	exhaust={}
 	death_fx={}
 	spawn_death_fx()
-	sfx(1,3)
+	snd_sfx(SFX_EXPLODE,FX_CH)
 	game_state="dying"
 end
 
@@ -113,7 +113,7 @@ function ship_init()
 	ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool=false,0,0,0
 	ship.shield_power=ship.shield_unlocked and SH.MAX or 0
 	ship.laser_cd=0
-	sfx(-1,SH.CH)
+	snd_stop_sfx(FX_CH)
 end
 
 local function update_death_fx()
@@ -187,10 +187,10 @@ function update_ship()
 		
 		if btn(5) and ship.shield_power>=SH.MIN and ship.shield_cool<=0 and not ship.dying and not ship.shield_active then
 			ship.shield_active=true
-			sfx(SH.SFX_ON,SH.CH)
+			snd_sfx(SFX_SHIELD_ON,FX_CH)
 		elseif not btn(5) and ship.shield_active then
 			ship.shield_active=false
-			sfx(-1,SH.CH)
+			snd_stop_sfx(FX_CH)
 		end
 		
 		if not ship.shield_active then
@@ -203,7 +203,7 @@ function update_ship()
 	else
 		if ship.shield_active then
 			ship.shield_active=false
-			sfx(-1,SH.CH)
+			snd_stop_sfx(FX_CH)
 		end
 		ship.shield_power=0
 	end

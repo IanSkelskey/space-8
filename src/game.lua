@@ -24,12 +24,11 @@ function complete_mission()
 	asteroid_init()
 	blackhole_init()
 	comet_init()
-	music(-1,0)
-	music(8,0,MM)
+	snd_music(MUS_FANFARE)
 	level_fanfare_timer,ship_departing,game_state=FL,true,"fanfare_depart"
 end
 function reset_game()
-	music(-1,0)
+	snd_music(nil)
 	starfield_init()
 	if ship_reset_upgrades then ship_reset_upgrades() end
 	ship_init()
@@ -42,7 +41,7 @@ function reset_game()
 	game_state,prev_game_state,round_number="menu","menu",1
 	current_mission,mission_distance,distance_remaining,money_total,ts=nil,0,0,0,0
 	last_pay,last_bonus,last_points,last_payout_ready=0,0,0,false
-	music(0,0,MM)
+	snd_music(MUS_MENU)
 end
 function _init()
 	starfield_init()
@@ -54,7 +53,7 @@ function _init()
 	comet_init()
 	station_init()
 	menu_init()
-	music(0,0,MM)
+	snd_music(MUS_MENU)
 end
 function _update()
 	update_starfield()
@@ -73,25 +72,13 @@ function _update()
 		return
 	end
 	local old_state,gs,pgs=game_state,game_state,prev_game_state
-	if gs=="game"and pgs=="station"then
-		music(-1,0)
-		music(4,0,MM)
-	elseif gs=="dying"and pgs=="game"then
-		music(-1,0)
-		music(9,0,MM)
-	elseif(gs=="menu"or gs=="station")and pgs!="menu"and pgs!="station"and pgs!="controls"and level_fanfare_timer<=0 then
-		music(-1,0)
-		music(gs=="station"and 10 or 0,0,MM)
-	elseif gs=="gameover"and(pgs=="game"or pgs=="menu"or pgs=="station")then
-		music(-1,0)
-	end
+	snd_update_music(gs,pgs,level_fanfare_timer)
 	if gs=="menu"then
 		update_menu()
 		if game_state=="game"then
 			game_state="station"
 			generate_mission()
-			music(-1,0)
-			music(10,0,MM)
+			snd_music(MUS_STATION)
 		end
 	elseif gs=="controls"then
 		update_controls()
