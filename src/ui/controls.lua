@@ -2,7 +2,7 @@ local hp,MP=1,4
 
 -- help pages as single strings with newlines
 local hd={
- "\fcgameplay loop\f6:\n 1. deliver tech packages\n 2. earn cash rewards\n 3. upgrade your ship\n 4. launch into space\n 5. survive obstacles\n 6. return to station\n\n\fccontrols\f6:\n move: arrow keys/d-pad\n shoot: 🅾️ button\n shield: ❎ (hold)",
+ "\fcgameplay loop\f6:\n\n 1. deliver tech packages\n 2. earn cash rewards\n 3. upgrade your ship\n 4. launch into space\n 5. survive obstacles\n 6. return to station\n\n\n\fccontrols\f6:\n\n move: arrow keys/d-pad\n shoot: 🅾️ button\n shield: ❎ (hold)",
  "\fcupgrades\f6:\n\n\f9fire rate\f6\n  faster weapon recharge\n\n\f9shield\f6\n  blocks damage when held\n\n\f9spread\f6\n  adds extra projectiles\n\n\f9hull\f6\n  increases max health\n\n\f9thrusters\f6\n  faster acceleration",
  "", -- page 3 will be custom drawn for sprites
  "\fctips\f6:\n\n • shield blocks all damage\n • prioritize dangerous foes\n • collect tech packages\n • upgrade before harder runs\n • comets move fast\n • black holes pull you in\n • asteroids drift slowly"
@@ -43,7 +43,7 @@ function draw_controls()
   spr(3,10,84) -- black hole sprite (id 3) - single sprite
   print("\f8black hole\f6",22,85,5)
   print("pulls you in",28,92,13)
-  print("ignores hull",28,99,13)
+  print("ignores shield",28,99,13)
  else
   -- use cursor() and print with built-in word wrap for other pages
   cursor(6,20)
