@@ -8,14 +8,14 @@ local opts={
 		game_state="game"
 		ship_init() asteroid_init() hud_init() comet_init()
 		snd_sfx(SFX_OK,UI_CH)
-	end},
+	end,icon=6},
 	{label="help",action=function()
 		-- don't restart music; just switch to controls
 		game_state="controls" controls_init()
-	end},
+	end,icon=41},
 	{label="exit",action=function()
 		if extcmd then stop("thanks for playing!") end
-	end}
+	end,icon=42}
 }
 
 function menu_init() sel=1 end
@@ -40,15 +40,17 @@ function draw_menu()
 	-- Title centered with improved styling
 	print("\014sPACE 8",36,24,7)
 	
-	print("v1.0.1",48,36,6)
+	print("v1.1.0",48,36,6)
 	local y=52
 	for i=1,#opts do 
 		local c=i==sel and 7 or 6 
 		if i==sel then 
 			-- Simplified pulsing (saves 2 tokens: removed 'and 0 or 1')
-			print(">",44+time()%1\0.5,y,c) 
+			print(">",36+time()%1\0.5,y,c) 
 		end 
-		print(opts[i].label,52,y,c) 
+		-- Draw sprite icon
+		spr(opts[i].icon,44,y)
+		print(opts[i].label,54,y,c) 
 		y+=12 
 	end
 	
