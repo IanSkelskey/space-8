@@ -1,80 +1,73 @@
-local sel,page,shop_msg,shop_msg_t=1,1,"",0
-local FM,SC,SM,TM,smc,HRC=3,120,2,3,11,200
+local s,p,sm,st,sc=1,1,"",0,11
 
--- item data: icon,max,cost_base,cost_inc,stat_field,unlock_field,desc
-local items={
- {11,FM,100,50,"fire_rate_level",nil,"fire rate +20%","+ faster shots"},
- {10,3,SC,80,"shield_level","shield_unlocked","shield upgrade","+ more shield"},
- {25,SM,150,100,"spread_level",nil,"phaser spread +1","+ wider spread"},
- {38,2,200,150,"hull_level",nil,"hull +1 segment","+ more hull"},
- {54,99,HRC,0,nil,nil,"repair hull","+ restore 1 hull"},
- {55,TM,80,60,"thruster_level",nil,"thruster boost","+ faster accel"}
-}
+-- compressed items: icon,max,base$,inc$,field,unlock,name,desc
+local id="11,3,100,50,fire_rate_level,,fire rate +20%,+ faster shots;10,3,120,80,shield_level,shield_unlocked,shield upgrade,+ more shield;25,2,150,100,spread_level,,phaser spread +1,+ wider spread;38,2,200,150,hull_level,,hull +1 segment,+ more hull;54,99,200,0,,,repair hull,+ restore 1 hull;55,3,80,60,thruster_level,,thruster boost,+ faster accel"
 
-function shop_init() sel,page,shop_msg,shop_msg_t=1,1,"",0 end
+function shop_init() s,p,sm,st=1,1,"",0 end
 
-local function msg(t,s,c) shop_msg,shop_msg_t,smc=t,60,c snd_sfx(s,UI_CH) end
+local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and SFX_ERR or SFX_OK,UI_CH) end
 
-local function buy(id)
- local it,mt=items[id],money_total or 0
- local lv=it[5] and (ship[it[5]] or 0) or 0
- local ul=it[6] and ship[it[6]]
+local function buy(i)
+ local it,m=split(split(id,";")[i],","),money_total or 0
+ local lv=it[5]~="" and (ship[it[5]] or 0) or 0
+ local ul=it[6]~="" and ship[it[6]]
  
- if id==5 then -- repair
-  local hu,mh=ship_get_hull(),ship_get_max_hull()
-  if hu>=mh then msg("hull full",SFX_ERR,8) return end
-  if mt<HRC then msg("not enough $$$!",SFX_ERR,8) return end
-  money_total-=HRC ship.hull=hu+1
- elseif id==2 and not ul then -- unlock shield
-  if mt<SC then msg("not enough $$$!",SFX_ERR,8) return end
-  money_total-=SC ship_unlock_shield()
+ if i==5 then -- repair
+  local h,mh=ship_get_hull(),ship_get_max_hull()
+  if h>=mh then msg("hull full",1) return end
+  if m<200 then msg("not enough $$$!",1) return end
+  money_total=m-200 ship.hull=h+1
+ elseif i==2 and not ul then -- unlock shield
+  if m<120 then msg("not enough $$$!",1) return end
+  money_total=m-120 ship_unlock_shield()
  else -- upgrade
-  if lv>=it[2] then msg("max level",SFX_ERR,8) return end
+  if lv>=it[2] then msg("max level",1) return end
   local c=it[3]+it[4]*lv
-  if mt<c then msg("not enough $$$!",SFX_ERR,8) return end
-  money_total-=c
-  if it[5] then ship[it[5]]=lv+1 end
-  if id==4 then ship.hull=ship_get_max_hull() end -- hull upgrade
+  if m<c then msg("not enough $$$!",1) return end
+  money_total=m-c
+  if it[5]~="" then ship[it[5]]=lv+1 end
+  if i==4 then ship.hull=ship_get_max_hull() end
  end
- msg(id==5 and "repaired!" or "bought!",SFX_OK,11)
+ msg(i==5 and "repaired!" or "bought!")
 end
 
 function shop_update()
- if shop_msg_t>0 then shop_msg_t-=1 if shop_msg_t<=0 then shop_msg="" end end
- local mx=page==1 and 5 or 1
- if btnp(2) then sel=sel>1 and sel-1 or mx snd_sfx(SFX_CURSOR,UI_CH) end
- if btnp(3) then sel=sel<mx and sel+1 or 1 snd_sfx(SFX_CURSOR,UI_CH) end
- if btnp(0) and page>1 then page,sel=1,1 snd_sfx(SFX_CURSOR,UI_CH) end
- if btnp(1) and page<2 then page,sel=2,1 snd_sfx(SFX_CURSOR,UI_CH) end
+ if st>0 then st-=1 if st<=0 then sm="" end end
+ local mx=p==1 and 5 or 1
+ if btnp(2) then s=s>1 and s-1 or mx snd_sfx(SFX_CURSOR,UI_CH) end
+ if btnp(3) then s=s<mx and s+1 or 1 snd_sfx(SFX_CURSOR,UI_CH) end
+ if btnp(0) and p>1 then p,s=1,1 snd_sfx(SFX_CURSOR,UI_CH) end
+ if btnp(1) and p<2 then p,s=2,1 snd_sfx(SFX_CURSOR,UI_CH) end
  if btnp(5) then snd_sfx(SFX_OK,UI_CH) station_mode="main" end
- if btnp(4) then buy(page==1 and sel or 6) end
+ if btnp(4) then buy(p==1 and s or 6) end
 end
 
 function shop_draw()
  rectfill(0,0,127,15,1)
- print("shop",4,4,7)
+ print("◀",4,4,p>1 and 7 or 1)
+ print("shop - page "..p.."/2",16,4,7)
+ print("▶",90,4,p<2 and 7 or 1)
  print("$"..(money_total or 0),100,4,10)
  rect(2,18,125,121,1)
  
- local st,ed=page==1 and 1 or 6,page==1 and 5 or 6
- local idx=1
- for i=st,ed do
-  local it=items[i]
-  local y,c=26+(idx-1)*11,idx==sel and 7 or 5
-  if idx==sel then rectfill(8,y-2,119,y+6,1) end
+ -- draw items
+ local idx,its=1,split(id,";")
+ for i=(p==1 and 1 or 6),(p==1 and 5 or 6) do
+  local it=split(its[i],",")
+  local y,c=26+(idx-1)*11,idx==s and 7 or 5
+  if idx==s then rectfill(8,y-2,119,y+6,1) end
   
-  local ic=it[1]
-  sspr((ic%16)*8,flr(ic/16)*8,5,5,12,y,5,5)
+  sspr((it[1]%16)*8,flr(it[1]/16)*8,5,5,12,y,5,5)
   print(it[7],22,y,c)
   
-  -- stat display
+  -- stat
   local stat=""
-  if i==5 then -- repair
-   local hu,mh=ship_get_hull(),ship_get_max_hull()
-   stat=hu.."/"..mh
-  elseif it[5] then -- upgrade
+  if i==5 then
+   local h,mh=ship_get_hull(),ship_get_max_hull()
+   stat=h.."/"..mh
+  elseif it[5]~="" then
    local lv=ship[it[5]] or 0
-   local ul=it[6] and ship[it[6]]
+   local ul=it[6]~="" and ship[it[6]]
    if i==2 and ul then lv=max(1,lv) end
    if i~=2 or ul then stat="lvl"..lv.."/"..it[2] end
   end
@@ -82,32 +75,26 @@ function shop_draw()
   idx+=1
  end
  
- -- cost/desc for selected
- local sit=items[page==1 and sel or 6]
- local cstr=""
- if sel==5 and page==1 then -- repair - always show price
-  cstr="$"..HRC
+ -- cost/desc
+ local sit=split(its[p==1 and s or 6],",")
+ local cstr,desc="",sit[8]
+ if s==5 and p==1 then
+  cstr="$200"
  else
-  local lv=sit[5] and (ship[sit[5]] or 0) or 0
-  local ul=sit[6] and ship[sit[6]]
-  if page==1 and sel==2 and not ul then
-   cstr="$"..SC
+  local lv=sit[5]~="" and (ship[sit[5]] or 0) or 0
+  local ul=sit[6]~="" and ship[sit[6]]
+  if p==1 and s==2 and not ul then
+   cstr,desc="$120","+ adds shield"
   elseif lv<sit[2] then
-   local cost=sit[3]+sit[4]*lv
-   cstr="$"..cost
+   cstr="$"..(sit[3]+sit[4]*lv)
   else
    cstr="owned"
   end
  end
  
- local desc=sit[8]
- if page==1 and sel==2 and not ship.shield_unlocked then desc="+ adds shield" end
- 
  rect(8,84,119,116,1)
  print("cost "..cstr,12,87,12)
  print(desc,12,94,11)
- print("◀",4,102,page>1 and 6 or 1)
- print("▶",120,102,page<2 and 6 or 1)
  print("🅾️ buy  ❎ back",12,102,6)
- if shop_msg~="" then print(shop_msg,12,110,smc) end
+ if sm~="" then print(sm,12,110,sc) end
 end

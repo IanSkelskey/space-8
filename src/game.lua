@@ -2,20 +2,19 @@ game_state,prev_game_state="menu","menu"
 function aabb(ax,ay,aw,ah,bx,by,bw,bh)
 	return ax<bx+bw and bx<ax+aw and ay<by+bh and by<ay+ah
 end
-local MM,FL,MB,B100,PR=3,120,35,4,0.03
 current_mission,round_number,mission_distance,distance_remaining,level_fanfare_timer,ship_departing=nil,1,0,0,0,false
-money_total,last_pay,last_bonus,last_payout_ready=money_total or 0,last_pay or 0,last_bonus or 0,last_payout_ready or false
+money_total,last_pay,last_bonus,last_payout_ready=money_total or 0,0,0,false
 sci_adj,sci_noun=split"quantum,plasma,ionic,fusion,nano,void",split"core,drive,matrix,relay,reactor,array"
 function generate_mission()
-	local adj,noun=sci_adj[flr(rnd(#sci_adj))+1],sci_noun[flr(rnd(#sci_noun))+1]
-	current_mission=adj.." "..noun
-	mission_distance,distance_remaining=400+round_number*80,400+round_number*80
+	local a,n=sci_adj,sci_noun
+	current_mission=a[flr(rnd(#a))+1].." "..n[flr(rnd(#n))+1]
+	mission_distance=400+round_number*80
+	distance_remaining=mission_distance
 	if sl then sl(round_number) end
 end
 function complete_mission()
-	local pts=hud_get_points and hud_get_points()or 0
-	last_bonus=flr(pts*PR)
-	last_pay=MB+flr(mission_distance/100)*B100
+	last_bonus=flr((hud_get_points and hud_get_points()or 0)*0.03)
+	last_pay=35+mission_distance\25
 	money_total+=last_pay+last_bonus
 	last_payout_ready=true
 	if hud_reset_points then hud_reset_points() end
@@ -25,10 +24,10 @@ function complete_mission()
 	blackhole_init()
 	comet_init()
 	snd_music(MUS_FANFARE)
-	level_fanfare_timer,ship_departing,game_state=FL,true,"fanfare_depart"
+	level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
 end
 function reset_game()
-	snd_music(nil)
+	snd_music()
 	starfield_init()
 	if ship_reset_upgrades then ship_reset_upgrades() end
 	ship_init()
@@ -38,9 +37,7 @@ function reset_game()
 	comet_init()
 	station_init()
 	menu_init()
-	game_state,prev_game_state,round_number="menu","menu",1
-	current_mission,mission_distance,distance_remaining,money_total,ts=nil,0,0,0,0
-	last_pay,last_bonus,last_points,last_payout_ready=0,0,0,false
+	game_state,prev_game_state,round_number,current_mission,mission_distance,distance_remaining,money_total,ts,last_pay,last_bonus,last_payout_ready="menu","menu",1,nil,0,0,0,0,0,0,false
 	snd_music(MUS_MENU)
 end
 function _init()
@@ -71,8 +68,8 @@ function _update()
 		prev_game_state="fanfare_depart"
 		return
 	end
-	local old_state,gs,pgs=game_state,game_state,prev_game_state
-	snd_update_music(gs,pgs,level_fanfare_timer)
+	local os,gs=game_state,game_state
+	snd_update_music(gs,prev_game_state,level_fanfare_timer)
 	if gs=="menu"then
 		update_menu()
 		if game_state=="game"then
@@ -103,7 +100,7 @@ function _update()
 	elseif gs=="gameover"then
 		if btnp(4)then reset_game() end
 	end
-	prev_game_state=old_state
+	prev_game_state=os
 end
 function _draw()
 	cls()
