@@ -15,8 +15,9 @@ local function buy(i)
  if i==5 then -- repair
   local h,mh=ship_get_hull(),ship_get_max_hull()
   if h>=mh then msg("hull full",1) return end
-  if m<200 then msg("not enough $$$!",1) return end
-  money_total=m-200 ship.hull=h+1
+  local repair_cost=200+((round_number or 1)-1)*50  -- scales with round
+  if m<repair_cost then msg("not enough $$$!",1) return end
+  money_total=m-repair_cost ship.hull=h+1
  elseif i==2 and not ul then -- unlock shield
   if m<120 then msg("not enough $$$!",1) return end
   money_total=m-120 ship_unlock_shield()
@@ -26,7 +27,8 @@ local function buy(i)
   if m<c then msg("not enough $$$!",1) return end
   money_total=m-c
   if it[5]~="" then ship[it[5]]=lv+1 end
-  if i==4 then ship.hull=ship_get_max_hull() end
+  -- if hull upgrade, add 1 hull point for the new segment
+  if i==4 then ship.hull=(ship.hull or 0)+1 end
  end
  msg(i==5 and "repaired!" or "bought!")
 end
@@ -79,7 +81,8 @@ function shop_draw()
  local sit=split(its[p==1 and s or 6],",")
  local cstr,desc="",sit[8]
  if s==5 and p==1 then
-  cstr="$200"
+  local repair_cost=200+((round_number or 1)-1)*25  -- scales with round
+  cstr="$"..repair_cost
  else
   local lv=sit[5]~="" and (ship[sit[5]] or 0) or 0
   local ul=sit[6]~="" and ship[sit[6]]
