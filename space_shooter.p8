@@ -10,6 +10,7 @@ __lua__
 #include src/ui/station.lua
 #include src/ui/gameover.lua
 #include src/starfield.lua
+#include src/particles.lua
 #include src/entities/ship.lua
 #include src/levels.lua
 #include src/entities/asteroid.lua

@@ -1,7 +1,7 @@
 local START_X,START_Y=60,77
 ship=ship or{x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0}
 
-local bullets,exhaust,death_fx={},{},{}
+local bullets={}
 
 local function sh_stats()
  local l=ship.shield_level or 0
@@ -27,10 +27,10 @@ function ship_kill()
  ship.hull_invuln=60
  snd_sfx(SFX_EXPLODE,FX_CH)
  if ship.hull<=0 then
-  ship.dying,ship.death_t,ship.vx,ship.vy,exhaust,death_fx,game_state=true,0,0,0,{},{},"dying"
+  ship.dying,ship.death_t,ship.vx,ship.vy,game_state=true,0,0,0,"dying"
   for i=1,22 do
    local a,sp=rnd(1),0.7+rnd(1.3)
-   add(death_fx,{x=ship.x+4,y=ship.y+4,dx=cos(a)*sp,dy=sin(a)*sp,life=flr(10+rnd(20))})
+   p_add(ship.x+4,ship.y+4,cos(a)*sp,sin(a)*sp,flr(10+rnd(20)),PT_DEATH)
   end
  end
 end
@@ -38,7 +38,7 @@ end
 function ship_death_done()return ship.dying and ship.death_t>=45 end
 
 function ship_init()
- bullets,exhaust,death_fx={},{},{}
+ bullets={}
  ship.x,ship.y,ship.vx,ship.vy,ship.dying,ship.death_t,ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool,ship.laser_cd,ship.hull_invuln=START_X,START_Y,0,0,false,0,false,0,0,0,0,0
  ship.shield_power=ship.shield_unlocked and 100 or 0
  snd_stop_sfx(FX_CH)
@@ -47,10 +47,6 @@ end
 function update_ship()
  if ship.dying then
   ship.death_t+=1
-  for p in all(death_fx)do
-   p.x+=p.dx p.y+=p.dy p.dx*=0.98 p.dy*=0.98 p.life-=1
-   if p.life<=0 then del(death_fx,p)end
-  end
   for b in all(bullets)do
    b.x+=b.dx b.y+=b.dy
    if b.x<-4 or b.x>132 or b.y<-4 or b.y>132 then del(bullets,b)end
@@ -82,18 +78,18 @@ function update_ship()
  str=mid(0,str,1)
  if str>0 then
   local y,x1,x2,bdy,life=ship.y+8,ship.x+2,ship.x+5,0.5+0.9*str,flr(6+10*str)
+  local tl=ship.thruster_level or 0
+  local cols={10,9,8}
+  if tl==1 then cols={12,13,1}
+  elseif tl==2 then cols={11,3,1}
+  elseif tl>=3 then cols={7,6,5} end
   for i=1,2 do
    if rnd(1)<str then
-    add(exhaust,{x=(i==1 and x1 or x2)+rnd(1)-0.5,y=y,dx=(rnd(0.6)-0.3)*str,dy=bdy+rnd(0.4*str),life=life})
+    p_add((i==1 and x1 or x2)+rnd(1)-0.5,y,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,PT_EXHAUST,nil,cols)
    end
   end
  end
- 
- for p in all(exhaust)do
-  p.x+=p.dx p.y+=p.dy p.life-=1
-  if p.life<=0 or p.y>132 then del(exhaust,p)end
- end
- 
+
  -- lasers
  if ship.laser_cd>0 then ship.laser_cd-=1 end
  if ship.laser_cd<=0 and btn(4)then
@@ -148,14 +144,8 @@ function update_ship()
 end
 
 function draw_ship()
- local tl,c1,c2,c3=ship.thruster_level or 0,10,9,8
- if tl==1 then c1,c2,c3=12,13,1
- elseif tl==2 then c1,c2,c3=11,3,1
- elseif tl>=3 then c1,c2,c3=7,6,5 end
- 
- for p in all(exhaust)do pset(flr(p.x),flr(p.y),p.life>8 and c1 or(p.life>4 and c2 or c3))end
  if ship.dying then
-  for p in all(death_fx)do pset(flr(p.x),flr(p.y),p.life>16 and 10 or(p.life>8 and 9 or 8))end
+  -- Death particles drawn by particle system
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
   spr(abs(ship.vx)>0.05 and 17 or 16,ship.x,ship.y,1,1,ship.vx>0)
  end
@@ -180,28 +170,11 @@ function ship_reset_upgrades()
 end
 
 function ship_trails_pull(cx,cy,r,str)
- local r2,lsts=r*r,{exhaust,death_fx}
- for lst in all(lsts)do
-  if lst then
-   for p in all(lst)do
-    local dx,dy,d2=cx-p.x,cy-p.y
-    d2=dx*dx+dy*dy
-    if d2>0.5 and d2<r2 then
-     local invd,acc=1/sqrt(d2),str*(1-d2/r2)
-     p.dx+=dx*invd*acc
-     p.dy+=dy*invd*acc
-    end
-   end
-  end
- end
+ -- Now handled by p_pull for PT_EXHAUST and PT_DEATH types
+ p_pull(cx,cy,r,str,{[PT_EXHAUST]=true,[PT_DEATH]=true})
 end
 
 function ship_trails_absorb(hx,hy,hw,hh)
- for lst in all{exhaust,death_fx}do
-  if lst then
-   for p in all(lst)do
-    if p.x>=hx and p.x<hx+hw and p.y>=hy and p.y<hy+hh then del(lst,p)end
-   end
-  end
- end
+ -- Now handled by p_absorb for PT_EXHAUST and PT_DEATH types
+ p_absorb(hx,hy,hw,hh,{[PT_EXHAUST]=true,[PT_DEATH]=true})
 end

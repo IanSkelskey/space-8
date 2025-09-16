@@ -1,4 +1,4 @@
-local asteroids,debris,dust,spawn_t={},{},{},0
+local asteroids,spawn_t={},0
 
 local function hit_by_player_bullet(x,y,w,h)
 	local pb=ship_get_bullets and ship_get_bullets()
@@ -14,7 +14,7 @@ end
 local function spawn_chunk_dust(x,y)
 	for i=1,3+flr(rnd(3)) do
 		local a=rnd()
-		add(dust,{x=x,y=y,dx=cos(a)*(0.6+rnd(0.6)),dy=sin(a)*(0.6+rnd(0.6)),life=8+flr(rnd(6))})
+		p_add(x,y,cos(a)*(0.6+rnd(0.6)),sin(a)*(0.6+rnd(0.6)),8+flr(rnd(6)),PT_DUST)
 	end
 end
 
@@ -23,11 +23,11 @@ local function spawn_asteroid_debris(x,y,alt)
 	for i=0,3 do
 		local ox,oy=i%2*4,i\2*4
 		local a=rnd()
-		add(debris,{x=x+ox,y=y+oy,dx=cos(a)*(0.5+rnd(1.2)),dy=sin(a)*(0.5+rnd(1.2)),sx=sx+ox,sy=sy+oy})
+		p_add(x+ox,y+oy,cos(a)*(0.5+rnd(1.2)),sin(a)*(0.5+rnd(1.2)),999,PT_DEBRIS,nil,{sx+ox,sy+oy})
 	end
 	for i=1,8 do
 		local a=rnd()
-		add(dust,{x=x+4,y=y+4,dx=cos(a)*rnd(1.2),dy=sin(a)*rnd(1.2),life=18})
+		p_add(x+4,y+4,cos(a)*rnd(1.2),sin(a)*rnd(1.2),18,PT_DUST)
 	end
 end
 
@@ -39,7 +39,7 @@ local function spawn_child_asteroids(x,y,w,h,a)
 end
 
 function asteroid_init()
-	asteroids,debris,dust,spawn_t={},{},{},0
+	asteroids,spawn_t={},0
 end
 
 local function spawn_asteroid()
@@ -96,29 +96,17 @@ function update_asteroid()
 		::continue::
 	end
 
-	for d in all(debris) do
-		d.x+=d.dx
-		d.y+=d.dy
-		d.dx*=0.99
-		d.dy*=0.99
-
-		if hit_by_player_bullet(d.x,d.y,4,4) then
-			if hud_add_score then hud_add_score(12) end
-			spawn_chunk_dust(d.x+2,d.y+2)
-			del(debris,d)
-		elseif ship and aabb(d.x,d.y,4,4,ship.x,ship.y,ship.w,ship.h) then
-			if game_state=="game" and ship_kill then ship_kill() end
-		elseif d.x<-4 or d.x>132 or d.y<-4 or d.y>132 then
-			del(debris,d)
-		end
-	end
-
-	for p in all(dust) do
-		p.x+=p.dx
-		p.y+=p.dy
-		p.life-=1
-		if p.life<=0 or p.x<-2 or p.x>130 or p.y<-2 or p.y>130 then
-			del(dust,p)
+	-- Check debris collisions with bullets and ship
+	local parts=p_get()
+	for p in all(parts) do
+		if p.t==PT_DEBRIS then
+			if hit_by_player_bullet(p.x,p.y,4,4) then
+				if hud_add_score then hud_add_score(12) end
+				spawn_chunk_dust(p.x+2,p.y+2)
+				p.l=0 -- Mark for deletion
+			elseif ship and aabb(p.x,p.y,4,4,ship.x,ship.y,ship.w,ship.h) then
+				if game_state=="game" and ship_kill then ship_kill() end
+			end
 		end
 	end
 end
@@ -141,12 +129,7 @@ function draw_asteroid()
 		end
 		if flash then pal() palt() end
 	end
-	for d in all(debris) do
-		sspr(d.sx,d.sy,4,4,d.x,d.y)
-	end
-	for p in all(dust) do
-		pset(flr(p.x),flr(p.y),p.life>12 and 6 or p.life>6 and 5 or 7)
-	end
+	-- Debris and dust now drawn by particle system
 end
 
 function asteroid_absorb(hx,hy,hw,hh)
@@ -155,28 +138,18 @@ function asteroid_absorb(hx,hy,hw,hh)
 			del(asteroids,m)
 		end
 	end
-	for d in all(debris) do
-		if aabb(d.x,d.y,4,4,hx,hy,hw,hh) then
-			spawn_chunk_dust(d.x+2,d.y+2)
-			del(debris,d)
+	-- Also absorb debris particles
+	p_absorb(hx,hy,hw,hh,{[PT_DEBRIS]=true})
+	-- Spawn dust when debris is absorbed
+	local parts=p_get()
+	for p in all(parts) do
+		if p.t==PT_DEBRIS and p.x>=hx and p.x<hx+hw and p.y>=hy and p.y<hy+hh then
+			spawn_chunk_dust(p.x+2,p.y+2)
 		end
 	end
 end
 
 function asteroid_debris_pull(cx,cy,r,strength)
-	local r2=r*r
-	for d in all(debris) do
-		local dx,dy=cx-(d.x+2),cy-(d.y+2)
-		local d2=dx*dx+dy*dy
-		if d2>0.5 and d2<r2 then
-			local invd,fall,acc=1/sqrt(d2),1-d2/r2,strength*(1-d2/r2)
-			d.dx+=dx*invd*acc
-			d.dy+=dy*invd*acc
-			local sp=sqrt(d.dx*d.dx+d.dy*d.dy)
-			if sp>2 then
-				d.dx*=2/sp
-				d.dy*=2/sp
-			end
-		end
-	end
+	-- Now use unified particle pull for debris
+	p_pull(cx,cy,r,strength,{[PT_DEBRIS]=true})
 end

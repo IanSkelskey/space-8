@@ -1,7 +1,7 @@
-local comets,parts,spawn_t,SIDS_ANGLED,SIDS_STRAIGHT,WARNING_TIME,SWAPS={},{},0,{43,44,45,46,47},{59,60,61,62,63},20,{{8,9},{2,14},{10,9},{3,11},{1,12}}
+local comets,spawn_t,SIDS_ANGLED,SIDS_STRAIGHT,WARNING_TIME,SWAPS={},0,{43,44,45,46,47},{59,60,61,62,63},20,{{8,9},{2,14},{10,9},{3,11},{1,12}}
 
 function comet_init()
-	comets,parts,spawn_t={},{},0
+	comets,spawn_t={},0
 end
 
 local function spawn_comet()
@@ -46,14 +46,8 @@ function update_comet()
 		local spd=sqrt(c.dx*c.dx+c.dy*c.dy)
 		local ux,uy=spd>0 and c.dx/spd or 0,spd>0 and c.dy/spd or 0
 		for i=1,rnd()<0.4 and 2 or 1 do
-			add(parts,{
-				x=c.x+4-ux*2+rnd()-0.5,
-				y=c.y+4-uy*2+rnd()-0.5,
-				dx=-ux*(0.2+rnd(0.2))+rnd(0.1)-0.05,
-				dy=-uy*(0.2+rnd(0.2))+rnd(0.1)-0.05,
-				life=18+flr(rnd(10)),
-				col=rnd()<0.5 and c.c8 or c.c9
-			})
+			local col=rnd()<0.5 and c.c8 or c.c9
+			p_add(c.x+4-ux*2+rnd()-0.5,c.y+4-uy*2+rnd()-0.5,-ux*(0.2+rnd(0.2))+rnd(0.1)-0.05,-uy*(0.2+rnd(0.2))+rnd(0.1)-0.05,18+flr(rnd(10)),PT_COMET,col)
 		end
 
 		if ship and not c.warning and aabb(c.x,c.y,c.w,c.h,ship.x,ship.y,ship.w,ship.h) then
@@ -62,13 +56,6 @@ function update_comet()
 
 		if c.x<-12 or c.x>140 or c.y<-12 or c.y>140 then del(comets,c) end
 		::continue::
-	end
-
-	for p in all(parts) do
-		p.x+=p.dx
-		p.y+=p.dy
-		p.life-=1
-		if p.life<=0 or p.x<-4 or p.x>132 or p.y<-4 or p.y>132 then del(parts,p) end
 	end
 end
 
@@ -85,9 +72,7 @@ function draw_comet()
 		end
 	end
 
-	for p in all(parts) do
-		pset(flr(p.x),flr(p.y),p.col)
-	end
+	-- Comet particles now drawn by particle system
 	
 	for c in all(comets) do
 		if c.warning_t<=0 then

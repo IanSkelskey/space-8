@@ -1,4 +1,4 @@
-local parts,holes,spawn_t={},{},0
+local holes,spawn_t={},0
 
 local function pull_bullets(h)
 	local pb=ship_get_bullets and ship_get_bullets()
@@ -40,65 +40,12 @@ local function spawn_particles(h)
 		local ang,rad=rnd(),2+rnd(2)
 		local px,py=h.x+4+cos(ang)*rad,h.y+4+sin(ang)*rad
 		local tx,ty,spd=-sin(ang),cos(ang),0.45+rnd(0.45)
-		add(parts,{
-			x=px,y=py,
-			vx=tx*spd+rnd(0.2)-0.1+cos(ang)*0.08,
-			vy=ty*spd+rnd(0.2)-0.1+sin(ang)*0.08,
-			life=20+flr(rnd(10))
-		})
-	end
-end
-
-local function update_particles()
-	for p in all(parts) do
-		local cx,cy,bestd2,hh
-		for h in all(holes) do
-			local hx,hy=h.x+4,h.y+4
-			local dx,dy=hx-p.x,hy-p.y
-			local d2=dx*dx+dy*dy
-			if not bestd2 or d2<bestd2 then
-				bestd2,cx,cy,hh=d2,hx,hy,h
-			end
-		end
-		if cx then
-			local dx,dy=cx-p.x,cy-p.y
-			local d2=dx*dx+dy*dy
-			if d2>0.1 then
-				local invd,d=1/sqrt(d2),sqrt(d2)
-				local fall=1-min(d/(hh and hh.r or 32),1)
-				local rg,sg=0.3*fall,0.8*max(fall,0.2)
-				p.vx+=dx*invd*rg-dy*invd*sg
-				p.vy+=dy*invd*rg+dx*invd*sg
-				if d<2.2 then
-					p.vx-=dx*invd*0.2
-					p.vy-=dy*invd*0.2
-				end
-				local sp=sqrt(p.vx*p.vx+p.vy*p.vy)
-				if sp>1.8 then
-					p.vx*=1.8/sp
-					p.vy*=1.8/sp
-				end
-			end
-		else
-			p.vx*=0.65
-			p.vy=p.vy*0.65+0.2
-			local sp=sqrt(p.vx*p.vx+p.vy*p.vy)
-			if sp>0.6 then
-				p.vx*=0.6/sp
-				p.vy*=0.6/sp
-			end
-			if abs(p.vx)<0.01 then p.vx=0 end
-			if abs(p.vy)<0.01 then p.vy=0 end
-		end
-		p.x+=p.vx
-		p.y+=p.vy
-		p.life-=1
-		if p.life<=0 then del(parts,p) end
+		p_add(px,py,tx*spd+rnd(0.2)-0.1+cos(ang)*0.08,ty*spd+rnd(0.2)-0.1+sin(ang)*0.08,20+flr(rnd(10)),PT_HOLE)
 	end
 end
 
 function blackhole_init()
-	holes,parts,spawn_t={},{},0
+	holes,spawn_t={},0
 end
 
 function update_blackhole()
@@ -152,13 +99,12 @@ function update_blackhole()
 		pull_bullets(h)
 	end
 
-	update_particles()
+	-- Update hole particles with special physics
+	p_hole_pull(holes)
 end
 
 function draw_blackhole()
-	for p in all(parts) do
-		pset(flr(p.x),flr(p.y),p.life>16 and 14 or p.life>8 and 2 or 1)
-	end
+	-- Hole particles now drawn by particle system
 	for h in all(holes) do
 		local ph=flr(h.spin_t/8)%4
 		spr(3,h.x,h.y,1,1,ph==1 or ph==2,ph==2 or ph==3)

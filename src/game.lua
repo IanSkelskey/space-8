@@ -37,6 +37,7 @@ function reset_game()
 	comet_init()
 	station_init()
 	menu_init()
+	p_clear() -- Clear all particles on reset
 	game_state,prev_game_state,round_number,current_mission,mission_distance,distance_remaining,money_total,ts,last_pay,last_bonus,last_payout_ready="menu","menu",1,nil,0,0,0,0,0,0,false
 	snd_music(MUS_MENU)
 end
@@ -50,6 +51,7 @@ function _init()
 	comet_init()
 	station_init()
 	menu_init()
+	p_clear() -- Clear all particles on init
 	snd_music(MUS_MENU)
 end
 function _update()
@@ -65,6 +67,7 @@ function _update()
 			ship_init()
 			game_state="station"
 		end
+		p_upd() -- Update particles during fanfare
 		prev_game_state="fanfare_depart"
 		return
 	end
@@ -81,11 +84,13 @@ function _update()
 		update_controls()
 	elseif gs=="station"then
 		update_station()
+		p_clear() -- Clear particles when at station
 	elseif gs=="game"then
 		update_blackhole()
 		update_asteroid()
 		update_comet()
 		update_ship()
+		p_upd() -- Update all particles
 		if distance_remaining>0 and not(ship and ship.dying)then
 			distance_remaining-=1
 			if distance_remaining<=0 then complete_mission() end
@@ -96,6 +101,7 @@ function _update()
 		update_asteroid()
 		update_comet()
 		update_ship()
+		p_upd() -- Update particles during death
 		if ship_death_done and ship_death_done()then game_state="gameover"end
 	elseif gs=="gameover"then
 		if btnp(4)then reset_game() end
@@ -117,6 +123,7 @@ function _draw()
 		draw_asteroid()
 		draw_comet()
 		draw_ship()
+		p_draw() -- Draw all particles
 		draw_hud()
 	elseif gs=="gameover"then
 		draw_gameover()
