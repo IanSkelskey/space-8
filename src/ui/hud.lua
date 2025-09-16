@@ -1,7 +1,7 @@
 local score,money,HUD_HEIGHT=0,0,10
 ts=ts or 0
 db=db or 0
-rd=rd or 0 gs=gs or game_state
+gs=gs or game_state
 
 function hud_init()score,money=0,0 end
 
@@ -9,7 +9,7 @@ function hud_add_score(n)score+=n or 0 ts+=n or 0 end
 function hud_add_money(n)money+=n or 0 end
 
 function hud_get_points()return score end
-function hud_reset_points()score=0 end
+function hud_reset_points()score=0 db=0 end  -- reset progress bar when starting new mission
 
 local function dm(x,y,w,h,v,m,cf,cm,cl)
 	rectfill(x,y,x+w-1,y+h-1,0)
@@ -41,15 +41,21 @@ function draw_hud()
 	draw_segmented_bar(37,3,min(20,m*10),3,h,m,11)
 	spr(10,58,2)
 	dm(65,3,20,3,ship and ship.shield_power or 0,100,12,13,8)
-	-- reset distance/smoothing on entering a run
-	if gs~=game_state then if game_state=="game"then rd,db=0,0 end gs=game_state end
+	-- reset smoothing only when entering game from non-game/fanfare state
+	if gs~=game_state then 
+		if game_state=="game" and gs!="fanfare_depart" and gs!="fanfare_arrive" then 
+			db=0 
+		end 
+		gs=game_state 
+	end
 	-- mission progress bar (subtle design)
-	if game_state=="game"and mission_distance and mission_distance>0 then
-		-- accumulate travel distance (use mission speed if available)
-		rd=min(mission_distance,rd+(mspd or 1))
-		-- smooth target; force full when fanfare plays
-		local t=min(1,rd/mission_distance)
+	if (game_state=="game" or game_state=="fanfare_depart" or game_state=="fanfare_arrive") and mission_distance and mission_distance>0 then
+		-- calculate actual progress from distance_remaining
+		local actual_progress = mission_distance - (distance_remaining or mission_distance)
+		local t = min(1, actual_progress / mission_distance)
+		-- force full during fanfare
 		if level_fanfare_timer and level_fanfare_timer>0 then t=1 end
+		-- smooth the display value
 		if db<t then db=min(t,db+0.02) elseif db>t then db=max(t,db-0.02) end
 
 		-- smaller, subtler progress bar

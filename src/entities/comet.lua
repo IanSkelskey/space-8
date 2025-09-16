@@ -1,5 +1,7 @@
 local comets,parts,spawn_t={},{},0
-local SIDS,WARNING_TIME={48,49,50,51,52},20
+local SIDS_ANGLED={48,49,50,51,52}  -- diagonal sprites
+local SIDS_STRAIGHT={59,60,61,62,63} -- horizontal/vertical sprites
+local WARNING_TIME=20
 local SWAPS={{8,9},{2,14},{10,9},{3,11},{1,12}}
 
 function comet_init()
@@ -9,13 +11,25 @@ end
 local function spawn_comet()
 	local left,x,y=rnd()<0.5,0,(HUD_HEIGHT or 0)+flr(rnd(120-(HUD_HEIGHT or 0)))
 	x=left and -8 or 128
-	local ang=left and (rnd()<0.5 and 0.125 or 0.875) or (rnd()<0.5 and 0.375 or 0.625)
+	
+	-- More varied angles: pick from 8 directions with some randomness
+	local base_angles = left and {0.125, 0, 0.875} or {0.375, 0.5, 0.625}
+	local ang = base_angles[flr(rnd(#base_angles))+1] + (rnd()-0.5)*0.08
+	
 	local spd=1.2+rnd(0.9)
 	local i=flr(rnd(#SWAPS))
+	
+	-- Determine if angle is closer to diagonal or perpendicular
+	-- Normalize angle to 0-1 range then to 0-0.5 (since we have symmetry)
+	local norm_ang = ang % 0.25
+	local use_angled = norm_ang > 0.0625 and norm_ang < 0.1875
+	
 	add(comets,{
 		x=x,y=y,w=8,h=8,
 		dx=cos(ang)*spd,dy=sin(ang)*spd,
-		c8=SWAPS[i+1][1],c9=SWAPS[i+1][2],sid=SIDS[i+1],
+		c8=SWAPS[i+1][1],c9=SWAPS[i+1][2],
+		sid=use_angled and SIDS_ANGLED[i+1] or SIDS_STRAIGHT[i+1],
+		use_angled=use_angled,
 		warning_t=WARNING_TIME,
 		left=left
 	})
@@ -89,7 +103,35 @@ function draw_comet()
 	
 	for c in all(comets) do
 		if c.warning_t<=0 then
-			spr(c.sid,c.x,c.y,1,1,c.dx<0,c.dy>0)
+			if c.use_angled then
+				-- Use diagonal sprite with flipping based on direction
+				spr(c.sid,c.x,c.y,1,1,c.dx<0,c.dy>0)
+			else
+				-- Use straight sprite with rotation based on primary direction
+				local ax,ay=abs(c.dx),abs(c.dy)
+				if ax > ay then
+					-- Horizontal movement - use sprite as-is or flipped
+					spr(c.sid,c.x,c.y,1,1,c.dx<0,false)
+				else
+					-- Vertical movement - rotate sprite 90 degrees
+					-- We'll need to draw it rotated
+					local cx,cy=c.x+4,c.y+4
+					for px=0,7 do
+						for py=0,7 do
+							local col=sget(c.sid%16*8+px,flr(c.sid/16)*8+py)
+							if col!=0 then
+								-- Rotate 90 degrees: (x,y) -> (y,7-x) for downward
+								-- or (7-y,x) for upward
+								if c.dy>0 then
+									pset(c.x+py,c.y+7-px,col)
+								else
+									pset(c.x+7-py,c.y+px,col)
+								end
+							end
+						end
+					end
+				end
+			end
 		end
 	end
 end
