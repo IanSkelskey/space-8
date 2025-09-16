@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship=ship or{x=START_X,y=START_Y,w=8,h=8,spr=1,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0}
+ship=ship or{x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0}
 
 local bullets,exhaust,death_fx={},{},{}
 
@@ -157,7 +157,7 @@ function draw_ship()
  if ship.dying then
   for p in all(death_fx)do pset(flr(p.x),flr(p.y),p.life>16 and 10 or(p.life>8 and 9 or 8))end
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
-  spr(abs(ship.vx)>0.05 and 4 or 1,ship.x,ship.y,1,1,ship.vx>0)
+  spr(abs(ship.vx)>0.05 and 17 or 16,ship.x,ship.y,1,1,ship.vx>0)
  end
  for b in all(bullets)do local x,y=flr(b.x),flr(b.y)pset(x,y,9)pset(x,y-1,8)end
  if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and(ship.shield_invuln%4)<2)then

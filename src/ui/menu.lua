@@ -36,10 +36,23 @@ function update_menu()
 end
 
 function draw_menu()
-	print("\014sPACE 8",32,28,7)
-	print("v1.0.1",32,36,6)
-	local y=48
-	for i=1,#opts do local c=i==sel and 7 or 6 if i==sel then print(">",28,y,c) end print(opts[i].label,36,y,c) y+=10 end
-	print("🅾️ select  ❎ back",26,108,5)
-	print("made with \fe♥\f7 by ian skelskey",8,120,5)
+	
+	-- Title centered with improved styling
+	print("\014sPACE 8",36,24,7)
+	
+	print("v1.0.1",48,36,6)
+	local y=52
+	for i=1,#opts do 
+		local c=i==sel and 7 or 6 
+		if i==sel then 
+			-- Simplified pulsing (saves 2 tokens: removed 'and 0 or 1')
+			print(">",44+time()%1\0.5,y,c) 
+		end 
+		print(opts[i].label,52,y,c) 
+		y+=12 
+	end
+	
+	-- Centered footer
+	print("🅾️ select  ❎ back",30,104,5)
+	print("made with \fe♥\f7 by ian skelskey",12,116,5)
 end

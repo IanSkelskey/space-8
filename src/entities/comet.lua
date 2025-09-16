@@ -1,28 +1,16 @@
-local comets,parts,spawn_t={},{},0
-local SIDS_ANGLED={48,49,50,51,52}  -- diagonal sprites
-local SIDS_STRAIGHT={59,60,61,62,63} -- horizontal/vertical sprites
-local WARNING_TIME=20
-local SWAPS={{8,9},{2,14},{10,9},{3,11},{1,12}}
+local comets,parts,spawn_t,SIDS_ANGLED,SIDS_STRAIGHT,WARNING_TIME,SWAPS={},{},0,{43,44,45,46,47},{59,60,61,62,63},20,{{8,9},{2,14},{10,9},{3,11},{1,12}}
 
 function comet_init()
 	comets,parts,spawn_t={},{},0
 end
 
 local function spawn_comet()
-	local left,x,y=rnd()<0.5,0,(HUD_HEIGHT or 0)+flr(rnd(120-(HUD_HEIGHT or 0)))
-	x=left and -8 or 128
-	
-	-- More varied angles: pick from 8 directions with some randomness
-	local base_angles = left and {0.125, 0, 0.875} or {0.375, 0.5, 0.625}
-	local ang = base_angles[flr(rnd(#base_angles))+1] + (rnd()-0.5)*0.08
-	
-	local spd=1.2+rnd(0.9)
-	local i=flr(rnd(#SWAPS))
-	
-	-- Determine if angle is closer to diagonal or perpendicular
-	-- Normalize angle to 0-1 range then to 0-0.5 (since we have symmetry)
-	local norm_ang = ang % 0.25
-	local use_angled = norm_ang > 0.0625 and norm_ang < 0.1875
+	local left=rnd()<0.5
+	local x,y=left and -8 or 128,(HUD_HEIGHT or 0)+flr(rnd(120-(HUD_HEIGHT or 0)))
+	local base_angles=left and {0.125,0,0.875} or {0.375,0.5,0.625}
+	local ang,spd,i=base_angles[flr(rnd(#base_angles))+1]+(rnd()-0.5)*0.08,1.2+rnd(0.9),flr(rnd(#SWAPS))
+	local norm_ang=ang%0.25
+	local use_angled=norm_ang>0.0625 and norm_ang<0.1875
 	
 	add(comets,{
 		x=x,y=y,w=8,h=8,

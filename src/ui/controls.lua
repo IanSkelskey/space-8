@@ -34,7 +34,7 @@ function draw_controls()
   print("splits into chunks",28,47,13)
   
   -- comet  
-  spr(51,10,58) -- comet sprite (id 51) - single sprite
+  spr(43,10,58) -- comet sprite (id 51) - single sprite
   print("\f8comet\f6",22,59,5)
   print("fast diagonal",28,66,13)
   print("hard to avoid",28,73,13)
@@ -43,7 +43,7 @@ function draw_controls()
   spr(3,10,84) -- black hole sprite (id 3) - single sprite
   print("\f8black hole\f6",22,85,5)
   print("pulls you in",28,92,13)
-  print("ignores hull+shield",28,99,13)
+  print("ignores hull",28,99,13)
  else
   -- use cursor() and print with built-in word wrap for other pages
   cursor(6,20)
