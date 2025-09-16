@@ -34,7 +34,13 @@ end
 
 function draw_hud()
 	print(score,2,2,7)
-	local t="$"..(money_total or money)
+	-- Show old total during game/fanfare, new total only at station
+	local show_amount = money_total or money
+	if (game_state=="game" or game_state=="fanfare_depart" or game_state=="dying") and last_payout_ready then
+		-- During gameplay after completing a mission, show the previous total
+		show_amount = (money_total or 0) - (last_pay or 0) - (last_bonus or 0)
+	end
+	local t="$"..show_amount
 	print(t,127-#t*4-2,2,10)
 	spr(38,30,2)
 	local h,m=ship_get_hull and ship_get_hull()or 2,ship_get_max_hull and ship_get_max_hull()or 2

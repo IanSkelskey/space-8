@@ -47,8 +47,9 @@ end
 function shop_draw()
  rectfill(0,0,127,15,1)
  print("◀",4,4,p>1 and 7 or 1)
- print("shop - page "..p.."/2",16,4,7)
- print("▶",90,4,p<2 and 7 or 1)
+ spr(22,14,4) -- Add sprite 22 before "shop"
+ print("shop - page "..p.."/2",24,4,7) -- Shifted text right to make room
+ print("▶",96,4,p<2 and 7 or 1) -- Shifted arrow right to match
  print("$"..(money_total or 0),100,4,10)
  rect(2,18,125,121,1)
  

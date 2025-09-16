@@ -114,20 +114,28 @@ end
 function draw_asteroid()
 	for m in all(asteroids) do
 		local flash=m.flash_t>0 and m.flash_t%2==0
-		if flash then
-			for i=1,15 do pal(i,7) end
-			palt(0,true)
-		end
 		if m.large then
-			local o=m.alt and 5 or 0
-			spr(7+o,m.x,m.y)
-			spr(8+o,m.x+8,m.y)
-			spr(23+o,m.x,m.y+8)
-			spr(24+o,m.x+8,m.y+8)
+			if flash then
+				-- Use hit sprite for large asteroids (2x2 starting at sprite 14)
+				spr(14,m.x,m.y)
+				spr(15,m.x+8,m.y)
+				spr(30,m.x,m.y+8)
+				spr(31,m.x+8,m.y+8)
+			else
+				local o=m.alt and 5 or 0
+				spr(7+o,m.x,m.y)
+				spr(8+o,m.x+8,m.y)
+				spr(23+o,m.x,m.y+8)
+				spr(24+o,m.x+8,m.y+8)
+			end
 		else
-			spr(m.alt and 26 or 2,m.x,m.y)
+			if flash then
+				-- Use hit sprite for regular asteroids (sprite 1)
+				spr(1,m.x,m.y)
+			else
+				spr(m.alt and 26 or 2,m.x,m.y)
+			end
 		end
-		if flash then pal() palt() end
 	end
 	-- Debris and dust now drawn by particle system
 end

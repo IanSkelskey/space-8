@@ -19,8 +19,9 @@ end
 function draw_controls()
  rectfill(0,0,127,15,1)
  print("◀",4,4,hp>1 and 7 or 1)
- print("help - page "..hp.."/"..MP,16,4,7)
- print("▶",90,4,hp<MP and 7 or 1)
+ spr(41,14,4) -- Add sprite 41 before "help" - moved down 1 pixel for alignment
+ print("help - page "..hp.."/"..MP,24,4,7) -- Shifted text right to make room
+ print("▶",100,4,hp<MP and 7 or 1) -- Shifted arrow right to match
  rect(1,17,126,118,1)
  
  if hp==3 then

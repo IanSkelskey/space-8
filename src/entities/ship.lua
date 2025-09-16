@@ -149,6 +149,10 @@ function draw_ship()
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
   spr(abs(ship.vx)>0.05 and 17 or 16,ship.x,ship.y,1,1,ship.vx>0)
  end
+ 
+ -- Skip bullets and shield during fanfare
+ if game_state=="fanfare_depart" then return end
+ 
  for b in all(bullets)do local x,y=flr(b.x),flr(b.y)pset(x,y,9)pset(x,y-1,8)end
  if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and(ship.shield_invuln%4)<2)then
   local cx,cy,t,cols=ship.x+4,ship.y+4,ship.shield_anim/30,{12,13,1}

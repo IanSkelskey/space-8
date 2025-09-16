@@ -42,6 +42,10 @@ function reset_game()
 	snd_music(MUS_MENU)
 end
 function _init()
+	-- Set up palette swap: use extended color 129 instead of color 15
+	-- 129 = 0x81 in hex (128 + 1)
+	pal(15, 0x81, 1)
+	
 	starfield_init()
 	if ship_reset_upgrades then ship_reset_upgrades() end
 	ship_init()
@@ -85,6 +89,10 @@ function _update()
 	elseif gs=="station"then
 		update_station()
 		p_clear() -- Clear particles when at station
+		-- Clear payout flag when leaving station to start new mission
+		if game_state=="game" and last_payout_ready then
+			last_payout_ready=false
+		end
 	elseif gs=="game"then
 		update_blackhole()
 		update_asteroid()
@@ -118,6 +126,9 @@ function _draw()
 		draw_controls()
 	elseif gs=="station"then
 		draw_station()
+	elseif gs=="fanfare_depart"then
+		draw_ship()
+		draw_hud()
 	elseif gs=="fanfare_depart"or gs=="game"or gs=="dying"then
 		draw_blackhole()
 		draw_asteroid()
