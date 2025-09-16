@@ -2,11 +2,15 @@
 
 # Space Shooter (PICO-8)
 
-A retro-inspired space shooter game built with PICO-8 fantasy console. Blast asteroids, dodge comets, and survive as long as you can!
+<p align="center">
+    <img src="preview/cart-preview.png" alt="Cartridge Art" width="160">
+</p>
+
+**Space Shooter** is a retro-inspired arcade game for the PICO-8 fantasy console. Blast asteroids, dodge comets, and survive as long as you can!
 
 ## Features
 - Classic arcade-style gameplay
-- Power-ups, score, and fuel management
+- Power-ups, scores, and upgrades
 - Custom music and sound effects
 - Optimized for web export and PICO-8
 
@@ -19,10 +23,14 @@ A retro-inspired space shooter game built with PICO-8 fantasy console. Blast ast
 ## Screenshots
 
 ![Shop](preview/screenshots/shop.png)
-![Late Gameplay](preview/screenshots/late_gameplay.png)
-![Controls](preview/screenshots/controls.png)
+![Gameplay](preview/screenshots/late_gameplay.png)
+![Help Screen 1](preview/screenshots/help_1.png)
+![Help Screen 2](preview/screenshots/help_2.png)
+![Help Screen 3](preview/screenshots/help_3.png)
+![Help Screen 4](preview/screenshots/help_4.png)
 ![Early Gameplay](preview/screenshots/early_gameplay.png)
 ![Station](preview/screenshots/station.png)
+![Station Late Game](preview/screenshots/station_late.png)
 ![Game Over](preview/screenshots/game_over.png)
 
 ## Obstacles
