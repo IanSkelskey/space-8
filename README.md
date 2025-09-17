@@ -31,7 +31,7 @@
 ![Early Gameplay](preview/screenshots/early_gameplay.png)
 ![Station](preview/screenshots/station.png)
 ![Station Late Game](preview/screenshots/station_late.png)
-![Game Over](preview/screenshots/game_over.png)
+![Game Over](preview/screenshots/gameover.png)
 
 ## Obstacles
 
