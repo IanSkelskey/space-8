@@ -510,3 +510,329 @@ PICO-8 cartridges are limited to a maximum of 8192 tokens. A token is a unit of 
 - Save tokens by using `next,mytable` instead of `pairs(mytable)`, and `inext,mytable` instead of `ipairs(mytable)`
 
 Efficient token usage is essential for fitting more features and logic into your PICO-8 games.
+
+## Advanced PICO-8 Token Optimization
+
+Goal: delay heavy obfuscating tricks until late; measure before/after (track tokens + compressed size).
+
+### 1. Environments (_ENV) for Localized Globals
+Access to a global like print is 1 token (identifier) but table indirections (g.print) add tokens. You can cache frequently used globals into a localized environment once and then refer to them directly without self./obj. prefixes.
+
+Pattern (scoped optimization):
+```lua
+do
+ local _g=_ENV -- preserve original
+ local print,rectfill,sub,add=time,rectfill,sub,add -- copy only what you spam
+ _ENV=setmetatable({},{__index=_g})
+ -- hot code here uses print/rectfill directly
+end
+```
+Per-object pattern (OOP-like without self. repetition):
+```lua
+player={
+ x=8,y=8,dx=0,dy=0,
+ update=function(self)
+  local _ENV=self
+  -- now x,y,dx,dy refer to fields; no self. tokens
+  dx=dx+0.1
+ end
+}
+```
+Notes:
+- Only false and nil are falsey: 0 is truthy—keep in mind while short‑circuiting.
+- Escape hatch: reference original via _G or saved _g if you intentionally shadow something.
+
+### 2. Replace Repeated Table Field Access
+If you do need self., cache:
+```lua
+local p=player
+p.x+=1 p.y+=1
+```
+Break even when using the field ≥2 times (token cost of local plus usages vs multiple table accesses).
+
+### 3. Short-Circuit Logic Instead of if
+```lua
+a=b>3 and 4 or a  -- replace: if b>3 then a=4 end
+res = try_primary() or try_backup() or default()
+ok = cond and do_side_effect() or ok
+```
+Arithmetic selection:
+```lua
+v = flag and a+b or a-b
+```
+Ensure lhs of and returns non-falsey when you rely on fallback via or.
+
+### 4. Optional Arguments via Nil Defaults
+Define frequently omitted params last and rely on implicit nil:
+```lua
+function fx(x,y,c)
+ c=c or 7
+end
+```
+Omit common constant arguments at call sites (1 token saved per omission).
+
+### 5. Data Packing (Numbers → Bitfields)
+Group tiny integers / flags:
+```lua
+-- pack: bits 0-2 state (0-7), bit3 airborne, bits4-7 hp (0-15)
+packed = state | (airborne and 8 or 0) | (hp<<4)
+-- unpack
+state = packed & 0x7
+airborne = packed & 0x8!=0
+hp = packed>>4 & 0xf
+```
+Saves tokens when multiple discrete fields would each appear many times.
+
+### 6. Dense String (or Map/SFX) Encodings
+Tables: {1,2,3,4,...} cost 1 token per element. A single string literal is 1 token regardless of length.
+Approaches:
+- Fixed-width substrings: every 2 chars is a byte (hex).
+- Direct digit/alpha alphabet indexing.
+- Use P8SCII extended chars for base > 16.
+Parsing (example hex pairs):
+```lua
+function parse_hex(s)
+ local t={}
+ for i=1,#s,2 do
+  add(t,tonum("0x"..sub(s,i,i+1)))
+ end
+ return t
+end
+```
+Store giant strings inside:
+- Unused map pages: memcpy into RAM then sub extraction.
+- Empty sfx slots: peek to reconstruct (advanced; trade CPU).
+
+### 7. RLE / Pattern Encoding
+For repetitive tile/light data:
+Format: count char (single nybble each) → expand at load. 1 token for whole string + small decoder.
+
+### 8. Structural Compression (split)
+Use split on comma strings for small numeric arrays:
+```lua
+coords=split"1,8,16,32,64"
+```
+Costs: 2 tokens (split + string literal). Cheaper than braces when length > 2.
+
+### 9. Precompute & Hoist
+Move invariant math (e.g., 1/sqrt(2), color tables) to constants once. Replace expressions with literals (after tuning) to remove operator tokens.
+
+### 10. Replace Constant Vars with Literals (Late Step)
+After gameplay locks, inline constants (g→0.21) saving ~3 tokens per usage (identifier + lookups). Do at end to avoid painful retuning.
+
+### 11. Constructor Shorthands
+Vector helper:
+```lua
+function v(x,y) return {x=x,y=y} end
+p=v(0,0)
+```
+Creation 4 tokens vs {x=0,y=0} (7 tokens). Gains when many constructed.
+
+### 12. Initialization in Declaration
+```lua
+obj={x=0,y=0,hp=3} -- avoids obj.x=... lines (1 token each)
+```
+
+### 13. Token-Aware Control Flow
+Collapse trivial states:
+```lua
+state = dying and 2 or (inv and 1 or 0)
+```
+Chaining saves multiple if/end tokens.
+
+### 14. Avoid Table Layering If Not Iterated
+Flatten deep paths:
+game_state_player_x → gpx variable if only one instance exists. Each dot costs tokens repeatedly.
+
+### 15. Loop Tightening
+Prefer numeric for when possible:
+```lua
+for i=1,#list do local e=list[i] ... end
+```
+all() costs tokens if you also need index.
+
+### 16. Eliminate Redundant Returns / Parens
+Return last expression only when needed. Remove parens on single-arg literals: sfx"0".
+
+### 17. Order of Attack (Suggested Workflow)
+1. Make it work (readable).
+2. Light basic optimizations (split, combine assignments).
+3. Measure token hotspots (editor, toolkit).
+4. Convert large static tables → strings.
+5. Introduce _ENV blocks around hottest update/draw logic.
+6. Pack flags / bitfields.
+7. Inline constants.
+8. Final pass: rename, compress trivial expressions.
+9. Stop—leave ~50 token buffer for patches.
+
+### 18. When NOT to Optimize
+- Early gameplay iteration.
+- Debug-heavy systems (readability outweighs savings).
+- Rarely executed code (init loaders). Optimize hot loops first.
+
+### 19. Tooling
+- Shrinko8: post-pass minification / compressed size insights.
+- PICO-8 Toolkit (VS Code): live token counts.
+- Parens-8 / Picoscript: author high-level, compile to compact Lua.
+- Custom build script: concatenate modules, strip comments (avoid huge manual merges).
+- grep / static scan: find self. or obj. counts to target environment conversion.
+
+### 20. Micro Benchmarks
+Measure before & after:
+```lua
+cls() local t=time()
+for i=1,2000 do hot_fn() end
+print((time()-t)*30) -- ms approx
+```
+Ensure optimization doesn’t regress CPU frame budget.
+
+### 21. Common Gotchas
+- and/or pattern returns second fallback when first result is false or nil; ensure non-nil truthy needed (pre-wrap numbers that can be 0 if relying on fallback).
+- Overuse of _ENV can shadow API accidentally (forgot to copy rnd, add).
+- Bit ops: ensure version supports (PICO-8 has band, bor? use & | << >> syntactic forms).
+- Parsing large strings every frame—do it once at init.
+
+### 22. Quick Reference (Heuristic ROI)
+High Impact (early application once stable):
+- String-encoding big tables
+- _ENV removal of self./object prefixes in tight loops
+- Bit/field packing for many small ints
+Moderate:
+- Short-circuit replacements
+- Initialization bundling
+- Constructor shorthands
+Low / Late:
+- Inlining constants
+- Eliminating parens / minor syntax golf
+
+Adopt only as needed to cross thresholds; readability has production value.
+
+### 23. Using Unused Memory Regions for Data (Map / Sprite / RAM / SFX)
+
+Move large static Lua tables (cost: 1 token per element) into cartridge memory areas that do not consume tokens.
+
+Key regions (consult memory map for conflicts):
+- Map base rows (0x2000-0x27ff = 128x32 tiles) always available.
+- Extended map rows (32-63) mirror sprite sheet upper half (0x1000-0x1fff). Use only if you can spare those sprites.
+- Unused sprites: any 16-byte sprite block you do not draw (each sprite index*16 offset at 0x0000+idx*0x40 (since 8x8*4bpp=32 bytes) — write custom bytes; just avoid ones you render).
+- General work RAM (commonly 0x4300-0x5dff) for custom buffers.
+- Empty SFX slots: each SFX 68 bytes starting at 0x3200; if you leave some blank you can repurpose (advanced; keep format docs handy).
+- Palette overhead / draw state (avoid unless expert—can corrupt rendering).
+
+Basic sequential write (replaces a Lua table):
+```lua
+-- data list we only need during initialization (can delete after)
+local tmp=split"1,4,2,3,5,8,13,21,34"
+local base=0x2000 -- top-left of map
+for i=1,#tmp do poke(base+i-1,tmp[i]) end
+-- later read direct:
+-- val=peek(base+offset)
+```
+
+Runtime iteration without rebuilding tables:
+```lua
+function each_byte(addr,len,fn)
+ for i=0,len-1 do fn(peek(addr+i),i) end
+end
+-- usage: each_byte(0x2000,9,function(v,i) print(v,i) end)
+```
+
+Packed flag writer (2–4 booleans per byte):
+```lua
+function write_flags(a,b,c,d,addr)
+ poke(addr,(a and 1 or 0)|(b and 2 or 0)|(c and 4 or 0)|(d and 8 or 0))
+end
+function read_flags(addr)
+ local v=peek(addr)
+ return (v&1)!=0,(v&2)!=0,(v&4)!=0,(v&8)!=0
+end
+```
+
+Nibble packing (two 0–15 values in one byte):
+```lua
+function pack2(a,b) return (a&0xf)|((b&0xf)<<4) end
+function unpack2(byte) return byte&0xf, byte>>4 end
+-- store
+poke(base,pack2(hp,ammo))
+-- load
+hp,ammo=unpack2(peek(base))
+```
+
+Bitfield example for entity (x (0–127), y (0–63), type (0–7), flags (4 bits)):
+Store across 3 bytes (instead of 4 separate numbers):
+```lua
+-- layout:
+-- byte0: x
+-- byte1: (y<<1)|(type>>2)
+-- byte2: ((type&0x3)<<6)|flags(0-63)
+function write_ent(i,x,y,t,f)
+ local a=base+i*3
+ poke(a,x)
+ poke(a+1, (y&0x3f)<<1 | (t>>2))
+ poke(a+2, ((t&0x3)<<6) | (f&0x3f))
+end
+function read_ent(i)
+ local a=base+i*3
+ local x=peek(a)
+ local b=peek(a+1)
+ local c=peek(a+2)
+ local y=(b>>1)&0x3f
+ local t=((b&1)<<2)| (c>>6)
+ local f=c&0x3f
+ return x,y,t,f
+end
+```
+
+Bulk copy / initialization (fewer tokens than loops when copying large static blobs):
+```lua
+-- copy 256 bytes from code-initialized buffer src_addr to map area
+-- memcpy(dest,src,len)
+memcpy(0x2000,0x4300,256)
+```
+
+Overwriting unused sprite rows for custom LUTs:
+```lua
+-- sprite 96 (assume unused) starts at addr:
+local lut_addr=0x0000+96*64
+for i=0,63 do poke(lut_addr+i,i*i%256) end
+-- read later: val=peek(lut_addr+index)
+```
+
+Dynamic string → memory (token-cheap large data):
+```lua
+str="001122ffab..." -- 1 token
+for i=1,#str,2 do
+ poke(base+(i>>1),tonum("0x"..sub(str,i,i+1)))
+end
+```
+
+Performance notes:
+- Prefer one-time _init parsing; avoid per-frame decode.
+- Keep an index map (start, length) to avoid magic numbers scattered in code.
+- Ensure you do not clobber map tiles you intend to draw—or accept that those tiles become data-only.
+
+Token savings pattern:
+- Remove giant table (N tokens) → add short loader (~10–30 tokens).
+- Net gain grows with N; break-even usually < 10 elements.
+
+Safety checklist:
+1. Enumerate which map rows / sprite indices are truly unused.
+2. Centralize addresses in constants.
+3. Write unit test printouts early (dump a few peek() values) to verify no accidental overwrites.
+4. Document packed layouts (comment once; saves debugging time vs lost tokens later).
+
+Combining with earlier techniques:
+- Store compressed (RLE) string in code (1 token) → decode to memory region → runtime only peeks.
+- Use bitfields so memory footprint shrinks; fewer addresses to manage.
+
+Minimal address references (token tip):
+```lua
+M=0x2000 -- single-letter constant
+poke(M+i,v) -- cheaper than named multi-char symbol at every site (inline late).
+```
+
+When NOT to use memory packing:
+- Data mutated frequently & simpler as tables (tables give iteration helpers).
+- Small datasets (<8 items)—table literal token cost negligible vs loader complexity.
+
+Result: frees tokens for gameplay while leveraging full 8K map / spare sprite / RAM space.
