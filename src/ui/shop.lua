@@ -86,7 +86,8 @@ function shop_draw()
  local sit=items[p==1 and s or 6]
  local cstr,desc="",sit[8]
  if s==5 and p==1 then
-  local repair_cost=200+((round_number or 1)-1)*25  -- scales with round
+  -- match actual charged repair cost (was displaying lower value)
+  local repair_cost=200+((round_number or 1)-1)*50  -- scales with round
   cstr="$"..repair_cost
  else
     local lv=sit[5]~="" and (ship[sit[5]] or 0) or 0

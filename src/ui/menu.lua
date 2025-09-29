@@ -40,7 +40,7 @@ function draw_menu()
 	-- Title centered with improved styling
 	print("\014sPACE 8",36,24,7)
 	
-	print("v1.1.0",48,36,6)
+	print("v1.2.0",48,36,6)
 	local y=52
 	for i=1,#opts do 
 		local c=i==sel and 7 or 6 
