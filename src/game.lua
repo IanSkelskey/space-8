@@ -3,7 +3,7 @@ function aabb(ax,ay,aw,ah,bx,by,bw,bh)
 	return ax<bx+bw and bx<ax+aw and ay<by+bh and by<ay+ah
 end
 current_mission,round_number,mission_distance,distance_remaining,level_fanfare_timer,ship_departing=nil,1,0,0,0,false
-money_total,last_pay,last_bonus,last_payout_ready=money_total or 0,0,0,false
+money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
 sci_adj,sci_noun=split"quantum,plasma,ionic,fusion,nano,void",split"core,drive,matrix,relay,reactor,array"
 function generate_mission()
 	local a,n=sci_adj,sci_noun

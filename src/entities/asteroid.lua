@@ -42,8 +42,8 @@ function asteroid_init()
 end
 
 local function spawn_asteroid()
-	local spd,alt=mspd or 0.9,(round_number or 0)>10 and rnd()<min(0.1+0.04*(round_number-10),0.5)
-	local large=(round_number and round_number>=4) and rnd()<(mlc or 0.3)
+	local spd,alt=mspd or 0.9,round_number>10 and rnd()<min(0.1+0.04*(round_number-10),0.5)
+	local large=round_number>=4 and rnd()<(mlc or 0.3)
 	add(asteroids,{
 		x=flr(rnd(large and 112 or 120)),
 		y=(HUD_HEIGHT or 0)-(large and 20 or 10),

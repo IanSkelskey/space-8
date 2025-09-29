@@ -12,14 +12,14 @@ function shop_init() s,p,sm,st=1,1,"",0 end
 local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and SFX_ERR or SFX_OK,UI_CH) end
 
 local function buy(i)
- local it,m=items[i],money_total or 0
+  local it,m=items[i],money_total
  local lv=it[5]~="" and (ship[it[5]] or 0) or 0
  local ul=it[6]~="" and ship[it[6]]
  
  if i==5 then -- repair
   local h,mh=ship_get_hull(),ship_get_max_hull()
   if h>=mh then msg("hull full",1) return end
-  local repair_cost=200+((round_number or 1)-1)*50  -- scales with round
+  local repair_cost=200+(round_number-1)*50  -- scales with round
   if m<repair_cost then msg("not enough $$$!",1) return end
   money_total=m-repair_cost ship.hull=h+1
  elseif i==2 and not ul then -- unlock shield
@@ -58,7 +58,7 @@ function shop_draw()
  spr(22,14,4) -- Add sprite 22 before "shop"
  print("shop - page "..p.."/2",24,4,7) -- Shifted text right to make room
  print("▶",96,4,p<2 and 7 or 1) -- Shifted arrow right to match
- print("$"..(money_total or 0),100,4,10)
+ print("$"..money_total,100,4,10)
  rect(2,18,125,121,1)
  
   -- draw items (reuse pre-split `items` table to avoid per-frame split calls)
@@ -90,7 +90,7 @@ function shop_draw()
  local cstr,desc="",sit[8]
  if s==5 and p==1 then
   -- match actual charged repair cost (was displaying lower value)
-  local repair_cost=200+((round_number or 1)-1)*50  -- scales with round
+  local repair_cost=200+(round_number-1)*50  -- scales with round
   cstr="$"..repair_cost
  else
     local lv=sit[5]~="" and (ship[sit[5]] or 0) or 0

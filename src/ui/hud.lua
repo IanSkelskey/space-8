@@ -18,7 +18,7 @@ function hud_reset_points()score=0 db=0 end  -- reset progress bar when starting
 function draw_hud()
 	print(score,2,2,7)
 	-- show prior total during run after payout achieved
-	local mt=money_total or 0
+	local mt=money_total
 	local run_state=(game_state=="game" or game_state=="fanfare_depart" or game_state=="dying")
 	local show_amount=(run_state and last_payout_ready) and (mt-(last_pay or 0)-(last_bonus or 0)) or mt
 	local t="$"..show_amount
