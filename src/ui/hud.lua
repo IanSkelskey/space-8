@@ -11,16 +11,7 @@ function hud_add_money(n)money+=n or 0 end
 function hud_get_points()return score end
 function hud_reset_points()score=0 db=0 end  -- reset progress bar when starting new mission
 
-local function dm(x,y,w,h,v,m,cf,cm,cl)
-	rectfill(x,y,x+w-1,y+h-1,0)
-	local fw=flr(v/m*w)
-	if fw>0 then
-		local r,c=v/m,cl
-		if r>0.5 then c=cf elseif r>0.25 then c=cm end
-		rectfill(x,y,x+fw-1,y+h-1,c)
-	end
-	rect(x,y,x+w-1,y+h-1,5)
-end
+-- removed dm helper (inlined in draw_hud)
 
 local function draw_segmented_bar(x,y,w,h,segments,max_segments,col)
 	rectfill(x,y,x+w-1,y+h-1,0)
@@ -46,7 +37,16 @@ function draw_hud()
 	local h,m=ship_get_hull and ship_get_hull()or 2,ship_get_max_hull and ship_get_max_hull()or 2
 	draw_segmented_bar(37,3,min(20,m*10),3,h,m,11)
 	spr(10,58,2)
-	dm(65,3,20,3,ship and ship.shield_power or 0,100,12,13,8)
+	-- inline shield bar (was dm)
+	local sp=ship and ship.shield_power or 0
+	rectfill(65,3,84,5,0)
+	local fw=flr(sp/100*20)
+	if fw>0 then
+		local r,c=sp/100,8
+		if r>0.5 then c=12 elseif r>0.25 then c=13 end
+		rectfill(65,3,65+fw-1,5,c)
+	end
+	rect(65,3,84,5,5)
 	-- reset smoothing only when entering game from non-game/fanfare state
 	if gs~=game_state then 
 		if game_state=="game" and gs!="fanfare_depart" and gs!="fanfare_arrive" then 
