@@ -42,7 +42,7 @@ function asteroid_init()
 end
 
 local function spawn_asteroid()
-	local spd,alt=mspd or 0.9,round_number>10 and rnd()<min(0.1+0.04*(round_number-10),0.5)
+	local spd,alt=mspd,round_number>10 and rnd()<min(0.1+0.04*(round_number-10),0.5)
 	local large=round_number>=4 and rnd()<(mlc or 0.3)
 	add(asteroids,{
 		x=flr(rnd(large and 112 or 120)),
@@ -58,9 +58,9 @@ end
 
 function update_asteroid()
 	spawn_t-=1/30
-	if spawn_t<=0 and #asteroids<(mm or 3) then
+		if spawn_t<=0 and #asteroids<mm then
 		spawn_asteroid()
-		spawn_t=(msmin or 1.5)+rnd(msrng or 1.5)
+		spawn_t=msmin+rnd(msrng)
 	end
 
 	for m in all(asteroids) do

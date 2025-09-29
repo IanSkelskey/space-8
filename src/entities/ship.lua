@@ -55,7 +55,7 @@ function update_ship()
   local dx,dy=btn(0)and -1 or(btn(1)and 1 or 0),btn(2)and -1 or(btn(3)and 1 or 0)
   local mag=sqrt(dx*dx+dy*dy) if mag>0 then dx/=mag dy/=mag end
   flipx=vx<-0.05 or(vx==0 and dx<0)
-  local tx,ty,ea=dx*spd,dy*spd,acc*(1+0.15*(thruster_level or 0))
+  local tx,ty,ea=dx*spd,dy*spd,acc*(1+0.15*thruster_level)
   vx+=mid(-ea,tx-vx,ea) vy+=mid(-ea,ty-vy,ea)
   x+=vx y+=vy
     x=mid(0,x,120) y=mid(HUD_HEIGHT or 0,y,120)
@@ -67,7 +67,7 @@ function update_ship()
    local yy,x1,x2,bdy,life=y+8,x+2,x+5,0.5+0.9*str,flr(6+10*str)
   local tl=thruster_level
    local cols={10,9,8}; if tl==1 then cols={12,13,1} elseif tl==2 then cols={11,3,1} elseif tl>=3 then cols={7,6,5} end
-   for i=1,2 do if rnd(1)<str then p_add((i==1 and x1 or x2)+rnd(1)-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,PT_EXHAUST,nil,cols) end end
+   for i=1,2 do if rnd()<str then p_add((i==1 and x1 or x2)+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,PT_EXHAUST,nil,cols) end end
   end
   if laser_cd>0 then laser_cd-=1 end
   if laser_cd<=0 and btn(4)then

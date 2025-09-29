@@ -20,7 +20,7 @@ function draw_hud()
 	-- show prior total during run after payout achieved
 	local mt=money_total
 	local run_state=(game_state=="game" or game_state=="fanfare_depart" or game_state=="dying")
-	local show_amount=(run_state and last_payout_ready) and (mt-(last_pay or 0)-(last_bonus or 0)) or mt
+	local show_amount=(run_state and last_payout_ready) and (mt-last_pay-last_bonus) or mt
 	local t="$"..show_amount
 	print(t,127-#t*4-2,2,10)
 	spr(38,30,2)

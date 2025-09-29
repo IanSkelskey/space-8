@@ -95,12 +95,12 @@ function _update()
 		end
 	elseif game_state=="game" or game_state=="dying"then
 		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
-		if game_state=="game" then
-			if ship and ship.dying then game_state="dying" end
-			if distance_remaining>0 and not(ship and ship.dying)then
-				distance_remaining-=1
-				if distance_remaining<=0 then complete_mission() end
-			end
+			if game_state=="game" then
+				if ship.dying then game_state="dying" end
+				if distance_remaining>0 and not ship.dying then
+					distance_remaining-=1
+					if distance_remaining<=0 then complete_mission() end
+				end
 		else
 			if ship_death_done()then game_state="gameover"end
 		end

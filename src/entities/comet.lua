@@ -24,7 +24,7 @@ local function spawn_comet()
 end
 
 function update_comet()
-	if not round_number or round_number<3 then return end
+	if round_number<3 then return end
 	spawn_t-=1/30
 	local mx,mi,rg=cm or 3,cmin or 1,crng or 1.2
 	if round_number<5 then mx=min(mx,1) end
@@ -39,9 +39,8 @@ function update_comet()
 			goto continue
 		end
 
-		local s=cs or 1
-		c.x+=c.dx*s
-		c.y+=c.dy*s
+		c.x+=c.dx*cs
+		c.y+=c.dy*cs
 
 		local spd=sqrt(c.dx*c.dx+c.dy*c.dy)
 		local ux,uy=spd>0 and c.dx/spd or 0,spd>0 and c.dy/spd or 0
