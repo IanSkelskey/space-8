@@ -32,7 +32,7 @@ function draw_hud()
 	rect(37,3,36+bw,5,5)
 	spr(10,58,2)
 	-- inline shield bar (was dm)
-	local sp=ship and ship.shield_power or 0
+	local sp=ship.shield_power
 	rectfill(65,3,84,5,0)
 	local fw=flr(sp/100*20)
 	if fw>0 then

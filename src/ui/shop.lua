@@ -32,7 +32,7 @@ local function buy(i)
   money_total=m-c
   if it[5]~="" then ship[it[5]]=lv+1 end
   -- if hull upgrade, add 1 hull point for the new segment
-  if i==4 then ship.hull=(ship.hull or 0)+1 end
+  if i==4 then ship.hull=ship.hull+1 end
  end
  msg(i==5 and "repaired!" or "bought!")
 end

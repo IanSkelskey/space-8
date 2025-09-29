@@ -1,10 +1,10 @@
 local START_X,START_Y=60,77
-ship=ship or{x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0}
 
 local bullets={}
 
 local function sh_stats()
- local l=ship.shield_level or 0
+ local l=ship.shield_level
  return l<=1 and 1.0 or(l==2 and 0.6 or 0.4),l<=1 and 0.7 or(l==2 and 0.9 or 1.2),l<=1 and 22 or(l==2 and 18 or 12)
 end
 
@@ -60,24 +60,23 @@ function update_ship()
   x+=vx y+=vy
     x=mid(0,x,120) y=mid(HUD_HEIGHT or 0,y,120)
     if (x==0 and vx<0)or(x==120 and vx>0)then vx=0 end
-    local hy=HUD_HEIGHT or 0
-    if (y==hy and vy<0)or(y==120 and vy>0)then vy=0 end
+  if (y==HUD_HEIGHT and vy<0)or(y==120 and vy>0)then vy=0 end
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
   if str>0 then
    local yy,x1,x2,bdy,life=y+8,x+2,x+5,0.5+0.9*str,flr(6+10*str)
-   local tl=thruster_level or 0
+  local tl=thruster_level
    local cols={10,9,8}; if tl==1 then cols={12,13,1} elseif tl==2 then cols={11,3,1} elseif tl>=3 then cols={7,6,5} end
    for i=1,2 do if rnd(1)<str then p_add((i==1 and x1 or x2)+rnd(1)-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,PT_EXHAUST,nil,cols) end end
   end
   if laser_cd>0 then laser_cd-=1 end
   if laser_cd<=0 and btn(4)then
-   local cx,by,iv,lvl=flr(x+3),y-2,vx*0.3,spread_level or 0
+  local cx,by,iv,lvl=flr(x+3),y-2,vx*0.3,spread_level
    local sdx=lvl>1 and 0.7 or 0
    if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-2})end
    if lvl>=1 then add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-2}) add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-2}) end
    snd_sfx(SFX_LASER,LASER_CH)
-   laser_cd=max(3,flr(15*(1-0.2*(fire_rate_level or 0))+0.5))
+  laser_cd=max(3,flr(15*(1-0.2*fire_rate_level)+0.5))
   end
   for b in all(bullets)do b.x+=b.dx b.y+=b.dy if b.x<-4 or b.x>132 or b.y<-4 or b.y>132 then del(bullets,b)end end
   if shield_invuln>0 then shield_invuln-=1 end
@@ -118,10 +117,10 @@ end
 
 function ship_get_bullets()return bullets end
 function ship_get_hull()return ship.hull end
-function ship_get_max_hull()return 2+(ship.hull_level or 0)end
+function ship_get_max_hull()return 2+ship.hull_level end
 
 function ship_unlock_shield()
- ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool=true,max(1,ship.shield_level or 1),100,0
+ ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool=true,max(1,ship.shield_level),100,0
 end
 
 function ship_reset_upgrades()

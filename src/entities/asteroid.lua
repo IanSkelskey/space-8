@@ -46,7 +46,7 @@ local function spawn_asteroid()
 	local large=round_number>=4 and rnd()<(mlc or 0.3)
 	add(asteroids,{
 		x=flr(rnd(large and 112 or 120)),
-		y=(HUD_HEIGHT or 0)-(large and 20 or 10),
+		y=HUD_HEIGHT-(large and 20 or 10),
 		w=large and 16 or 8,
 		h=large and 16 or 8,
 		dx=0,dy=0,
@@ -87,7 +87,7 @@ function update_asteroid()
 			end
 		end
 
-		if ship and aabb(m.x,m.y,m.w,m.h,ship.x,ship.y,ship.w,ship.h) then
+		if aabb(m.x,m.y,m.w,m.h,ship.x,ship.y,ship.w,ship.h) then
 			ship_kill()
 		end
 
@@ -103,7 +103,7 @@ function update_asteroid()
 				hud_add_score(12)
 				spawn_chunk_dust(p.x+2,p.y+2)
 				p.l=0 -- Mark for deletion
-			elseif ship and aabb(p.x,p.y,4,4,ship.x,ship.y,ship.w,ship.h) then
+			elseif aabb(p.x,p.y,4,4,ship.x,ship.y,ship.w,ship.h) then
 				if game_state=="game" then ship_kill() end
 			end
 		end

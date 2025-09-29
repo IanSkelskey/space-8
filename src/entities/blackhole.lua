@@ -3,7 +3,7 @@ local holes,spawn_t={},0
 local function spawn_hole()
 	add(holes,{
 		x=flr(rnd(120)),
-		y=(HUD_HEIGHT or 0)-10,
+		y=HUD_HEIGHT-10,
 		w=8,h=8,
 		spd=0.8,
 		r=50,
@@ -41,20 +41,18 @@ function update_blackhole()
 		asteroid_debris_pull(cx,cy,h.r,0.35)
 		ship_trails_pull(cx,cy,h.r,0.22)
 
-		if ship then
-			local dx,dy=cx-ship.x-ship.w/2,cy-ship.y-ship.h/2
-			local d2=dx*dx+dy*dy
-			local r2=h.r*h.r
-			if d2<r2 and d2>0 then
-				local invd,str=1/sqrt(d2),0.75*(1-d2/r2)
-				ship.x=mid(0,ship.x+dx*invd*str,128-ship.w)
-				ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
-			end
-			if aabb(h.x,h.y,h.w,h.h,ship.x,ship.y,ship.w,ship.h) then
-				if ship.dying~=true then
-					ship.shield_power,ship.shield_active=0,false
-					ship_kill()
-				end
+		local dx,dy=cx-ship.x-ship.w/2,cy-ship.y-ship.h/2
+		local d2=dx*dx+dy*dy
+		local r2=h.r*h.r
+		if d2<r2 and d2>0 then
+			local invd,str=1/sqrt(d2),0.75*(1-d2/r2)
+			ship.x=mid(0,ship.x+dx*invd*str,128-ship.w)
+			ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
+		end
+		if aabb(h.x,h.y,h.w,h.h,ship.x,ship.y,ship.w,ship.h) then
+			if ship.dying~=true then
+				ship.shield_power,ship.shield_active=0,false
+				ship_kill()
 			end
 		end
 

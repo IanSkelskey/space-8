@@ -6,7 +6,7 @@ end
 
 local function spawn_comet()
 	local left=rnd()<0.5
-	local x,y=left and -8 or 128,(HUD_HEIGHT or 0)+flr(rnd(120-(HUD_HEIGHT or 0)))
+	local x,y=left and -8 or 128,HUD_HEIGHT+flr(rnd(120-HUD_HEIGHT))
 	local base_angles=left and {0.125,0,0.875} or {0.375,0.5,0.625}
 	local ang,spd,i=base_angles[flr(rnd(#base_angles))+1]+(rnd()-0.5)*0.08,1.2+rnd(0.9),flr(rnd(#SWAPS))
 	local norm_ang=ang%0.25
@@ -50,7 +50,7 @@ function update_comet()
 			p_add(c.x+4-ux*2+rnd()-0.5,c.y+4-uy*2+rnd()-0.5,-ux*(0.2+rnd(0.2))+rnd(0.1)-0.05,-uy*(0.2+rnd(0.2))+rnd(0.1)-0.05,18+flr(rnd(10)),PT_COMET,col)
 		end
 
-		if ship and not c.warning and aabb(c.x,c.y,c.w,c.h,ship.x,ship.y,ship.w,ship.h) then
+		if not c.warning and aabb(c.x,c.y,c.w,c.h,ship.x,ship.y,ship.w,ship.h) then
 			ship_kill()
 		end
 
@@ -62,7 +62,7 @@ end
 function draw_comet()
 	for c in all(comets) do
 		if c.warning_t>0 then
-			local cx,cy,ht=c.left and 4 or 123,c.y+4,HUD_HEIGHT or 0
+			local cx,cy,ht=c.left and 4 or 123,c.y+4,HUD_HEIGHT
 			cy=max(cy,ht+4)
 			local ba=(WARNING_TIME-c.warning_t)*0.15
 			for i=0,3 do
