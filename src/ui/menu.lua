@@ -7,8 +7,9 @@ SFX_OK=SFX_OK or 63
 UI_CH=UI_CH or 3
 local opts={
 	{label="start",action=function()
+		round_number=sr[df] vr=1 -- internal difficulty round, visible round
 		game_state="game"
-		ship_init() asteroid_init() hud_init() comet_init()
+		ship_init() asteroid_init() hud_init() comet_init() blackhole_init()
 		snd_sfx(SFX_OK,UI_CH)
 	end,icon=6},
 	{label="help",action=function()

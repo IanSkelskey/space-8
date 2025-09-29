@@ -3,6 +3,8 @@ function aabb(ax,ay,aw,ah,bx,by,bw,bh)
 	return ax<bx+bw and bx<ax+aw and ay<by+bh and by<ay+ah
 end
 current_mission,round_number,mission_distance,distance_remaining,level_fanfare_timer,ship_departing=nil,1,0,0,0,false
+vr=1 -- visible round counter (always starts at 1)
+sr=sr or split"1,2,4" -- start rounds per difficulty (easy,normal,veteran)
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
 sci_adj,sci_noun=split"quantum,plasma,ionic,fusion,nano,void",split"core,drive,matrix,relay,reactor,array"
 function generate_mission()
@@ -20,6 +22,7 @@ function complete_mission()
 	last_payout_ready=true
 	hud_reset_points()
 	round_number+=1
+	vr+=1
 	generate_mission()
 	asteroid_init()
 	blackhole_init()
@@ -39,7 +42,8 @@ function reset_game()
 	station_init()
 	menu_init()
 	p_clear() -- Clear all particles on reset
-	game_state,prev_game_state,round_number,current_mission,mission_distance,distance_remaining,money_total,ts,last_pay,last_bonus,last_payout_ready="menu","menu",1,nil,0,0,0,0,0,0,false
+	game_state,prev_game_state,round_number,current_mission,mission_distance,distance_remaining,money_total,ts,last_pay,last_bonus,last_payout_ready="menu","menu",sr[df],nil,0,0,0,0,0,0,false
+	vr=1
 	snd_music(MUS_MENU)
 end
 function _init()
@@ -57,6 +61,7 @@ function _init()
 	station_init()
 	menu_init()
 	p_clear() -- Clear all particles on init
+	round_number=sr[df] vr=1
 	snd_music(MUS_MENU)
 end
 function _update()

@@ -41,7 +41,7 @@ function draw_station()
         -- header bar
         rectfill(0,0,127,15,1)
     print("station",4,4,7)
-    print("round"..round_number,72,4,6)
+    print("round"..vr,72,4,6)
     local cf="$"..money_total
     print(cf,124-#cf*4,4,10)
 

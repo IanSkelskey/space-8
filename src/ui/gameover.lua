@@ -4,7 +4,7 @@ function draw_gameover()
 	print("\014game over",28,40,c)
 	
 	-- Calculate dynamic centering for stats
-	local r,m,s="round "..round_number,"cash $"..money_total,"score "..(ts or 0)
+	local r,m,s="round "..vr,"cash $"..money_total,"score "..(ts or 0)
 	print(r,64-#r*2,56,6)
 	print(m,64-#m*2,66,10)
 	print(s,64-#s*2,76,7)
