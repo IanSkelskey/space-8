@@ -75,60 +75,60 @@ function _update()
 		prev_game_state="fanfare_depart"
 		return
 	end
-	local os,gs=game_state,game_state
-	snd_update_music(gs,prev_game_state,level_fanfare_timer)
-	if gs=="menu"then
+	local prev=game_state
+	snd_update_music(game_state,prev_game_state,level_fanfare_timer)
+	if game_state=="menu"then
 		update_menu()
 		if game_state=="game"then
 			game_state="station"
 			generate_mission()
 			snd_music(MUS_STATION)
 		end
-	elseif gs=="controls"then
+	elseif game_state=="controls"then
 		update_controls()
-	elseif gs=="station"then
+	elseif game_state=="station"then
 		update_station()
 		p_clear() -- Clear particles when at station
 		-- Clear payout flag when leaving station to start new mission
 		if game_state=="game" and last_payout_ready then
 			last_payout_ready=false
 		end
-	elseif gs=="game"then
+	elseif game_state=="game" or game_state=="dying"then
 		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
-		if ship and ship.dying then game_state="dying" end
-		if distance_remaining>0 and not(ship and ship.dying)then
-			distance_remaining-=1
-			if distance_remaining<=0 then complete_mission() end
+		if game_state=="game" then
+			if ship and ship.dying then game_state="dying" end
+			if distance_remaining>0 and not(ship and ship.dying)then
+				distance_remaining-=1
+				if distance_remaining<=0 then complete_mission() end
+			end
+		else
+			if ship_death_done and ship_death_done()then game_state="gameover"end
 		end
-	elseif gs=="dying"then
-		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
-		if ship_death_done and ship_death_done()then game_state="gameover"end
-	elseif gs=="gameover"then
+	elseif game_state=="gameover"then
 		if btnp(4)then reset_game() end
 	end
-	prev_game_state=os
+	prev_game_state=prev
 end
 function _draw()
 	cls()
 	draw_starfield()
-	local gs=game_state
-	if gs=="menu"then
+	if game_state=="menu"then
 		draw_menu()
-	elseif gs=="controls"then
+	elseif game_state=="controls"then
 		draw_controls()
-	elseif gs=="station"then
+	elseif game_state=="station"then
 		draw_station()
-	elseif gs=="fanfare_depart"then
+	elseif game_state=="fanfare_depart"then
 		draw_ship()
 		draw_hud()
-	elseif gs=="game"or gs=="dying"then
+	elseif game_state=="game"or game_state=="dying"then
 		draw_blackhole()
 		draw_asteroid()
 		draw_comet()
 		draw_ship()
 		p_draw() -- Draw all particles
 		draw_hud()
-	elseif gs=="gameover"then
+	elseif game_state=="gameover"then
 		draw_gameover()
 	end
 end

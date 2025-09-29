@@ -19,7 +19,7 @@ local function spawn_chunk_dust(x,y)
 end
 
 local function spawn_asteroid_debris(x,y,alt)
-	local base,sx,sy=alt and 27 or 5,(alt and 27 or 5)%16*8,flr((alt and 27 or 5)/16)*8
+	local sx,sy=(alt and 27 or 5)%16*8,flr((alt and 27 or 5)/16)*8
 	for i=0,3 do
 		local ox,oy=i%2*4,i\2*4
 		local a=rnd()
