@@ -24,7 +24,7 @@ function update_station()
                 level_fanfare_timer = 0
                 last_payout_ready = false
                 game_state = "game"
-                if sl then sl(round_number) end
+                sl(round_number)
                 ship_init()
                 station_confirm = false
             elseif btnp(5) then

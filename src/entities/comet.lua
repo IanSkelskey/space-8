@@ -51,7 +51,7 @@ function update_comet()
 		end
 
 		if ship and not c.warning and aabb(c.x,c.y,c.w,c.h,ship.x,ship.y,ship.w,ship.h) then
-			if ship_kill then ship_kill() end
+			ship_kill()
 		end
 
 		if c.x<-12 or c.x>140 or c.y<-12 or c.y>140 then del(comets,c) end

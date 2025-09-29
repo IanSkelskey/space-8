@@ -19,7 +19,8 @@ function draw_hud()
 	print(score,2,2,7)
 	-- show prior total during run after payout achieved
 	local mt=money_total or 0
-	local show_amount=((game_state=="game" or game_state=="fanfare_depart" or game_state=="dying") and last_payout_ready) and (mt-(last_pay or 0)-(last_bonus or 0)) or mt
+	local run_state=(game_state=="game" or game_state=="fanfare_depart" or game_state=="dying")
+	local show_amount=(run_state and last_payout_ready) and (mt-(last_pay or 0)-(last_bonus or 0)) or mt
 	local t="$"..show_amount
 	print(t,127-#t*4-2,2,10)
 	spr(38,30,2)
@@ -43,7 +44,7 @@ function draw_hud()
 	-- track previous state; reset progress only on entering gameplay from outside fanfare
 	if gs~=game_state then if game_state=="game" and (gs!="fanfare_depart" and gs!="fanfare_arrive") then db=0 end gs=game_state end
 	-- mission progress bar (subtle design)
-	if (game_state=="game" or game_state=="fanfare_depart" or game_state=="fanfare_arrive") and mission_distance and mission_distance>0 then
+	if (run_state or game_state=="fanfare_arrive") and mission_distance and mission_distance>0 then
 		-- calculate actual progress from distance_remaining
 		local actual_progress = mission_distance - (distance_remaining or mission_distance)
 		local t = min(1, actual_progress / mission_distance)
