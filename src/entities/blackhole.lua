@@ -38,12 +38,8 @@ function update_blackhole()
 		h.spin_t=(h.spin_t+1)%32
 		
 		local cx,cy=h.x+4,h.y+4
-		if asteroid_debris_pull then
-			asteroid_debris_pull(cx,cy,h.r,0.35)
-		end
-		if ship_trails_pull then
-			ship_trails_pull(cx,cy,h.r,0.22)
-		end
+		asteroid_debris_pull(cx,cy,h.r,0.35)
+		ship_trails_pull(cx,cy,h.r,0.22)
 
 		if ship then
 			local dx,dy=cx-ship.x-ship.w/2,cy-ship.y-ship.h/2
@@ -64,12 +60,8 @@ function update_blackhole()
 
 		if h.y>136 then del(holes,h) end
 
-		if asteroid_absorb then
-			asteroid_absorb(h.x,h.y,h.w,h.h)
-		end
-		if ship_trails_absorb then
-			ship_trails_absorb(h.x,h.y,h.w,h.h)
-		end
+		asteroid_absorb(h.x,h.y,h.w,h.h)
+		ship_trails_absorb(h.x,h.y,h.w,h.h)
 
 		spawn_particles(h)
 		-- inline bullet pull (reuse cx,cy)

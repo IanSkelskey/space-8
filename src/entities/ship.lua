@@ -52,17 +52,17 @@ function update_ship()
  end
  do local _ENV=setmetatable(ship,{__index=_ENV})
   if hull_invuln>0 then hull_invuln-=1 end
-  local dx,dy,rdx,rdy=btn(0)and -1 or(btn(1)and 1 or 0),btn(2)and -1 or(btn(3)and 1 or 0)
-  rdx,rdy=dx,dy
+  local dx,dy=btn(0)and -1 or(btn(1)and 1 or 0),btn(2)and -1 or(btn(3)and 1 or 0)
   local mag=sqrt(dx*dx+dy*dy) if mag>0 then dx/=mag dy/=mag end
   flipx=vx<-0.05 or(vx==0 and dx<0)
   local tx,ty,ea=dx*spd,dy*spd,acc*(1+0.15*(thruster_level or 0))
   vx+=mid(-ea,tx-vx,ea) vy+=mid(-ea,ty-vy,ea)
   x+=vx y+=vy
-  x=mid(0,x,120) y=mid(HUD_HEIGHT or 0,y,120)
-  if x==0 and vx<0 then vx=0 end if x==120 and vx>0 then vx=0 end
-  if y==(HUD_HEIGHT or 0)and vy<0 then vy=0 end if y==120 and vy>0 then vy=0 end
-  local str=rdx==0 and rdy==0 and 0.2 or(rdy>0 and 0.03 or(rdy<0 and 0.45 or 0.6))
+    x=mid(0,x,120) y=mid(HUD_HEIGHT or 0,y,120)
+    if (x==0 and vx<0)or(x==120 and vx>0)then vx=0 end
+    local hy=HUD_HEIGHT or 0
+    if (y==hy and vy<0)or(y==120 and vy>0)then vy=0 end
+    local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
   if str>0 then
    local yy,x1,x2,bdy,life=y+8,x+2,x+5,0.5+0.9*str,flr(6+10*str)

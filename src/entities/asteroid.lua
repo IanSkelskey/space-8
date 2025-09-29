@@ -115,19 +115,12 @@ function draw_asteroid()
 	for m in all(asteroids) do
 		local flash=m.flash_t>0 and m.flash_t%2==0
 		if m.large then
-			local q
 			if flash then
-				q={14,15,30,31}
+				spr(14,m.x,m.y) spr(15,m.x+8,m.y) spr(30,m.x,m.y+8) spr(31,m.x+8,m.y+8)
 			else
 				local o=m.alt and 5 or 0
-				q={7+o,8+o,23+o,24+o}
-			end
-			local i=1
-			for dy=0,1 do
-				for dx=0,1 do
-					spr(q[i],m.x+dx*8,m.y+dy*8)
-					i+=1
-				end
+				local a=7+o
+				spr(a,m.x,m.y) spr(a+1,m.x+8,m.y) spr(a+16,m.x,m.y+8) spr(a+17,m.x+8,m.y+8)
 			end
 		else
 			if flash then
