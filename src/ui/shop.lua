@@ -2,13 +2,17 @@ local s,p,sm,st,sc=1,1,"",0,11
 
 -- compressed items: icon,max,base$,inc$,field,unlock,name,desc
 local id="11,3,100,50,fire_rate_level,,fire rate +20%,+ faster shots;10,3,120,80,shield_level,shield_unlocked,shield upgrade,+ more shield;25,2,150,100,spread_level,,phaser spread +1,+ wider spread;38,2,200,150,hull_level,,hull +1 segment,+ more hull;54,99,200,0,,,repair hull,+ restore 1 hull;55,3,80,60,thruster_level,,thruster boost,+ faster accel"
+-- pre-split once to save tokens (was repeatedly split each access)
+local raw_items=split(id,";")
+local items={}
+for e in all(raw_items) do add(items,split(e,",")) end
 
 function shop_init() s,p,sm,st=1,1,"",0 end
 
 local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and SFX_ERR or SFX_OK,UI_CH) end
 
 local function buy(i)
- local it,m=split(split(id,";")[i],","),money_total or 0
+ local it,m=items[i],money_total or 0
  local lv=it[5]~="" and (ship[it[5]] or 0) or 0
  local ul=it[6]~="" and ship[it[6]]
  
@@ -79,14 +83,14 @@ function shop_draw()
  end
  
  -- cost/desc
- local sit=split(its[p==1 and s or 6],",")
+ local sit=items[p==1 and s or 6]
  local cstr,desc="",sit[8]
  if s==5 and p==1 then
   local repair_cost=200+((round_number or 1)-1)*25  -- scales with round
   cstr="$"..repair_cost
  else
-  local lv=sit[5]~="" and (ship[sit[5]] or 0) or 0
-  local ul=sit[6]~="" and ship[sit[6]]
+    local lv=sit[5]~="" and (ship[sit[5]] or 0) or 0
+    local ul=sit[6]~="" and ship[sit[6]]
   if p==1 and s==2 and not ul then
    cstr,desc="$120","+ adds shield"
   elseif lv<sit[2] then

@@ -115,18 +115,19 @@ function draw_asteroid()
 	for m in all(asteroids) do
 		local flash=m.flash_t>0 and m.flash_t%2==0
 		if m.large then
+			local q
 			if flash then
-				-- Use hit sprite for large asteroids (2x2 starting at sprite 14)
-				spr(14,m.x,m.y)
-				spr(15,m.x+8,m.y)
-				spr(30,m.x,m.y+8)
-				spr(31,m.x+8,m.y+8)
+				q={14,15,30,31}
 			else
 				local o=m.alt and 5 or 0
-				spr(7+o,m.x,m.y)
-				spr(8+o,m.x+8,m.y)
-				spr(23+o,m.x,m.y+8)
-				spr(24+o,m.x+8,m.y+8)
+				q={7+o,8+o,23+o,24+o}
+			end
+			local i=1
+			for dy=0,1 do
+				for dx=0,1 do
+					spr(q[i],m.x+dx*8,m.y+dy*8)
+					i+=1
+				end
 			end
 		else
 			if flash then
