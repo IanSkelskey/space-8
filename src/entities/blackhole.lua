@@ -1,29 +1,5 @@
 local holes,spawn_t={},0
 
-local function pull_bullets(h)
-	local pb=ship_get_bullets and ship_get_bullets()
-	if not pb then return end
-	local cx,cy,r2=h.x+4,h.y+4,h.r*h.r
-	for b in all(pb) do
-		if aabb(b.x,b.y,2,2,h.x,h.y,h.w,h.h) then
-			del(pb,b)
-		else
-			local dx,dy=cx-b.x,cy-b.y
-			local d2=dx*dx+dy*dy
-			if d2>0.1 and d2<r2 then
-				local invd,acc=1/sqrt(d2),0.25*(1-d2/r2)
-				b.dx+=dx*invd*acc
-				b.dy+=dy*invd*acc
-				local sp=sqrt(b.dx*b.dx+b.dy*b.dy)
-				if sp>4 then
-					b.dx*=4/sp
-					b.dy*=4/sp
-				end
-			end
-		end
-	end
-end
-
 local function spawn_hole()
 	add(holes,{
 		x=flr(rnd(120)),
@@ -96,7 +72,26 @@ function update_blackhole()
 		end
 
 		spawn_particles(h)
-		pull_bullets(h)
+		-- inline bullet pull
+		local pb=ship_get_bullets and ship_get_bullets()
+		if pb then
+			local cx,cy,r2=h.x+4,h.y+4,h.r*h.r
+			for b in all(pb) do
+				if aabb(b.x,b.y,2,2,h.x,h.y,h.w,h.h) then
+					del(pb,b)
+				else
+					local dx,dy=cx-b.x,cy-b.y
+					local d2=dx*dx+dy*dy
+					if d2>0.1 and d2<r2 then
+						local invd,acc=1/sqrt(d2),0.25*(1-d2/r2)
+						b.dx+=dx*invd*acc
+						b.dy+=dy*invd*acc
+						local sp=sqrt(b.dx*b.dx+b.dy*b.dy)
+						if sp>4 then b.dx*=4/sp b.dy*=4/sp end
+					end
+				end
+			end
+		end
 	end
 
 	-- Update hole particles with special physics

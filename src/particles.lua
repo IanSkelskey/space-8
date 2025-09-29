@@ -8,28 +8,12 @@ function p_add(x,y,dx,dy,life,typ,col,dat)
  add(p,{x=x,y=y,dx=dx,dy=dy,l=life,t=typ,c=col,d=dat})
 end
 
+local damp={[PT_DEBRIS]=0.99,[PT_EXHAUST]=0.98,[PT_DEATH]=0.98}
 function p_upd()
  for i in all(p) do
-  i.x+=i.dx
-  i.y+=i.dy
-  i.l-=1
-  
-  -- Type-specific physics
-  if i.t==PT_DUST then
-   -- No friction for dust
-  elseif i.t==PT_DEBRIS then
-   -- Debris needs friction like original
-   i.dx*=0.99
-   i.dy*=0.99
-  elseif i.t==PT_EXHAUST or i.t==PT_DEATH then
-   -- Ship particles
-   i.dx*=0.98
-   i.dy*=0.98
-  end
-  
-  if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then
-   del(p,i)
-  end
+  i.x+=i.dx i.y+=i.dy i.l-=1
+  local d=damp[i.t]; if d then i.dx*=d i.dy*=d end
+  if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end
  end
 end
 

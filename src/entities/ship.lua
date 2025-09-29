@@ -47,100 +47,55 @@ end
 function update_ship()
  if ship.dying then
   ship.death_t+=1
-  for b in all(bullets)do
-   b.x+=b.dx b.y+=b.dy
-   if b.x<-4 or b.x>132 or b.y<-4 or b.y>132 then del(bullets,b)end
-  end
+  for b in all(bullets)do b.x+=b.dx b.y+=b.dy if b.x<-4 or b.x>132 or b.y<-4 or b.y>132 then del(bullets,b)end end
   return
  end
- 
- if ship.hull_invuln>0 then ship.hull_invuln-=1 end
- 
- local dx,dy,rdx,rdy=btn(0)and -1 or(btn(1)and 1 or 0),btn(2)and -1 or(btn(3)and 1 or 0)
- rdx,rdy=dx,dy
- local mag=sqrt(dx*dx+dy*dy)
- if mag>0 then dx/=mag dy/=mag end
- ship.flipx=ship.vx<-0.05 or(ship.vx==0 and dx<0)
- local tx,ty,ea=dx*ship.spd,dy*ship.spd,ship.acc*(1+0.15*(ship.thruster_level or 0))
- ship.vx+=mid(-ea,tx-ship.vx,ea)
- ship.vy+=mid(-ea,ty-ship.vy,ea)
- ship.x+=ship.vx
- ship.y+=ship.vy
- ship.x=mid(0,ship.x,120)
- ship.y=mid(HUD_HEIGHT or 0,ship.y,120)
- if ship.x==0 and ship.vx<0 then ship.vx=0 end
- if ship.x==120 and ship.vx>0 then ship.vx=0 end
- if ship.y==(HUD_HEIGHT or 0)and ship.vy<0 then ship.vy=0 end
- if ship.y==120 and ship.vy>0 then ship.vy=0 end
- 
- -- exhaust
- local str=rdx==0 and rdy==0 and 0.2 or(rdy>0 and 0.03 or(rdy<0 and 0.45 or 0.6))
- str=mid(0,str,1)
- if str>0 then
-  local y,x1,x2,bdy,life=ship.y+8,ship.x+2,ship.x+5,0.5+0.9*str,flr(6+10*str)
-  local tl=ship.thruster_level or 0
-  local cols={10,9,8}
-  if tl==1 then cols={12,13,1}
-  elseif tl==2 then cols={11,3,1}
-  elseif tl>=3 then cols={7,6,5} end
-  for i=1,2 do
-   if rnd(1)<str then
-    p_add((i==1 and x1 or x2)+rnd(1)-0.5,y,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,PT_EXHAUST,nil,cols)
+ do local _ENV=setmetatable(ship,{__index=_ENV})
+  if hull_invuln>0 then hull_invuln-=1 end
+  local dx,dy,rdx,rdy=btn(0)and -1 or(btn(1)and 1 or 0),btn(2)and -1 or(btn(3)and 1 or 0)
+  rdx,rdy=dx,dy
+  local mag=sqrt(dx*dx+dy*dy) if mag>0 then dx/=mag dy/=mag end
+  flipx=vx<-0.05 or(vx==0 and dx<0)
+  local tx,ty,ea=dx*spd,dy*spd,acc*(1+0.15*(thruster_level or 0))
+  vx+=mid(-ea,tx-vx,ea) vy+=mid(-ea,ty-vy,ea)
+  x+=vx y+=vy
+  x=mid(0,x,120) y=mid(HUD_HEIGHT or 0,y,120)
+  if x==0 and vx<0 then vx=0 end if x==120 and vx>0 then vx=0 end
+  if y==(HUD_HEIGHT or 0)and vy<0 then vy=0 end if y==120 and vy>0 then vy=0 end
+  local str=rdx==0 and rdy==0 and 0.2 or(rdy>0 and 0.03 or(rdy<0 and 0.45 or 0.6))
+  str=mid(0,str,1)
+  if str>0 then
+   local yy,x1,x2,bdy,life=y+8,x+2,x+5,0.5+0.9*str,flr(6+10*str)
+   local tl=thruster_level or 0
+   local cols={10,9,8}; if tl==1 then cols={12,13,1} elseif tl==2 then cols={11,3,1} elseif tl>=3 then cols={7,6,5} end
+   for i=1,2 do if rnd(1)<str then p_add((i==1 and x1 or x2)+rnd(1)-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,PT_EXHAUST,nil,cols) end end
+  end
+  if laser_cd>0 then laser_cd-=1 end
+  if laser_cd<=0 and btn(4)then
+   local cx,by,iv,lvl=flr(x+3),y-2,vx*0.3,spread_level or 0
+   local sdx=lvl>1 and 0.7 or 0
+   if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-2})end
+   if lvl>=1 then add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-2}) add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-2}) end
+   snd_sfx(SFX_LASER,LASER_CH)
+   laser_cd=max(3,flr(15*(1-0.2*(fire_rate_level or 0))+0.5))
+  end
+  for b in all(bullets)do b.x+=b.dx b.y+=b.dy if b.x<-4 or b.x>132 or b.y<-4 or b.y>132 then del(bullets,b)end end
+  if shield_invuln>0 then shield_invuln-=1 end
+  if shield_unlocked then
+   local drain,rech=sh_stats()
+   if shield_active then
+    shield_power=max(0,shield_power-drain)
+    if shield_power<=0 then shield_active,shield_cool,shield_invuln,shield_anim=false,60,30,0 snd_stop_sfx(FX_CH)snd_sfx(SFX_SHIELD_OFF,FX_CH) end
    end
+   if btn(5)and shield_power>=10 and shield_cool<=0 and not dying and not shield_active then shield_active=true snd_sfx(SFX_SHIELD_ON,FX_CH)
+   elseif not btn(5)and shield_active then shield_active=false snd_stop_sfx(FX_CH) end
+   if not shield_active then if shield_cool>0 then shield_cool-=1 elseif shield_power<100 and shield_invuln<=0 then shield_power=min(100,shield_power+rech) end end
+  else
+   if shield_active then shield_active=false snd_stop_sfx(FX_CH) end
+   shield_power=0
   end
- end
-
- -- lasers
- if ship.laser_cd>0 then ship.laser_cd-=1 end
- if ship.laser_cd<=0 and btn(4)then
-  local cx,by,iv,lvl=flr(ship.x+3),ship.y-2,ship.vx*0.3,ship.spread_level or 0
-  local sdx=lvl>1 and 0.7 or 0
-  if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-2})end
-  if lvl>=1 then
-   add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-2})
-   add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-2})
-  end
-  snd_sfx(SFX_LASER,LASER_CH)
-  ship.laser_cd=max(3,flr(15*(1-0.2*(ship.fire_rate_level or 0))+0.5))
- end
- 
- for b in all(bullets)do
-  b.x+=b.dx b.y+=b.dy
-  if b.x<-4 or b.x>132 or b.y<-4 or b.y>132 then del(bullets,b)end
- end
- 
- -- shield
- if ship.shield_invuln>0 then ship.shield_invuln-=1 end
- if ship.shield_unlocked then
-  local drain,rech=sh_stats()
-  if ship.shield_active then
-   ship.shield_power=max(0,ship.shield_power-drain)
-   if ship.shield_power<=0 then
-    ship.shield_active,ship.shield_cool,ship.shield_invuln,ship.shield_anim=false,60,30,0
-    snd_stop_sfx(FX_CH)snd_sfx(SFX_SHIELD_OFF,FX_CH)
-   end
-  end
-  
-  if btn(5)and ship.shield_power>=10 and ship.shield_cool<=0 and not ship.dying and not ship.shield_active then
-   ship.shield_active=true
-   snd_sfx(SFX_SHIELD_ON,FX_CH)
-  elseif not btn(5)and ship.shield_active then
-   ship.shield_active=false
-   snd_stop_sfx(FX_CH)
-  end
-  
-  if not ship.shield_active then
-   if ship.shield_cool>0 then
-    ship.shield_cool-=1
-   elseif ship.shield_power<100 and ship.shield_invuln<=0 then
-    ship.shield_power=min(100,ship.shield_power+rech)
-   end
-  end
- else
-  if ship.shield_active then ship.shield_active=false snd_stop_sfx(FX_CH)end
-  ship.shield_power=0
- end
- if ship.shield_active then ship.shield_anim=(ship.shield_anim+1)%30 end
+  if shield_active then shield_anim=(shield_anim+1)%30 end
+ end -- _ENV block
 end
 
 function draw_ship()
