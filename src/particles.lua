@@ -25,20 +25,14 @@ function p_draw()
   else
    -- Draw regular particles
    local c=i.c
-   if not c then
-    -- Default colors based on type/life
-    if i.t==PT_DUST then
-     c=i.l>12 and 6 or i.l>6 and 5 or 7
-    elseif i.t==PT_EXHAUST then
-     c=i.l>8 and (i.d and i.d[1] or 10) or i.l>4 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)
-    elseif i.t==PT_DEATH then
-     c=i.l>16 and 10 or i.l>8 and 9 or 8
-    elseif i.t==PT_HOLE then
-     c=i.l>16 and 14 or i.l>8 and 2 or 1
-    else
-     c=7
-    end
-   end
+       if not c then
+        local t,l=i.t,i.l
+        c=(t==PT_DUST and (l>12 and 6 or l>6 and 5 or 7))
+        or (t==PT_EXHAUST and (l>8 and (i.d and i.d[1] or 10) or l>4 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
+        or (t==PT_DEATH and (l>16 and 10 or l>8 and 9 or 8))
+        or (t==PT_HOLE and (l>16 and 14 or l>8 and 2 or 1))
+        or 7
+       end
    pset(flr(i.x),flr(i.y),c)
   end
  end
