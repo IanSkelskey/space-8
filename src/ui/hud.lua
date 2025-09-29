@@ -23,7 +23,7 @@ function draw_hud()
 	local t="$"..show_amount
 	print(t,127-#t*4-2,2,10)
 	spr(38,30,2)
-	local h,m=ship_get_hull and ship_get_hull()or 2,ship_get_max_hull and ship_get_max_hull()or 2
+	local h,m=ship_get_hull(),ship_get_max_hull()
 	local bw=min(20,m*10)
 	rectfill(37,3,36+bw,5,0)
 	local sw=bw/m

@@ -73,11 +73,11 @@ function update_asteroid()
 			m.hp-=1
 			if m.hp<=0 then
 				if m.large then
-					if hud_add_score then hud_add_score(200) end
+					hud_add_score(200)
 					spawn_child_asteroids(m.x,m.y,m.w,m.h,m.alt)
 					spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
 				else
-					if hud_add_score then hud_add_score(120) end
+					hud_add_score(120)
 					spawn_asteroid_debris(m.x+(m.w-8)/2,m.y+(m.h-8)/2,m.alt)
 				end
 				snd_sfx(SFX_EXPLODE,FX_CH)
@@ -89,7 +89,7 @@ function update_asteroid()
 		end
 
 		if ship and aabb(m.x,m.y,m.w,m.h,ship.x,ship.y,ship.w,ship.h) then
-			if ship_kill then ship_kill() end
+			ship_kill()
 		end
 
 		if m.y>136 or m.x<-20 or m.x>148 then del(asteroids,m) end
@@ -101,11 +101,11 @@ function update_asteroid()
 	for p in all(parts) do
 		if p.t==PT_DEBRIS then
 			if hit_by_player_bullet(p.x,p.y,4,4) then
-				if hud_add_score then hud_add_score(12) end
+				hud_add_score(12)
 				spawn_chunk_dust(p.x+2,p.y+2)
 				p.l=0 -- Mark for deletion
 			elseif ship and aabb(p.x,p.y,4,4,ship.x,ship.y,ship.w,ship.h) then
-				if game_state=="game" and ship_kill then ship_kill() end
+				if game_state=="game" then ship_kill() end
 			end
 		end
 	end
