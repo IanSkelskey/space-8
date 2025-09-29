@@ -94,22 +94,14 @@ function _update()
 			last_payout_ready=false
 		end
 	elseif gs=="game"then
-		update_blackhole()
-		update_asteroid()
-		update_comet()
-		update_ship()
-		p_upd() -- Update all particles
+		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
+		if ship and ship.dying then game_state="dying" end
 		if distance_remaining>0 and not(ship and ship.dying)then
 			distance_remaining-=1
 			if distance_remaining<=0 then complete_mission() end
 		end
-		if ship and ship.dying then game_state="dying"end
 	elseif gs=="dying"then
-		update_blackhole()
-		update_asteroid()
-		update_comet()
-		update_ship()
-		p_upd() -- Update particles during death
+		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
 		if ship_death_done and ship_death_done()then game_state="gameover"end
 	elseif gs=="gameover"then
 		if btnp(4)then reset_game() end
