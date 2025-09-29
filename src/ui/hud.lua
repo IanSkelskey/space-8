@@ -5,7 +5,11 @@ gs=gs or game_state
 
 function hud_init()score,money=0,0 end
 
-function hud_add_score(n)score+=n or 0 ts+=n or 0 end
+function hud_add_score(n)
+ local m=(n or 0)* (dsc and dsc[df] or 1)
+ m=flr(m+0.5)
+ score+=m ts+=m
+end
 function hud_add_money(n)money+=n or 0 end
 
 function hud_get_points()return score end

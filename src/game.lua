@@ -13,8 +13,9 @@ function generate_mission()
 	sl(round_number)
 end
 function complete_mission()
-	last_bonus=flr(hud_get_points()*0.03)
-	last_pay=35+mission_distance\25
+	local mult=dsc and dsc[df] or 1
+	last_bonus=flr(hud_get_points()*0.03*mult)
+	last_pay=flr((35+mission_distance\25)*mult)
 	money_total+=last_pay+last_bonus
 	last_payout_ready=true
 	hud_reset_points()
