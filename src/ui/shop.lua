@@ -45,7 +45,11 @@ function shop_update()
  if btnp(0) and p>1 then p,s=1,1 snd_sfx(SFX_CURSOR,UI_CH) end
  if btnp(1) and p<2 then p,s=2,1 snd_sfx(SFX_CURSOR,UI_CH) end
  if btnp(5) then snd_sfx(SFX_OK,UI_CH) station_mode="main" end
- if btnp(4) then buy(p==1 and s or 6) end
+  if btnp(4) then
+    -- compute selected item index without branch (page 1: 1..5, page 2: item 6)
+    local gi=p==1 and s or 6
+    buy(gi)
+  end
 end
 
 function shop_draw()
@@ -57,30 +61,29 @@ function shop_draw()
  print("$"..(money_total or 0),100,4,10)
  rect(2,18,125,121,1)
  
- -- draw items
- local idx,its=1,split(id,";")
- for i=(p==1 and 1 or 6),(p==1 and 5 or 6) do
-  local it=split(its[i],",")
-  local y,c=26+(idx-1)*11,idx==s and 7 or 5
-  if idx==s then rectfill(8,y-2,119,y+6,1) end
-  
-  sspr((it[1]%16)*8,flr(it[1]/16)*8,5,5,12,y,5,5)
-  print(it[7],22,y,c)
-  
-  -- stat
-  local stat=""
-  if i==5 then
-   local h,mh=ship_get_hull(),ship_get_max_hull()
-   stat=h.."/"..mh
-  elseif it[5]~="" then
-   local lv=ship[it[5]] or 0
-   local ul=it[6]~="" and ship[it[6]]
-   if i==2 and ul then lv=max(1,lv) end
-   if i~=2 or ul then stat="lvl"..lv.."/"..it[2] end
+  -- draw items (reuse pre-split `items` table to avoid per-frame split calls)
+  local idx,start_i,end_i=1,(p==1 and 1 or 6),(p==1 and 5 or 6)
+  for i=start_i,end_i do
+    local it=items[i]
+    local y=26+(idx-1)*11
+    local selc=idx==s
+    local c=selc and 7 or 5
+    if selc then rectfill(8,y-2,119,y+6,1) end
+    sspr((it[1]%16)*8,flr(it[1]/16)*8,5,5,12,y,5,5)
+    print(it[7],22,y,c)
+    local stat=""
+    if i==5 then
+      local h,mh=ship_get_hull(),ship_get_max_hull()
+      stat=h.."/"..mh
+    elseif it[5]~="" then
+      local lv=ship[it[5]] or 0
+      local ul=it[6]~="" and ship[it[6]]
+      if i==2 and ul then lv=max(1,lv) end
+      if i~=2 or ul then stat="lvl"..lv.."/"..it[2] end
+    end
+    if stat~="" then print(stat,94,y,c) end
+    idx+=1
   end
-  if stat~="" then print(stat,94,y,c) end
-  idx+=1
- end
  
  -- cost/desc
  local sit=items[p==1 and s or 6]

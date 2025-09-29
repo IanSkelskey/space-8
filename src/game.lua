@@ -129,7 +129,7 @@ function _draw()
 	elseif gs=="fanfare_depart"then
 		draw_ship()
 		draw_hud()
-	elseif gs=="fanfare_depart"or gs=="game"or gs=="dying"then
+	elseif gs=="game"or gs=="dying"then
 		draw_blackhole()
 		draw_asteroid()
 		draw_comet()
