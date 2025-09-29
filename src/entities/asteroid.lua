@@ -1,8 +1,7 @@
 local asteroids,spawn_t={},0
 
 local function hit_by_player_bullet(x,y,w,h)
-	local pb=ship_get_bullets and ship_get_bullets()
-	if not pb then return end
+	local pb=ship_get_bullets()
 	for b in all(pb) do
 		if aabb(x,y,w,h,b.x,b.y,2,2) then
 			del(pb,b)

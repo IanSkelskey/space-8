@@ -10,14 +10,14 @@ function generate_mission()
 	current_mission=a[flr(rnd(#a))+1].." "..n[flr(rnd(#n))+1]
 	mission_distance=400+round_number*80
 	distance_remaining=mission_distance
-	if sl then sl(round_number) end
+	sl(round_number)
 end
 function complete_mission()
-	last_bonus=flr((hud_get_points and hud_get_points()or 0)*0.03)
+	last_bonus=flr(hud_get_points()*0.03)
 	last_pay=35+mission_distance\25
 	money_total+=last_pay+last_bonus
 	last_payout_ready=true
-	if hud_reset_points then hud_reset_points() end
+	hud_reset_points()
 	round_number+=1
 	generate_mission()
 	asteroid_init()
@@ -29,7 +29,7 @@ end
 function reset_game()
 	snd_music()
 	starfield_init()
-	if ship_reset_upgrades then ship_reset_upgrades() end
+	ship_reset_upgrades()
 	ship_init()
 	asteroid_init()
 	hud_init()
@@ -47,7 +47,7 @@ function _init()
 	pal(15, 0x81, 1)
 	
 	starfield_init()
-	if ship_reset_upgrades then ship_reset_upgrades() end
+	ship_reset_upgrades()
 	ship_init()
 	asteroid_init()
 	hud_init()
@@ -102,7 +102,7 @@ function _update()
 				if distance_remaining<=0 then complete_mission() end
 			end
 		else
-			if ship_death_done and ship_death_done()then game_state="gameover"end
+			if ship_death_done()then game_state="gameover"end
 		end
 	elseif game_state=="gameover"then
 		if btnp(4)then reset_game() end

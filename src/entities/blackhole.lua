@@ -51,7 +51,7 @@ function update_blackhole()
 				ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
 			end
 			if aabb(h.x,h.y,h.w,h.h,ship.x,ship.y,ship.w,ship.h) then
-				if ship.dying~=true and ship_kill then
+				if ship.dying~=true then
 					ship.shield_power,ship.shield_active=0,false
 					ship_kill()
 				end
@@ -65,7 +65,7 @@ function update_blackhole()
 
 		spawn_particles(h)
 		-- inline bullet pull (reuse cx,cy)
-		local pb=ship_get_bullets and ship_get_bullets()
+		local pb=ship_get_bullets()
 		if pb then
 			local r2=h.r*h.r
 			for b in all(pb) do

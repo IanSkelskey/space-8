@@ -25,7 +25,7 @@ function update_menu()
 	if btnp(3) then sel+=1 snd_sfx(SFX_CURSOR,UI_CH) end
 	if sel<1 then sel=#opts end
 	if sel>#opts then sel=1 end
-	if btnp(4) then if sel>1 then snd_sfx(SFX_OK,UI_CH) end local a=opts[sel].action if a then a() end end
+	if btnp(4) then if sel>1 then snd_sfx(SFX_OK,UI_CH) end opts[sel].action() end
 end
 
 function draw_menu()
