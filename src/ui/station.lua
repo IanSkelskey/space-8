@@ -7,20 +7,19 @@ function station_init() station_mode="main" station_confirm=false sel=1 if shop_
 function update_station()
     if station_mode == "main" then
         if not station_confirm then
-            if btnp(2) then sel -= 1 snd_sfx(SFX_CURSOR,UI_CH) end -- up
-            if btnp(3) then sel += 1 snd_sfx(SFX_CURSOR,UI_CH) end -- down
-            if sel < 1 then sel = 2 end
-            if sel > 2 then sel = 1 end
+            if btnp(2) then sel -= 1 snd_sfx(SFX_CURSOR) end -- up
+            if btnp(3) then sel += 1 snd_sfx(SFX_CURSOR) end -- down
+            if sel<1 then sel=2 elseif sel>2 then sel=1 end
             if btnp(4) then
                 if sel == 1 then
-                    if level_fanfare_timer<=0 then station_confirm = true snd_sfx(SFX_OK,UI_CH) end
+                    if level_fanfare_timer<=0 then station_confirm = true snd_sfx(SFX_OK) end
                 else
-                    station_mode = "shop" snd_sfx(SFX_OK,UI_CH)
+                    station_mode = "shop" snd_sfx(SFX_OK)
                 end
             end
         else
             if btnp(4) then
-                snd_sfx(SFX_OK,UI_CH)
+                snd_sfx(SFX_OK)
                 level_fanfare_timer = 0
                 last_payout_ready = false
                 game_state = "game"
@@ -28,7 +27,7 @@ function update_station()
                 ship_init()
                 station_confirm = false
             elseif btnp(5) then
-                station_confirm = false snd_sfx(SFX_CURSOR,UI_CH)
+                station_confirm = false snd_sfx(SFX_CURSOR)
             end
         end
     else
@@ -40,10 +39,14 @@ function draw_station()
     if station_mode == "main" then
         -- header bar
         rectfill(0,0,127,15,1)
-    print("station",4,4,7)
-    print("round"..vr,72,4,6)
-    local cf="$"..money_total
-    print(cf,124-#cf*4,4,10)
+        print("station",4,4,7)
+        print("round"..vr,72,4,6)
+        local cf="$"..money_total
+        -- show accumulated score (ts) in header
+    local ls="00"..ts
+    local sc=tsh>0 and (tsh..sub(ls,#ls-2)) or ts
+    print(sc,40,4,11)
+        print(cf,124-#cf*4,4,10)
 
         -- mission panel
         rect(2,18,78,54,1)

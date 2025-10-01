@@ -1,75 +1,38 @@
-local score,money,HUD_HEIGHT=0,0,10
-ts=ts or 0
+local score,scoreh=0,0 -- low (0-999) + thousands
+ts=ts or 0 tsh=tsh or 0 -- total low + thousands
 db=db or 0
 gs=gs or game_state
 
-function hud_init()score,money=0,0 end
+function hud_init()score=0 end
 
 function hud_add_score(n)
- local m=(n or 0)* (dsc and dsc[df] or 1)
- m=flr(m+0.5)
+ local m=flr(((n or 0)*(dsc and dsc[df] or 1))+0.5)
  score+=m ts+=m
+ while score>=1000 do score-=1000 scoreh+=1 end
+ while ts>=1000 do ts-=1000 tsh+=1 end
 end
-function hud_add_money(n)money+=n or 0 end
+-- hud_add_money removed (unused)
 
-function hud_get_points()return score end
-function hud_reset_points()score=0 db=0 end  -- reset progress bar when starting new mission
+-- inline score access; direct read from module scope
+function hud_reset_points()score,scoreh=0,0 db=0 end  -- reset progress bar when starting new mission
 
 -- removed dm helper (inlined in draw_hud)
 
 -- removed segmented bar helper (inlined below for tokens)
 
 function draw_hud()
-	print(score,2,2,7)
-	-- show prior total during run after payout achieved
-	local mt=money_total
-	local run_state=(game_state=="game" or game_state=="fanfare_depart" or game_state=="dying")
-	local show_amount=(run_state and last_payout_ready) and (mt-last_pay-last_bonus) or mt
-	local t="$"..show_amount
-	print(t,127-#t*4-2,2,10)
+	-- build display score (run)
+	local ls="00"..score
+	local ds=scoreh>0 and (scoreh..sub(ls,#ls-2)) or score
+	print(ds,2,2,7)
+	local gsx,gsn=game_state,gs
+	local run=(gsx=="game" or gsx=="fanfare_depart" or gsx=="dying")
+	local sa=(run and last_payout_ready) and (money_total-last_pay-last_bonus) or money_total
+	local t="$"..sa print(t,127-#t*4-2,2,10)
 	spr(38,30,2)
-	local h,m=ship_get_hull(),ship_get_max_hull()
-	local bw=min(20,m*10)
-	rectfill(37,3,36+bw,5,0)
-	local sw=bw/m
-	for i=1,h do local sx=37+(i-1)*sw rectfill(sx,3,sx+sw-2,5,11) end
-	rect(37,3,36+bw,5,5)
+	local h,m=ship.hull,2+ship.hull_level local bw=min(20,m*10) rectfill(37,3,36+bw,5,0) local sw=bw/m for i=1,h do local sx=37+(i-1)*sw rectfill(sx,3,sx+sw-2,5,11) end rect(37,3,36+bw,5,5)
 	spr(10,58,2)
-	-- inline shield bar (was dm)
-	local sp=ship.shield_power
-	rectfill(65,3,84,5,0)
-	local fw=flr(sp/100*20)
-	if fw>0 then
-		local r,c=sp/100,8
-		if r>0.5 then c=12 elseif r>0.25 then c=13 end
-		rectfill(65,3,65+fw-1,5,c)
-	end
-	rect(65,3,84,5,5)
-	-- track previous state; reset progress only on entering gameplay from outside fanfare
-	if gs~=game_state then if game_state=="game" and (gs!="fanfare_depart" and gs!="fanfare_arrive") then db=0 end gs=game_state end
-	-- mission progress bar (subtle design)
-	if (run_state or game_state=="fanfare_arrive") and mission_distance and mission_distance>0 then
-		-- calculate actual progress from distance_remaining
-		local actual_progress = mission_distance - (distance_remaining or mission_distance)
-		local t = min(1, actual_progress / mission_distance)
-		-- force full during fanfare
-		if level_fanfare_timer and level_fanfare_timer>0 then t=1 end
-		-- smooth progress
-		db=db<t and min(t,db+0.02) or (db>t and max(t,db-0.02) or db)
-
-		-- smaller, subtler progress bar
-		local bx,by,bw,bh=20,122,88,2
-		rectfill(bx,by,bx+bw-1,by+bh-1,1) -- dark blue background
-		local w=db*bw
-		if w>0 then 
-			rectfill(bx,by,bx+w-1,by+bh-1,13) -- dark gray fill
-			if db>0.95 then
-				-- pulse near completion
-				local c=flr(time()*4)%2==0 and 6 or 13
-				rectfill(bx+w-2,by,bx+w-1,by+bh-1,c)
-			end
-		end
-		-- icon stays at same position
-		spr(39,111,119)
-	end
+	local sp=ship.shield_power local fw=sp>0 and sp*0.2\1 or 0 rectfill(65,3,84,5,0) if fw>0 then local r=sp/100 rectfill(65,3,64+fw,5,r>0.5 and 12 or(r>0.25 and 13 or 8)) end rect(65,3,84,5,5)
+	if gsn~=gsx then if gsx=="game" and (gsn!="fanfare_depart" and gsn!="fanfare_arrive") then db=0 end gs=gsx end
+	if (run or gsx=="fanfare_arrive") and mission_distance and mission_distance>0 then local t=level_fanfare_timer>0 and 1 or min(1,(mission_distance-(dr or mission_distance))/mission_distance) db=db<t and min(t,db+0.02) or(db>t and max(t,db-0.02) or db) local bx,by,bw=20,122,88 local w=db*bw rectfill(bx,by,bx+bw-1,123,1) if w>0 then rectfill(bx,by,bx+w-1,123,13) if db>0.95 then rectfill(bx+w-2,by,bx+w-1,123,flr(time()*4)%2==0 and 6 or 13) end end spr(39,111,119) end
 end
