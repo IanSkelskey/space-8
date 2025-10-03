@@ -15,10 +15,7 @@ local opts={
 	{label="help",action=function()
 		-- don't restart music; just switch to controls
 		game_state="controls" controls_init()
-	end,icon=41},
-	{label="exit",action=function()
-		if extcmd then stop("thanks for playing!") end
-	end,icon=42}
+	end,icon=41}
 }
 
 function menu_init() sel=1 end
