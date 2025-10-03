@@ -8,7 +8,8 @@ local function start_game(set_df)
     snd_sfx(63,3)
 end
 
-local labels,icons=split"easy,normal,veteran,help",{19,34,6,41}
+-- removed help/controls option
+local labels,icons=split"easy,normal,veteran",{19,34,6}
 
 function menu_init() sel=1 end
 
@@ -17,9 +18,7 @@ function update_menu()
     if btnp(3) then sel+=1 snd_sfx(44,3) end
     if sel<1 then sel=#labels end
     if sel>#labels then sel=1 end
-    if btnp(4) then
-        if sel<4 then start_game(sel) else game_state="controls" controls_init() end
-    end
+    if btnp(4) then start_game(sel) end
 end
 
 function draw_menu()

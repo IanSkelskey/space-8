@@ -14,11 +14,3 @@ function draw_gameover()
 	-- Single centered button prompt
 	print("❎ main menu",40,92,6)
 end
-
--- Simplified input handling (saves tokens)
-function update_gameover()
-	if btnp(5) then
-		game_state="menu"
-		snd_sfx(63,3)
-	end
-end

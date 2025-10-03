@@ -84,8 +84,6 @@ function _update()
 			generate_mission()
 			snd_music(10)
 		end
-	elseif gs=="controls"then
-		update_controls()
 	elseif gs=="station"then
 		update_station()
 		p_clear() -- Clear particles when at station
@@ -97,7 +95,11 @@ function _update()
 		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
 		if game_state=="game" then if ship.dying then game_state="dying" elseif dr>0 then dr-=1 if dr<=0 then complete_mission() end end else if ship.dying and ship.death_t>=45 then game_state="gameover" end end
 	elseif gs=="gameover"then
-		if btnp(4)then reset_game() end
+		-- use ❎ (btn 5) per on-screen prompt; play select sfx after reset so ship_init doesn't cancel it
+		if btnp(5) then
+			reset_game()
+			snd_sfx(63,3)
+		end
 	end
 	prev_game_state=prev
 end
@@ -106,8 +108,6 @@ function _draw()
 	draw_starfield()
 	if game_state=="menu"then
 		draw_menu()
-	elseif game_state=="controls"then
-		draw_controls()
 	elseif game_state=="station"then
 		draw_station()
 	elseif game_state=="fanfare_depart"then
