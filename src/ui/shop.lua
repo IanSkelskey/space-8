@@ -91,13 +91,21 @@ function shop_draw()
  -- cost/desc
  local sit=items[p==1 and s or 6]
  local cstr,desc="",sit[8]
- local dm=0.7+0.1*df
+ -- use same difficulty cost multiplier as in buy() to keep display + charge consistent
+ local dm=0.6+0.1*df+0.1*mid(0,df-1,1)
  if s==5 and p==1 then
   local repair_cost=(200+max(0,round_number-10)*50)*dm
   cstr="$"..flr(repair_cost+0.5)
  else
   local lv,ul=sit[5]~="" and (ship[sit[5]] or 0) or 0,sit[6]~="" and ship[sit[6]]
-  if p==1 and s==2 and not ul then cstr,desc="$"..flr(220*dm+0.5),"+ adds shield" elseif lv<sit[2] then cstr="$"..flr((sit[3]+sit[4]*lv)*dm+0.5) else cstr="owned" end
+  if p==1 and s==2 and not ul then
+   -- shield unlock: was displaying 220 (old value) while charging 140; now consistent
+   cstr,desc="$"..flr(140*dm+0.5),"+ adds shield"
+  elseif lv<sit[2] then
+   cstr="$"..flr((sit[3]+sit[4]*lv)*dm+0.5)
+  else
+   cstr="owned"
+  end
  end
  
  rect(8,84,119,116,1)
