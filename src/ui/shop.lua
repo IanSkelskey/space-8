@@ -14,7 +14,7 @@ local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and SFX_ERR or SFX
 local function buy(i)
   local it,m=items[i],money_total
   -- difficulty cost multiplier (easy<normal<veteran) more generous for early progression: df=1->0.7,2->0.8,3->1.0
-  local dm=0.6+0.1*df+0.1*mid(0,df-1,1)
+  local dm=dmul()
   local lv=it[5]~="" and (ship[it[5]] or 0) or 0
   local ul=it[6]~="" and ship[it[6]]
  
@@ -92,7 +92,7 @@ function shop_draw()
  local sit=items[p==1 and s or 6]
  local cstr,desc="",sit[8]
  -- use same difficulty cost multiplier as in buy() to keep display + charge consistent
- local dm=0.6+0.1*df+0.1*mid(0,df-1,1)
+ local dm=dmul()
  if s==5 and p==1 then
   local repair_cost=(200+max(0,round_number-10)*50)*dm
   cstr="$"..flr(repair_cost+0.5)

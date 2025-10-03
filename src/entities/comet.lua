@@ -29,7 +29,7 @@ end
 
 function update_comet()
 	if round_number<3 then return end
-	spawn_t-=1/30
+	spawn_t-=FT
 	local mx,mi,rg=cm or 3,cmin or 1,crng or 1.2
 	if round_number<5 then mx=min(mx,1) end
 	if spawn_t<=0 and #comets<mx then

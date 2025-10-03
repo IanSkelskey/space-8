@@ -52,7 +52,7 @@ local function spawn_asteroid()
 end
 
 function update_asteroid()
-	spawn_t-=1/30
+	spawn_t-=FT
 		if spawn_t<=0 and #asteroids<mm then
 		spawn_asteroid()
 		spawn_t=msmin+rnd(msrng)

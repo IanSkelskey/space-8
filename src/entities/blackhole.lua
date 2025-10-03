@@ -19,7 +19,7 @@ end
 
 function update_blackhole()
 	if round_number<5 then return end
-	spawn_t-=1/30
+	spawn_t-=FT
 	local hm=round_number<7 and 1 or 2
 	if spawn_t<=0 and #holes<hm then
 		spawn_hole()
