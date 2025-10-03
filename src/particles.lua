@@ -12,9 +12,9 @@ function p_upd()
   -- pickup (type 7)
   if i.t==7 and scoll(i.x,i.y,8,8) then
   if i.d then -- shield pickup (shorter free duration)
-  ship.shield_active=true ship.shield_free=110 ship.shield_power=max(ship.shield_power,10) snd_sfx(SFX_SHIELD_ON)
+  ship.shield_active=true ship.shield_free=110 ship.shield_power=max(ship.shield_power,10) snd_sfx(30)
    else
-  if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(SFX_OK)
+  if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
    end
    del(p,i) goto continue
   end

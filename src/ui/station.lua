@@ -7,19 +7,19 @@ function station_init() station_mode="main" station_confirm=false sel=1 if shop_
 function update_station()
     if station_mode == "main" then
         if not station_confirm then
-            if btnp(2) then sel -= 1 snd_sfx(SFX_CURSOR) end -- up
-            if btnp(3) then sel += 1 snd_sfx(SFX_CURSOR) end -- down
+            if btnp(2) then sel -= 1 snd_sfx(44) end -- up
+            if btnp(3) then sel += 1 snd_sfx(44) end -- down
             if sel<1 then sel=2 elseif sel>2 then sel=1 end
             if btnp(4) then
                 if sel == 1 then
-                    if level_fanfare_timer<=0 then station_confirm = true snd_sfx(SFX_OK) end
+                    if level_fanfare_timer<=0 then station_confirm = true snd_sfx(63) end
                 else
-                    station_mode = "shop" snd_sfx(SFX_OK)
+                    station_mode = "shop" snd_sfx(63)
                 end
             end
         else
             if btnp(4) then
-                snd_sfx(SFX_OK)
+                snd_sfx(63)
                 level_fanfare_timer = 0
                 last_payout_ready = false
                 game_state = "game"
@@ -27,7 +27,7 @@ function update_station()
                 ship_init()
                 station_confirm = false
             elseif btnp(5) then
-                station_confirm = false snd_sfx(SFX_CURSOR)
+                station_confirm = false snd_sfx(44)
             end
         end
     else

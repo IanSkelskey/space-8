@@ -9,7 +9,7 @@ for e in all(split(id,";")) do add(items,split(e,",")) end
 
 function shop_init() s,p,sm,st=1,1,"",0 end
 
-local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and SFX_ERR or SFX_OK) end
+local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and 45 or 63) end
 
 local function buy(i)
   local it,m=items[i],money_total
@@ -43,11 +43,11 @@ end
 function shop_update()
  if st>0 then st-=1 if st<=0 then sm="" end end
  local mx=p==1 and 5 or 1
- if btnp(2) then s=s>1 and s-1 or mx snd_sfx(SFX_CURSOR) end
- if btnp(3) then s=s<mx and s+1 or 1 snd_sfx(SFX_CURSOR) end
- if btnp(0) and p>1 then p,s=1,1 snd_sfx(SFX_CURSOR) end
- if btnp(1) and p<2 then p,s=2,1 snd_sfx(SFX_CURSOR) end
- if btnp(5) then snd_sfx(SFX_OK) station_mode="main" end
+ if btnp(2) then s=s>1 and s-1 or mx snd_sfx(44) end
+ if btnp(3) then s=s<mx and s+1 or 1 snd_sfx(44) end
+ if btnp(0) and p>1 then p,s=1,1 snd_sfx(44) end
+ if btnp(1) and p<2 then p,s=2,1 snd_sfx(44) end
+ if btnp(5) then snd_sfx(63) station_mode="main" end
   if btnp(4) then
     -- compute selected item index without branch (page 1: 1..5, page 2: item 6)
     local gi=p==1 and s or 6

@@ -28,18 +28,18 @@ end
 -- unified shield shutdown (set vars + sfx)
 local function sh_off()
  ship.shield_active,ship.shield_cool,ship.shield_invuln,ship.shield_anim=false,60,30,0
- sfx(-1,FX_CH) snd_sfx(SFX_SHIELD_OFF)
+ sfx(-1,3) snd_sfx(43)
 end
 
 function ship_kill()
  if ship.dying or ship.shield_invuln>0 or ship.hull_invuln>0 then return end
- sfx(-1,FX_CH)
+ sfx(-1,3)
  if ship.shield_active then
   local _,_,hit=sh_stats()
   ship.shield_power=max(0,ship.shield_power-hit)
   ship.shield_invuln=30
   ship.shield_anim=0
-  snd_sfx(SFX_SHIELD_HIT)
+  snd_sfx(31)
   if ship.shield_power<=0 then
      sh_off()
   end
@@ -47,7 +47,7 @@ function ship_kill()
  end
  ship.hull-=1
  ship.hull_invuln=60
-  snd_sfx(SFX_EXPLODE)
+  snd_sfx(1)
  if ship.hull<=0 then
   ship.dying,ship.death_t,ship.vx,ship.vy,game_state=true,0,0,0,"dying"
   for i=1,22 do
@@ -62,7 +62,7 @@ function ship_init()
  bullets={}
  ship.x,ship.y,ship.vx,ship.vy,ship.dying,ship.death_t,ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool,ship.laser_cd,ship.hull_invuln,ship.shield_free=START_X,START_Y,0,0,false,0,false,0,0,0,0,0,0
  ship.shield_power=ship.shield_unlocked and 100 or 0
- sfx(-1,FX_CH)
+ sfx(-1,3)
 end
 
 function update_ship()
@@ -95,7 +95,7 @@ function update_ship()
    local sdx=lvl>1 and 0.7 or 0
    if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-2})end
    if lvl>=1 then add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-2}) add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-2}) end
-   snd_sfx(SFX_LASER,LASER_CH)
+   snd_sfx(62,2)
   laser_cd=max(3,flr(15*(1-0.2*fire_rate_level)+0.5))
   end
   ub()
@@ -110,12 +110,12 @@ function update_ship()
   if shield_free>0 then
    shield_active=true
   else
-  if btn(5)and shield_power>=10 and shield_cool<=0 and not dying and not shield_active then shield_active=true snd_sfx(SFX_SHIELD_ON)
-   elseif not btn(5)and shield_active then shield_active=false sfx(-1,FX_CH) end
+  if btn(5)and shield_power>=10 and shield_cool<=0 and not dying and not shield_active then shield_active=true snd_sfx(30)
+   elseif not btn(5)and shield_active then shield_active=false sfx(-1,3) end
   end
    if not shield_active then if shield_cool>0 then shield_cool-=1 elseif shield_power<100 and shield_invuln<=0 then shield_power=min(100,shield_power+rech) end end
   else
-   if shield_active then shield_active=false sfx(-1,FX_CH) end
+   if shield_active then shield_active=false sfx(-1,3) end
    shield_power=0 shield_free=0
   end
   if shield_active then shield_anim=(shield_anim+1)%30 end

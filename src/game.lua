@@ -37,14 +37,14 @@ function complete_mission()
 	asteroid_init()
 	blackhole_init()
 	comet_init()
-	snd_music(MUS_FANFARE)
+	snd_music(8)
 	level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
 end
 function reset_game()
 	snd_music()
 	starfield_init() ship_reset_upgrades() ie() station_init() menu_init() p_clear()
 	game_state,prev_game_state,round_number,current_mission,mission_distance,dr,money_total,ts,tsh,last_pay,last_bonus,last_payout_ready="menu","menu",sr[df],nil,0,0,0,0,0,0,0,false
-	vr=1 snd_music(MUS_MENU)
+	vr=1 snd_music(0)
 end
 function _init()
 	-- Set up palette swap: use extended color 129 instead of color 15
@@ -52,7 +52,7 @@ function _init()
 	pal(15, 0x81, 1)
 	
 	starfield_init() ship_reset_upgrades() ie() station_init() menu_init() p_clear()
-	round_number=sr[df] tsh=0 vr=1 snd_music(MUS_MENU)
+	round_number=sr[df] tsh=0 vr=1 snd_music(0)
 end
 function _update()
 	update_starfield()
@@ -82,7 +82,7 @@ function _update()
 		if game_state=="game"then
 			game_state="station"
 			generate_mission()
-			snd_music(MUS_STATION)
+			snd_music(10)
 		end
 	elseif gs=="controls"then
 		update_controls()

@@ -11,9 +11,9 @@ local hd={
 function controls_init() hp=1 end
 
 function update_controls()
- if btnp(0) and hp>1 then hp-=1 snd_sfx(SFX_CURSOR,UI_CH) end
- if btnp(1) and hp<MP then hp+=1 snd_sfx(SFX_CURSOR,UI_CH) end
- if btnp(4) or btnp(5) then snd_sfx(SFX_OK,UI_CH) game_state="menu" menu_init() end
+ if btnp(0) and hp>1 then hp-=1 snd_sfx(44,3) end
+ if btnp(1) and hp<MP then hp+=1 snd_sfx(44,3) end
+ if btnp(4) or btnp(5) then snd_sfx(63,3) game_state="menu" menu_init() end
 end
 
 function draw_controls()

@@ -60,7 +60,7 @@ function update_comet()
 					local blue=(c.c9==12)
 					if green and rnd()<0.18 then p_add(c.x,c.y,0,0,170,7) end
 					if blue and rnd()<0.14 then p_add(c.x,c.y,0,0,140,7,nil,true) end
-						hud_add_score(55) snd_sfx(SFX_EXPLODE) del(comets,c) break
+						hud_add_score(55) snd_sfx(1) del(comets,c) break
 				else c.flash_t=4 end
 				break
 			end

@@ -75,7 +75,7 @@ function update_asteroid()
 						hud_add_score(35)
 					spawn_asteroid_debris(m.x+(m.w-8)/2,m.y+(m.h-8)/2,m.alt)
 				end
-				snd_sfx(SFX_EXPLODE)
+				snd_sfx(1)
 				del(asteroids,m)
 				goto continue
 			else

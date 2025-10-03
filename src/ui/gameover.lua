@@ -19,6 +19,6 @@ end
 function update_gameover()
 	if btnp(5) then
 		game_state="menu"
-		snd_sfx(SFX_OK,UI_CH)
+		snd_sfx(63,3)
 	end
 end
