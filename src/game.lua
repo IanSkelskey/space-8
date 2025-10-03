@@ -26,11 +26,11 @@ end
 function complete_mission()
 	local mult=dsc and dsc[df] or 1
 	-- increased bonus % and base pay for faster early progression
-	last_bonus=flr((score or 0)*0.04*mult)
+	last_bonus=flr((score or 0)*0.09*mult)
 	last_pay=flr((40+mission_distance\25)*mult)
 	money_total+=last_pay+last_bonus
 	last_payout_ready=true
-	hud_reset_points()
+	score,scoreh,db=0,0,0
 	round_number+=1
 	vr+=1
 	generate_mission()

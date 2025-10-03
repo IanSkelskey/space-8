@@ -42,10 +42,9 @@ function draw_station()
         print("station",4,4,7)
         print("round"..vr,72,4,6)
         local cf="$"..money_total
-        -- show accumulated score (ts) in header
-    local ls="00"..ts
-    local sc=tsh>0 and (tsh..sub(ls,#ls-2)) or ts
-    print(sc,40,4,11)
+    local tls="00"..ts
+    local tdisp=tsh>0 and (tsh..sub(tls,#tls-2)) or ts
+    print(tdisp,40,4,11)
         print(cf,124-#cf*4,4,10)
 
         -- mission panel
