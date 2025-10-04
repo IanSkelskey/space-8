@@ -1,7 +1,8 @@
 game_state,prev_game_state="menu","menu"
 -- shared small constants / helpers (token savings)
 FT=1/30
-function dmul() return 0.6+0.1*df+0.1*mid(0,df-1,1) end -- difficulty cost multiplier
+dm=dm or split"0.7,0.8,0.9" -- difficulty multipliers (easy,normal,veteran)
+function dmul()return dm[df] end
 function aabb(ax,ay,aw,ah,bx,by,bw,bh)
 	return ax<bx+bw and bx<ax+aw and ay<by+bh and by<ay+ah
 end
@@ -57,8 +58,8 @@ function _update()
 	update_starfield()
 	if level_fanfare_timer>0 then level_fanfare_timer-=1 end
 
-	-- update pause menu item (shows current round)
-	do local show=(game_state=="game" or game_state=="station" or game_state=="fanfare_depart") if show then menuitem(1,"round "..vr) else menuitem(1) end end
+	-- pause menu item: show round when active
+	if game_state=="game" or game_state=="station" or game_state=="fanfare_depart" then menuitem(1,"round "..vr) else menuitem(1) end
 
 	if game_state=="fanfare_depart"then
 		if ship_departing then

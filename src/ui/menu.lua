@@ -25,7 +25,7 @@ function draw_menu()
     -- Title
     print("\014sPACE 8",36,16,7)
     print("v2.0.0",48,28,6)
-    local y=46
+    local y=50
     for i=1,#labels do
         local c=i==sel and 7 or 6
         if i==sel then print(">",36+time()%1\0.5,y,c) end

@@ -78,13 +78,8 @@ end
 function draw_comet()
 	for c in all(comets) do
 		if c.warning_t>0 then
-			local cx,cy,ht=c.left and 4 or 123,c.y+4,10
-			cy=max(cy,ht+4)
-			local ba=(20-c.warning_t)*0.15
-			for i=0,3 do
-				local ang=ba+i*0.25
-				pset(flr(cx+cos(ang)*3),flr(cy+sin(ang)*3),i%2==0 and c.c8 or c.c9)
-			end
+			local cx,cy=c.left and 4 or 123,max(c.y+4,14)
+			h(cx,cy,(20-c.warning_t)*0.15,c.c8,c.c9)
 		else
 			local sid=c.sid
 			if c.flash_t>0 then sid=c.use_angled and 35 or 51 end

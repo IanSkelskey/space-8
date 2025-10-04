@@ -2,6 +2,9 @@
 local p={}
 Gp=p
 
+-- tiny shared halo (rotating 4-dot ring) reused by comets + powerups
+function h(x,y,a,c1,c2)for i=0,3 do local g=a+i*0.25 pset(flr(x+cos(g)*3),flr(y+sin(g)*3),i%2==0 and c1 or c2)end end
+
 function p_add(x,y,dx,dy,life,typ,col,dat) add(p,{x=x,y=y,dx=dx,dy=dy,l=life,t=typ,c=col,d=dat}) end
 
 function p_upd()
@@ -37,7 +40,7 @@ function p_draw()
     if i.t==7 then
      local d=i.d
      if d==7 then pset(i.x,i.y,10)pset(i.x+1,i.y,10)pset(i.x,i.y+1,10)pset(i.x+1,i.y+1,10)
-   else local sprid=(d==2 and 10) or (d==5 and 11) or 38 spr(sprid,i.x,i.y) end
+   else h(i.x+2.5,i.y+2.5,time(),d==2 and 12 or d==5 and 9 or 11,d==2 and 1 or d==5 and 10 or 7) spr((d==2 and 10) or (d==5 and 11) or 38,i.x,i.y) end
     elseif i.t==4 and i.d then
      sspr(i.d[1],i.d[2],4,4,i.x,i.y)
     else
