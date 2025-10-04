@@ -10,14 +10,34 @@ function p_upd()
   -- inline damp
   if i.t==4 then i.dx*=0.99 i.dy*=0.99 elseif i.t==2 or i.t==3 then i.dx*=0.98 i.dy*=0.98 end
   -- pickup (type 7)
-  if i.t==7 and scoll(i.x,i.y,8,8) then
-  if i.d then -- shield pickup (shorter free duration)
-  ship.shield_active=true ship.shield_free=110 ship.shield_power=max(ship.shield_power,10) snd_sfx(30)
-   else
-  if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
+   if i.t==7 and scoll(i.x,i.y,8,8) then
+   local d=i.d
+   if d==2 then -- shield free (existing behavior)
+    ship.shield_active=true ship.shield_free=110 ship.shield_power=max(ship.shield_power,10) snd_sfx(30)
+   elseif d==1 or d==nil then -- hull repair (legacy nil or explicit 1)
+    if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
+   elseif d==3 then -- cash
+    money_total+=40 snd_sfx(63)
+   elseif d==4 then -- score
+    hud_add_score(100) snd_sfx(63)
+   elseif d==5 then -- rapid fire burst (extended duration)
+    ship.rfb=120 snd_sfx(63)
+    elseif d==6 then -- magnet field
+      mag_t=180 snd_sfx(63)
    end
    del(p,i) goto continue
   end
+   -- magnet attraction influences other pickups while active (excluding the one just collected)
+   if mag_t and mag_t>0 and i.t==7 then
+    local cx,cy=ship.x+4,ship.y+4
+    local dx,dy=cx-i.x,cy-i.y
+    local d2=dx*dx+dy*dy
+    if d2>9 and d2<3600 then
+      local inv=1/sqrt(d2)
+      i.dx+=dx*inv*0.07
+      i.dy+=dy*inv*0.07
+    end
+   end
   if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end
   ::continue::
  end
@@ -25,34 +45,34 @@ end
 
 function p_draw()
  for i in all(p) do
-  if i.t==7 then
-  -- powerup sprite + subtle alternating halo (single pixels)
-  -- sprite is a 5x5 centered in the top-left of its 8x8 slot; center at +2,+2
-  local cx,cy=i.x+2,i.y+2
-  spr(i.d and 10 or 38,i.x,i.y)
-  local ph=flr(time()*8)%2
-  local gc=i.d and 12 or 11 -- blue-ish for shield (12), yellow (11) for hull
-  if ph==0 then
-   pset(cx-4,cy,gc)pset(cx+4,cy,gc)pset(cx,cy-4,gc)pset(cx,cy+4,gc)
-  else
-   pset(cx-3,cy-3,gc)pset(cx+3,cy-3,gc)pset(cx-3,cy+3,gc)pset(cx+3,cy+3,gc)
-  end
-  elseif i.t==4 and i.d then
-   -- Draw debris chunks
-   sspr(i.d[1],i.d[2],4,4,i.x,i.y)
-  else
-   -- Draw regular particles
-   local c=i.c
-    if not c then
+    if i.t==7 then
+     -- powerup sprite + subtle alternating halo
+     local cx,cy=i.x+2,i.y+2
+     local d=i.d
+   -- sprite selection: 10 shield, 38 hull/cash/score, 11 rapid (d==5), 56 magnet (d==6)
+   local sprid=(d==2 and 10) or (d==5 and 11) or (d==6 and 56) or 38
+     spr(sprid,i.x,i.y)
+     local ph=flr(time()*8)%2
+   local gc=(d==2 and 12) or (d==5 and 10) or (d==6 and 13) or 11 -- blue shield, yellow default, bright yellow rapid, pink magnet
+     if ph==0 then
+        pset(cx-4,cy,gc)pset(cx+4,cy,gc)pset(cx,cy-4,gc)pset(cx,cy+4,gc)
+     else
+        pset(cx-3,cy-3,gc)pset(cx+3,cy-3,gc)pset(cx-3,cy+3,gc)pset(cx+3,cy+3,gc)
+     end
+    elseif i.t==4 and i.d then
+     sspr(i.d[1],i.d[2],4,4,i.x,i.y)
+    else
+     local c=i.c
+     if not c then
         local t,l=i.t,i.l
-  c=(t==1 and (l>12 and 6 or l>6 and 5 or 7))
-  or (t==2 and (l>8 and (i.d and i.d[1] or 10) or l>4 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
-  or (t==3 and (l>16 and 10 or l>8 and 9 or 8))
-  or (t==6 and (l>16 and 14 or l>8 and 2 or 1))
-        or 7
-       end
-   pset(flr(i.x),flr(i.y),c)
-  end
+        c=(t==1 and (l>12 and 6 or l>6 and 5 or 7))
+         or (t==2 and (l>8 and (i.d and i.d[1] or 10) or l>4 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
+         or (t==3 and (l>16 and 10 or l>8 and 9 or 8))
+         or (t==6 and (l>16 and 14 or l>8 and 2 or 1))
+         or 7
+     end
+     pset(flr(i.x),flr(i.y),c)
+    end
  end
 end
 

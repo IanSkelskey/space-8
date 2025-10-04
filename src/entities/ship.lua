@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0}
 
 bullets={}
 
@@ -60,7 +60,7 @@ end
 
 function ship_init()
  bullets={}
- ship.x,ship.y,ship.vx,ship.vy,ship.dying,ship.death_t,ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool,ship.laser_cd,ship.hull_invuln,ship.shield_free=START_X,START_Y,0,0,false,0,false,0,0,0,0,0,0
+ ship.x,ship.y,ship.vx,ship.vy,ship.dying,ship.death_t,ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool,ship.laser_cd,ship.hull_invuln,ship.shield_free,ship.rfb=START_X,START_Y,0,0,false,0,false,0,0,0,0,0,0,0
  ship.shield_power=ship.shield_unlocked and 100 or 0
  sfx(-1,3)
 end
@@ -90,13 +90,22 @@ function update_ship()
   for i=1,2 do if rnd()<str then p_add((i==1 and x1 or x2)+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end
   end
   if laser_cd>0 then laser_cd-=1 end
+  -- rapid fire burst timer
+  if rfb and rfb>0 then rfb-=1 end
   if laser_cd<=0 and btn(4)then
   local cx,by,iv,lvl=flr(x+3),y-2,vx*0.3,spread_level
    local sdx=lvl>1 and 0.7 or 0
    if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-2})end
    if lvl>=1 then add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-2}) add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-2}) end
+  -- muzzle flash particles (slight spread) when rapid fire active
+  if rfb>0 then
+   for mi=1,2 do
+    local ang=rnd(0.2)-0.1
+    p_add(cx+((mi==1)and -1 or 1),by+1,ang*0.4+rnd(0.2)-0.1,-1.5-rnd(0.3),6+rnd(4)\1,1, (mi==1 and 10 or 9))
+   end
+  end
    snd_sfx(62,2)
-  laser_cd=max(3,flr(15*(1-0.2*fire_rate_level)+0.5))
+  laser_cd=max(3,flr(15*(1-0.2*fire_rate_level)-(rfb>0 and 5 or 0)+0.5))
   end
   ub()
   if shield_invuln>0 then shield_invuln-=1 end
@@ -133,6 +142,10 @@ function draw_ship()
  if game_state=="fanfare_depart" then return end
  
  for b in all(bullets)do local x,y=flr(b.x),flr(b.y)pset(x,y,9)pset(x,y-1,8)end
+ if ship.rfb>0 then
+  -- overlay yellow tint: redraw bullets with brighter colors
+  for b in all(bullets)do local x,y=flr(b.x),flr(b.y)pset(x,y,10)pset(x,y-1,9)end
+ end
  if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and(ship.shield_invuln%4)<2)then
   local cx,cy,t,cols=ship.x+4,ship.y+4,ship.shield_anim/30,thr_cols[2]
   local flash=ship.shield_invuln>25 and 7 or nil
@@ -147,7 +160,7 @@ function ship_unlock_shield()
 end
 
 function ship_reset_upgrades()
- ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level,ship.thruster_level,ship.hull=0,0,false,0,0,0,0,0,2
+ ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level,ship.thruster_level,ship.hull,ship.rfb=0,0,false,0,0,0,0,0,2,0
 end
 
 -- ship_trails_pull / ship_trails_absorb wrappers removed (inline where used)
