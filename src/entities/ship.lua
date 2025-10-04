@@ -91,7 +91,7 @@ function update_ship()
   end
   if laser_cd>0 then laser_cd-=1 end
   -- rapid fire burst timer
-  if rfb and rfb>0 then rfb-=1 end
+  if rfb>0 then rfb-=1 end
   if laser_cd<=0 and btn(4)then
   local cx,by,iv,lvl=flr(x+3),y-2,vx*0.3,spread_level
    local sdx=lvl>1 and 0.7 or 0

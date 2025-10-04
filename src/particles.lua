@@ -16,10 +16,10 @@ function p_upd()
     ship.shield_active=true ship.shield_free=110 ship.shield_power=max(ship.shield_power,10) snd_sfx(30)
    elseif d==1 or d==nil then -- hull repair (legacy nil or explicit 1)
     if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
-   elseif d==3 then -- cash
-    money_total+=40 snd_sfx(63)
-   elseif d==4 then -- score
-    hud_add_score(100) snd_sfx(63)
+   elseif d==3 then -- big cash coin
+    money_total+=30 last_bonus+=30 snd_sfx(63)
+   elseif d==7 then -- small cash shard
+    money_total+=8 last_bonus+=8 snd_sfx(63)
    elseif d==5 then -- rapid fire burst (extended duration)
     ship.rfb=120 snd_sfx(63)
     elseif d==6 then -- magnet field
@@ -49,11 +49,16 @@ function p_draw()
      -- powerup sprite + subtle alternating halo
      local cx,cy=i.x+2,i.y+2
      local d=i.d
-   -- sprite selection: 10 shield, 38 hull/cash/score, 11 rapid (d==5), 56 magnet (d==6)
-   local sprid=(d==2 and 10) or (d==5 and 11) or (d==6 and 56) or 38
-     spr(sprid,i.x,i.y)
+    -- sprite selection: 10 shield, 38 hull, 57 big cash, 11 rapid, 56 magnet, 38 score; small cash (d==7) = custom spark
+    if d==7 then
+      local ph=flr(time()*8)%2 local col=10
+      pset(cx-1,cy,col)pset(cx+1,cy,col)pset(cx,cy-1,col)pset(cx,cy+1,col)
+    else
+      local sprid=(d==2 and 10) or (d==5 and 11) or (d==6 and 56) or (d==3 and 57) or 38
+      spr(sprid,i.x,i.y)
+    end
      local ph=flr(time()*8)%2
-   local gc=(d==2 and 12) or (d==5 and 10) or (d==6 and 13) or 11 -- blue shield, yellow default, bright yellow rapid, pink magnet
+   local gc=(d==2 and 12) or (d==5 and 10) or (d==6 and 13) or ((d==3 or d==7) and 10) or 11 -- halo for all cash types
      if ph==0 then
         pset(cx-4,cy,gc)pset(cx+4,cy,gc)pset(cx,cy-4,gc)pset(cx,cy+4,gc)
      else
