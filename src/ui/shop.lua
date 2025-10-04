@@ -94,7 +94,7 @@ function shop_draw()
  -- use same difficulty cost multiplier as in buy() to keep display + charge consistent
  local dm=dmul()
  if s==5 and p==1 then
-  local repair_cost=(200+max(0,round_number-10)*50)*dm
+  local repair_cost=(150+max(0,round_number-8)*30)*dm
   cstr="$"..flr(repair_cost+0.5)
  else
   local lv,ul=sit[5]~="" and (ship[sit[5]] or 0) or 0,sit[6]~="" and ship[sit[6]]

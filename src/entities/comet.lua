@@ -1,7 +1,8 @@
 local comets,spawn_t={},0
 -- use split strings for ids (cheaper than table literals)
-local SIDS_ANGLED,SIDS_STRAIGHT=split"43,44,45,46,47",split"59,60,61,62,63"
-local C8,C9=split"8,2,10,3,1",split"9,14,9,11,12"
+-- removed red comet variant (first entries) since it had no drop; arrays now align to: pink, yellow, green, blue
+local SIDS_ANGLED,SIDS_STRAIGHT=split"44,45,46,47",split"60,61,62,63"
+local C8,C9=split"2,10,3,1",split"14,9,11,12"
 
 function comet_init()
 	comets,spawn_t={},0
@@ -59,14 +60,11 @@ function update_comet()
 					local green=(c.c8==3 or c.c9==11)
 					local blue=(c.c9==12)
 					local yellow=(c.c8==10)
-					local pink=(c.c8==2) -- magenta/pink variant
 					if green and rnd()<0.18 then p_add(c.x,c.y,0,0,170,7) end
 					-- blue comet: ensure shield pickup uses dat=2 (was nil,true legacy)
 					if blue and rnd()<0.14 then p_add(c.x,c.y,0,0,140,7,nil,2) end
 					-- new: yellow comet (c8==10) drops burst fire powerup (type 7, dat=5)
 					if yellow and rnd()<0.17 then p_add(c.x,c.y,0,0,150,7,nil,5) end
-					-- pink comet (c8==2) drops magnet powerup (type 7, d=6)
-					if pink and rnd()<0.16 then p_add(c.x,c.y,0,0,150,7,nil,6) end
 						hud_add_score(55) snd_sfx(1) del(comets,c) break
 				else c.flash_t=4 end
 				break

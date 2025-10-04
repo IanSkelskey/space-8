@@ -25,10 +25,9 @@ function generate_mission()
 end
 function complete_mission()
 	local mult=dsc and dsc[df] or 1
-	-- increased bonus % and base pay for faster early progression
-	last_bonus=flr((score or 0)*0.09*mult)
+	-- mission pay only; bonus collected in-level via shard pickups
 	last_pay=flr((40+mission_distance\25)*mult)
-	money_total+=last_pay+last_bonus
+	money_total+=last_pay
 	last_payout_ready=true
 	score,scoreh,db=0,0,0
 	round_number+=1

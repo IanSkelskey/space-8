@@ -84,11 +84,7 @@ function update_ship()
   if (y==10 and vy<0)or(y==120 and vy>0)then vy=0 end
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
-  if str>0 then
-   local yy,x1,x2,bdy,life=y+8,x+2,x+5,0.5+0.9*str,flr(6+10*str)
-  local cols=thr_cols[min(4,thruster_level+1)]
-  for i=1,2 do if rnd()<str then p_add((i==1 and x1 or x2)+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end
-  end
+  if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 2 or 5) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end
   if laser_cd>0 then laser_cd-=1 end
   -- rapid fire burst timer
   if rfb>0 then rfb-=1 end

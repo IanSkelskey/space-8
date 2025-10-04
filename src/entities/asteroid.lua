@@ -68,11 +68,15 @@ function update_asteroid()
 				if m.hp<=0 then
 				if m.large then
 						hud_add_score(60)
+						-- money shards (large): 0-5 (avg ~2.5) at 4 each => ~10 value
+						for i=1,rnd(6)\1 do p_add(m.x+4,m.y+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
 					-- inlined spawn_child_asteroids
 					for i=0,1 do local ag=i*0.25+rnd(0.1) add(asteroids,{x=i%2*m.w-i%2*8+m.x+2,y=m.y+2,w=8,h=8,dx=cos(ag)*(0.4+rnd(0.3)),dy=sin(ag)*(0.4+rnd(0.3))*0.5+0.9,spd=mspd or 0.9,hp=m.alt and 4 or 2,large=false,alt=m.alt,flash_t=0}) end
 					spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
 				else
 						hud_add_score(35)
+						-- money shards (small): 0-3 (avg ~1.5) => ~6 value
+						for i=1,rnd(4)\1 do p_add(m.x+(m.w-8)/2+4,m.y+(m.h-8)/2+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
 					spawn_asteroid_debris(m.x+(m.w-8)/2,m.y+(m.h-8)/2,m.alt)
 				end
 				snd_sfx(1)
@@ -92,10 +96,8 @@ function update_asteroid()
 	-- Check debris collisions with bullets and ship
 	for p in all(Gp) do
 		if p.t==4 then
-				if hit_by_player_bullet(p.x,p.y,4,4) then
-						hud_add_score(3)
-			spawn_chunk_dust(p.x+2,p.y+2)
-			p.l=0 -- Mark for deletion
+			if hit_by_player_bullet(p.x,p.y,4,4) then
+					hud_add_score(3) spawn_chunk_dust(p.x+2,p.y+2) p.l=0 if rnd()<0.2 then p_add(p.x+2,p.y+2,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
 			elseif scoll(p.x,p.y,4,4) then if game_state=="game" then ship_kill() end end
 		end
 	end

@@ -9,34 +9,23 @@ function p_upd()
   i.x+=i.dx i.y+=i.dy+((i.t==7 and cs*0.7) or 0) i.l-=1
   -- inline damp
   if i.t==4 then i.dx*=0.99 i.dy*=0.99 elseif i.t==2 or i.t==3 then i.dx*=0.98 i.dy*=0.98 end
-  -- pickup (type 7)
-   if i.t==7 and scoll(i.x,i.y,8,8) then
-   local d=i.d
-   if d==2 then -- shield free (existing behavior)
-    ship.shield_active=true ship.shield_free=110 ship.shield_power=max(ship.shield_power,10) snd_sfx(30)
-   elseif d==1 or d==nil then -- hull repair (legacy nil or explicit 1)
-    if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
-   elseif d==3 then -- big cash coin
-    money_total+=30 last_bonus+=30 snd_sfx(63)
-   elseif d==7 then -- small cash shard
-    money_total+=8 last_bonus+=8 snd_sfx(63)
-   elseif d==5 then -- rapid fire burst (extended duration)
-    ship.rfb=120 snd_sfx(63)
-    elseif d==6 then -- magnet field
-      mag_t=180 snd_sfx(63)
-   end
-   del(p,i) goto continue
-  end
-   -- magnet attraction influences other pickups while active (excluding the one just collected)
-   if mag_t and mag_t>0 and i.t==7 then
-    local cx,cy=ship.x+4,ship.y+4
-    local dx,dy=cx-i.x,cy-i.y
-    local d2=dx*dx+dy*dy
-    if d2>9 and d2<3600 then
-      local inv=1/sqrt(d2)
-      i.dx+=dx*inv*0.07
-      i.dy+=dy*inv*0.07
+   -- money shard settle: apply stronger friction once speed low
+    if i.t==7 and i.d==7 then
+         local dx,dy=ship.x+4-(i.x+1),ship.y+4-(i.y+1) local d2=dx*dx+dy*dy
+         if d2<196 and d2>0 then local inv=1/sqrt(d2)
+            if d2<49 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
+         else i.dx*=0.94 i.dy*=0.94 end
     end
+   -- pickup handling with tighter coin capture (center 4x4)
+   if i.t==7 then
+      if i.d==7 then local cx,cy=ship.x+2,ship.y+2 if not (i.x>=cx and i.x<cx+4 and i.y>=cy and i.y<cy+4) then goto skip_pick end end
+      if scoll(i.x,i.y,8,8) then local d=i.d
+   if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(30)
+       elseif d==1 or d==nil then if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
+       elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
+   elseif d==5 then ship.rfb=120 snd_sfx(63)
+       end del(p,i) goto continue end
+      ::skip_pick::
    end
   if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end
   ::continue::
@@ -46,24 +35,9 @@ end
 function p_draw()
  for i in all(p) do
     if i.t==7 then
-     -- powerup sprite + subtle alternating halo
-     local cx,cy=i.x+2,i.y+2
      local d=i.d
-    -- sprite selection: 10 shield, 38 hull, 57 big cash, 11 rapid, 56 magnet, 38 score; small cash (d==7) = custom spark
-    if d==7 then
-      local ph=flr(time()*8)%2 local col=10
-      pset(cx-1,cy,col)pset(cx+1,cy,col)pset(cx,cy-1,col)pset(cx,cy+1,col)
-    else
-      local sprid=(d==2 and 10) or (d==5 and 11) or (d==6 and 56) or (d==3 and 57) or 38
-      spr(sprid,i.x,i.y)
-    end
-     local ph=flr(time()*8)%2
-   local gc=(d==2 and 12) or (d==5 and 10) or (d==6 and 13) or ((d==3 or d==7) and 10) or 11 -- halo for all cash types
-     if ph==0 then
-        pset(cx-4,cy,gc)pset(cx+4,cy,gc)pset(cx,cy-4,gc)pset(cx,cy+4,gc)
-     else
-        pset(cx-3,cy-3,gc)pset(cx+3,cy-3,gc)pset(cx-3,cy+3,gc)pset(cx+3,cy+3,gc)
-     end
+     if d==7 then pset(i.x,i.y,10)pset(i.x+1,i.y,10)pset(i.x,i.y+1,10)pset(i.x+1,i.y+1,10)
+   else local sprid=(d==2 and 10) or (d==5 and 11) or 38 spr(sprid,i.x,i.y) end
     elseif i.t==4 and i.d then
      sspr(i.d[1],i.d[2],4,4,i.x,i.y)
     else

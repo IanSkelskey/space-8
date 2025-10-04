@@ -22,6 +22,7 @@ function update_station()
                 snd_sfx(63)
                 level_fanfare_timer = 0
                 last_payout_ready = false
+                last_bonus=0 -- reset collected bonus for new mission
                 game_state = "game"
                 sl(round_number)
                 ship_init()
@@ -60,15 +61,10 @@ function draw_station()
         -- payout (round earnings) panel - current funds moved to header
         rect(80,18,125,54,1)
         print("payout",84,20,6)
-        local function rtxt(label,val,y,col_l,col_v)
-            print(label,84,y,col_l)
-            local vs=""..val
-            print(vs,124-#vs*4,y,col_v)
-        end
         if last_payout_ready then
-            rtxt("base",last_pay,26,5,11)
-            rtxt("bonus",last_bonus,32,5,12)
-            rtxt("total",(last_pay+last_bonus),38,5,7)
+            print("base",84,26,5) local v=""..last_pay print(v,124-#v*4,26,11)
+            print("bonus",84,32,5) v=""..last_bonus print(v,124-#v*4,32,12)
+            print("total",84,38,5) v=""..(last_pay+last_bonus) print(v,124-#v*4,38,7)
         else
             print("none",84,30,5)
         end
