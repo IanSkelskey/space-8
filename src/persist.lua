@@ -172,7 +172,19 @@ function persist_reset_progress()
  money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
  ts,tsh,vr=0,0,1
  round_number=1
- if ship and ship_reset_upgrades then ship_reset_upgrades() end
+ -- reset ship upgrades both in gameplay (has ship_reset_upgrades) and UI cart (no ship.lua included)
+ if ship then
+  if ship_reset_upgrades then
+   ship_reset_upgrades()
+  else
+   -- explicit inline reset (mirror gameplay reset intent)
+   ship.fire_rate_level,ship.shield_level,ship.spread_level,ship.hull_level,ship.thruster_level=0,0,0,0,0
+   ship.shield_unlocked=false
+   ship.hull=2
+   ship.shield_pulse_level=0
+   ship.shield_power=0
+  end
+ end
  -- persisted fields
  dset(I_MONEY,0) dset(I_LAST_PAY,0) dset(I_LAST_BONUS,0)
  dset(I_PAYOUT_READY,0) dset(I_VR,1)
