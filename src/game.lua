@@ -95,7 +95,7 @@ function _update()
 			if ship.dying and ship.death_t>=45 then
 				ship.shield_pulse_level=0 -- reset per-run upgrade
 				-- CHANGED: store total accumulated run score (ts/tsh) instead of per‑mission score
-				persist_store_last_run(ts,tsh)
+				persist_store_last_run_total(tsh*1000+ts) -- new robust call
 				persist_save_from_game(2)
 				load("ui.p8")
 				return
