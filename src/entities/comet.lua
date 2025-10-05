@@ -60,11 +60,12 @@ function update_comet()
 					local green=(c.c8==3 or c.c9==11)
 					local blue=(c.c9==12)
 					local yellow=(c.c8==10)
-					if green and rnd()<0.18 then p_add(c.x,c.y,0,0,170,7) end
-					-- blue comet: ensure shield pickup uses dat=2 (was nil,true legacy)
+					local pink=(c.c8==2 or c.c9==14)
+					if green and rnd()<0.18 then p_add(c.x,c.y,0,0,170,7,nil,7) end
 					if blue and rnd()<0.14 then p_add(c.x,c.y,0,0,140,7,nil,2) end
-					-- new: yellow comet (c8==10) drops burst fire powerup (type 7, dat=5)
 					if yellow and rnd()<0.17 then p_add(c.x,c.y,0,0,150,7,nil,5) end
+					-- magnet (tile 56 powerup) from pink comets
+					if pink and rnd()<0.20 then p_add(c.x,c.y,0,0,150,7,nil,6) end
 						hud_add_score(55) snd_sfx(1) del(comets,c) break
 				else c.flash_t=4 end
 				break

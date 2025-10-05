@@ -36,7 +36,7 @@ end
 
 function draw_menu()
     if show_hs then
-        print("\014sPACE 8",36,12,7)
+        -- removed duplicate title print
         hs_draw_full()
         hs_draw_entry_overlay()
         return

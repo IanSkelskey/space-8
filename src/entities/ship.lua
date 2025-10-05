@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0} -- + magnet_t
 
 bullets={}
 
@@ -62,6 +62,7 @@ function ship_init()
  bullets={}
  ship.x,ship.y,ship.vx,ship.vy,ship.dying,ship.death_t,ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool,ship.laser_cd,ship.hull_invuln,ship.shield_free,ship.rfb=START_X,START_Y,0,0,false,0,false,0,0,0,0,0,0,0
  ship.shield_power=ship.shield_unlocked and 100 or 0
+ ship.magnet_t=0
  sfx(-1,3)
 end
 
@@ -124,6 +125,7 @@ function update_ship()
    shield_power=0 shield_free=0
   end
   if shield_active then shield_anim=(shield_anim+1)%30 end
+  if magnet_t>0 then magnet_t-=1 end
  end -- _ENV block
 end
 
@@ -146,6 +148,12 @@ function draw_ship()
   local cx,cy,t,cols=ship.x+4,ship.y+4,ship.shield_anim/30,thr_cols[2]
   local flash=ship.shield_invuln>25 and 7 or nil
   for i=1,3 do circ(cx,cy,10-i+sin(t+i*0.2)*2,flash or cols[i])end
+ end
+ if ship.magnet_t>0 then
+  -- pulsating magnet radius (base 40, slight pulse)
+  local r=40+sin(time()*2)*2
+  if ship.magnet_t<60 then r*=ship.magnet_t/60 end
+  circ(ship.x+4,ship.y+4,r, (flr(time()*8)%2==0) and 11 or 10)
  end
 end
 

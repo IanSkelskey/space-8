@@ -124,63 +124,53 @@ local function fmt_score(hi,lo)
  return ""..lo
 end
 
--- helper: centered print
+-- helper: centered print (ignore control chars <16 so font switches don't skew width)
 local function cprint(t,y,c)
- local x=64-#t*2
+ local vis=0
+ for i=1,#t do
+  if ord(t,i)>=16 then vis+=1 end
+ end
+ local x=64-vis*2
  print(t,x,y,c)
 end
 
 -- improved full-table renderer
 function hs_draw_full()
  if #hs_entries==0 then return end
- -- layout constants (tuned for more vertical spacing)
  local top=10
- local panel_bottom=118
- local row_gap=13        -- increased from 11
- local row_h_hi_y_off=8  -- highlight box bottom offset
- -- panel frame (taller)
- rectfill(6,top-6,121,panel_bottom,0)
- rect(6,top-6,121,panel_bottom,1)
+ local row_gap=13
+ local row_start=top+24
 
- -- title block (shifted up slightly with extra gap before rows)
- cprint("high scores",top-4,7)
+ -- header (no panel background now)
+ cprint("HIGH SCORES",top-4,7)
  cprint("\014sPACE 8\15",top+4,7)
  line(18,top+12,110,top+12,1)
 
- -- column headers (pushed down a bit for clarity)
+ -- column headers
  local hy=top+14
  print("#",12,hy,5)
  print("name",26,hy,5)
  print("score",92,hy,5)
 
- -- rows (start further down)
- local row_start=top+24
+ -- rows (no stripe / border rectangles)
  local trophy_sprs={50,103,104}
  for i,e in ipairs and ipairs(hs_entries) or inext,hs_entries do
   local a,b,c=dec_name(e.nc)
   local nm=name_to_string(a,b,c)
   local sc=fmt_score(e.hi,e.lo)
   local row_y=row_start+(i-1)*row_gap
-  -- base stripe
-  local stripe=((i%2)==0) and 1 or 0
-  rectfill(10,row_y-3,118,row_y+row_h_hi_y_off,stripe)
 
-  -- special styling for top 3
   if i<=3 then
-   -- overlay distinct background & border
-   local bc=i==1 and 10 or (i==2 and 6 or 4) -- gold, silver, bronze accents
-   rectfill(10,row_y-3,118,row_y+row_h_hi_y_off,0)
-   rect(10,row_y-3,118,row_y+row_h_hi_y_off,bc)
-   spr(trophy_sprs[i],14,row_y)
+   spr(trophy_sprs[i],14,row_y) -- trophy
   else
-   spr(50,14,row_y) -- reuse gold icon as generic marker for remaining
+   spr(50,14,row_y) -- generic marker
   end
 
   -- rank / name
   print(i..".",22,row_y,(i==1 and 10 or i==2 and 6 or i==3 and 4 or 6))
   print(nm,34,row_y,(i==1 and 7 or 6))
 
-  -- score color pulse for #1, subtle for #2/#3
+  -- score coloring
   local sc_col=
     (i==1 and ((time()%0.5<0.25) and 11 or 10))
     or (i==2 and 6)
@@ -189,10 +179,9 @@ function hs_draw_full()
   print(sc,118-#sc*4,row_y,sc_col)
  end
 
- -- footer (lower, matching new panel height)
- local fy=panel_bottom-14
- line(18,fy,110,fy,1)
- cprint("❎ back",panel_bottom-9,5)
+ -- footer line + back hint (minimal, no fill)
+ line(18,top+12+row_gap*#hs_entries+6,110,top+12+row_gap*#hs_entries+6,1)
+ cprint("❎ back",top+12+row_gap*#hs_entries+11,5)
 end
 
 -- compact (single-line) display

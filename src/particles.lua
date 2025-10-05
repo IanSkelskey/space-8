@@ -26,12 +26,31 @@ function p_upd()
    if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(30)
        elseif d==1 or d==nil then if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
        elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
-   elseif d==5 then ship.rfb=120 snd_sfx(63)
+       elseif d==5 then ship.rfb=120 snd_sfx(63)
+       elseif d==6 then ship.magnet_t=420 snd_sfx(63)
        end del(p,i) goto continue end
       ::skip_pick::
    end
   if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end
   ::continue::
+ end
+ -- global magnet pull (after per-particle updates for smoother feel)
+ if ship.magnet_t and ship.magnet_t>0 then
+  local cx,cy=ship.x+4,ship.y+4
+  local r=44
+  local r2=r*r
+  for i in all(p) do
+   if i.t==7 then
+    local dx,dy=cx-i.x,cy-i.y
+    local d2=dx*dx+dy*dy
+    if d2<r2 and d2>0.5 then
+     local inv=1/sqrt(d2)
+     local pull=0.55*(1-d2/r2)
+     i.dx+=dx*inv*pull
+     i.dy+=dy*inv*pull
+    end
+   end
+  end
  end
 end
 
@@ -39,8 +58,14 @@ function p_draw()
  for i in all(p) do
     if i.t==7 then
      local d=i.d
-     if d==7 then pset(i.x,i.y,10)pset(i.x+1,i.y,10)pset(i.x,i.y+1,10)pset(i.x+1,i.y+1,10)
-   else h(i.x+2.5,i.y+2.5,time(),d==2 and 12 or d==5 and 9 or 11,d==2 and 1 or d==5 and 10 or 7) spr((d==2 and 10) or (d==5 and 11) or 38,i.x,i.y) end
+     if d==7 then
+       pset(i.x,i.y,10)pset(i.x+1,i.y,10)pset(i.x,i.y+1,10)pset(i.x+1,i.y+1,10)
+     else
+       h(i.x+2.5,i.y+2.5,time(),
+        (d==2 and 12) or (d==5 and 9) or (d==6 and 10) or 11,
+        (d==2 and 1)  or (d==5 and 10) or (d==6 and 8)  or 7)
+       spr((d==2 and 10) or (d==5 and 11) or (d==6 and 56) or 38,i.x,i.y)
+     end
     elseif i.t==4 and i.d then
      sspr(i.d[1],i.d[2],4,4,i.x,i.y)
     else
