@@ -160,10 +160,9 @@ function hs_draw_full()
   local sc=fmt_score(e.hi,e.lo)
   local row_y=row_start+(i-1)*row_gap
 
+  -- only draw trophy icons for top 3 (no marker for others)
   if i<=3 then
-   spr(trophy_sprs[i],14,row_y) -- trophy
-  else
-   spr(50,14,row_y) -- generic marker
+   spr(trophy_sprs[i],14,row_y)
   end
 
   -- rank / name
@@ -193,8 +192,9 @@ function hs_draw_compact()
  local a,b,c=dec_name(e.nc)
  local nm=name_to_string(a,b,c)
  local sc=fmt_score(e.hi,e.lo)
- -- small tag top-left
- print("top "..nm.." "..sc,2,4,7)
+ -- trophy icon + name/score
+ spr(50,2,4)
+ print(nm.." "..sc,12,4,7)
 end
 
 -- adjust overlay so it centers above new panel (y shift)
