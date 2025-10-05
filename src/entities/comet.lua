@@ -66,12 +66,15 @@ function update_comet()
 					local cx,cy=c.x+4,c.y+4
 					p_add(cx,cy,0,0,10,1,7)
 					for i=1,10 do local a=rnd() local sp=rnd(1.3) p_add(cx,cy,cos(a)*sp,sin(a)*sp,12+rnd(10)\1,5,(i%2==0 and c.c8 or c.c9)) end
-					-- existing drop logic
+					-- existing drop logic (money shards removed)
 					local green=(c.c8==3 or c.c9==11)
 					local blue=(c.c9==12)
 					local yellow=(c.c8==10)
 					local pink=(c.c8==2 or c.c9==14)
-					if green and rnd()<0.18 then p_add(c.x,c.y,0,0,170,7,nil,7) end
+					-- green: 5% hull repair only (no money shard anymore)
+					if green and rnd()<0.05 then
+					 p_add(c.x,c.y,0,0,170,7,nil,1) -- hull repair
+					end
 					if blue and rnd()<0.14 then p_add(c.x,c.y,0,0,140,7,nil,2) end
 					if yellow and rnd()<0.17 then p_add(c.x,c.y,0,0,150,7,nil,5) end
 					if pink and rnd()<0.20 then p_add(c.x,c.y,0,0,150,7,nil,6) end
