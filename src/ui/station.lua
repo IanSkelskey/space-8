@@ -2,7 +2,26 @@ station_mode = station_mode or "main"
 station_confirm = station_confirm or false
 local sel = sel or 1
 
-function station_init() station_mode="main" station_confirm=false sel=1 if shop_init then shop_init() end end
+-- fallback mission word lists (only created if not already defined by gameplay cart)
+local sci_adj=sci_adj or split"quantum,plasma,ionic,fusion,nano,void"
+local sci_noun=sci_noun or split"core,drive,matrix,relay,reactor,array"
+
+local function ensure_mission()
+ -- if gameplay cart didn't persist name, synthesize deterministic one
+ if not current_mission then
+  local ai=(round_number*3)%#sci_adj+1
+  local ni=(round_number*5)%#sci_noun+1
+  current_mission=sci_adj[ai].." "..sci_noun[ni]
+ end
+ if not mission_distance or mission_distance<=0 then
+  mission_distance=400+round_number*80
+ end
+end
+
+function station_init() station_mode="main" station_confirm=false sel=1
+ ensure_mission()
+ if shop_init then shop_init() end
+end
 
 function update_station()
     if station_mode == "main" then
@@ -36,6 +55,7 @@ end
 
 function draw_station()
     if station_mode == "main" then
+        ensure_mission()
         -- header bar
         rectfill(0,0,127,15,1)
         print("station",4,4,7)

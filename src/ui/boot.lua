@@ -41,6 +41,7 @@ function _update()
  elseif game_state=="station" then update_station()
  elseif game_state=="gameover" then
   if btnp(5) then
+   persist_reset_progress() -- NEW: clear accumulated progress after game over
    game_state="menu"
    menu_init()
    dset(0,0)

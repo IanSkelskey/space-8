@@ -38,8 +38,18 @@ function update_comet()
 		spawn_t=(mi+rnd(rg))*(round_number<5 and 1.5 or 1)
 	end
 
+	local p_act,pr,prp=ship.pulse_active,ship.pulse_r,ship.pulse_prev
 	for c in all(comets) do
+		-- pre-warning skip
 		if c.warning_t>0 then c.warning_t-=1 goto continue end
+		-- retaliation splash
+		if ship.shield_retaliate_t>0 then
+		 local dx=c.x+4-(ship.x+4) local dy=c.y+4-(ship.y+4)
+		 if dx*dx+dy*dy <= ship.shield_retaliate_r*ship.shield_retaliate_r then
+		  c.hp-=1 c.flash_t=4
+		 end
+		end
+		-- movement
 		c.x+=c.dx*cs c.y+=c.dy*cs
 		if c.flash_t>0 then c.flash_t-=1 end
 		local spd=c.dx*c.dx+c.dy*c.dy
@@ -56,7 +66,7 @@ function update_comet()
 					local cx,cy=c.x+4,c.y+4
 					p_add(cx,cy,0,0,10,1,7)
 					for i=1,10 do local a=rnd() local sp=rnd(1.3) p_add(cx,cy,cos(a)*sp,sin(a)*sp,12+rnd(10)\1,5,(i%2==0 and c.c8 or c.c9)) end
-					-- reduced drop rates: fewer free survivability resources
+					-- existing drop logic
 					local green=(c.c8==3 or c.c9==11)
 					local blue=(c.c9==12)
 					local yellow=(c.c8==10)
@@ -64,9 +74,8 @@ function update_comet()
 					if green and rnd()<0.18 then p_add(c.x,c.y,0,0,170,7,nil,7) end
 					if blue and rnd()<0.14 then p_add(c.x,c.y,0,0,140,7,nil,2) end
 					if yellow and rnd()<0.17 then p_add(c.x,c.y,0,0,150,7,nil,5) end
-					-- magnet (tile 56 powerup) from pink comets
 					if pink and rnd()<0.20 then p_add(c.x,c.y,0,0,150,7,nil,6) end
-						hud_add_score(55) snd_sfx(1) del(comets,c) break
+					hud_add_score(55) snd_sfx(1) del(comets,c) goto continue
 				else c.flash_t=4 end
 				break
 			end

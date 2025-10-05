@@ -32,6 +32,7 @@ local I_LAST_RUN_LO=18
 local I_LAST_RUN_HI=19
 local I_HS_COUNT=20
 local I_HS_BASE=21 -- entries: (hi,lo,name) * n
+local I_PULSE=40 -- new: shield pulse upgrade (keep away from hs region)
 
 -- write a value only if non-nil (saves a few tokens where used repeatedly)
 local function w(i,v) if v then dset(i,v) end end
@@ -52,6 +53,7 @@ function persist_save_for_game()
   w(I_THRUST,ship.thruster_level)
   w(I_SHIELD_UNL,ship.shield_unlocked and 1 or 0)
   w(I_HULL,ship.hull)
+  w(I_PULSE,ship.shield_pulse_level) -- save between missions in a live run
  end
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
@@ -77,6 +79,13 @@ function persist_save_from_game(ui_state)
   w(I_THRUST,ship.thruster_level)
   w(I_SHIELD_UNL,ship.shield_unlocked and 1 or 0)
   w(I_HULL,ship.hull)
+  if ui_state==2 then
+   -- gameover: do not persist shield shock upgrade
+   ship.shield_pulse_level=0
+   dset(I_PULSE,0)
+  else
+   w(I_PULSE,ship.shield_pulse_level)
+  end
  end
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
@@ -104,6 +113,7 @@ local function lg()
   ship.thruster_level=dget(I_THRUST)
   ship.shield_unlocked=dget(I_SHIELD_UNL)==1
   ship.hull=dget(I_HULL)>0 and dget(I_HULL) or ship.hull
+  ship.shield_pulse_level=dget(I_PULSE)
  end
 end
 
@@ -146,4 +156,20 @@ function persist_clear_last_run()
 end
 function persist_hs_indices()
  return I_HS_COUNT,I_HS_BASE
+end
+
+function persist_reset_progress()
+ -- runtime vars
+ money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
+ ts,tsh,vr=0,0,1
+ round_number=1
+ if ship and ship_reset_upgrades then ship_reset_upgrades() end
+ -- persisted fields
+ dset(I_MONEY,0) dset(I_LAST_PAY,0) dset(I_LAST_BONUS,0)
+ dset(I_PAYOUT_READY,0) dset(I_VR,1)
+ dset(I_FIRE,0) dset(I_SHIELD,0) dset(I_SPREAD,0) dset(I_HULL_L,0)
+ dset(I_THRUST,0) dset(I_SHIELD_UNL,0) dset(I_HULL,2) dset(I_PULSE,0)
+ dset(I_TS,0) dset(I_TSH,0)
+ -- clear last run (score) so next session starts fresh (highscores unaffected)
+ dset(I_LAST_RUN_LO,0) dset(I_LAST_RUN_HI,0)
 end

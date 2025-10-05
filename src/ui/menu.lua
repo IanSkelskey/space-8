@@ -3,6 +3,7 @@ local show_hs=false -- new: full high score mode
 
 local function start_game(set_df)
  df=set_df
+ persist_reset_progress() -- NEW: wipe money/score/upgrades before new run
  round_number=sr[df] vr=1
  persist_save_for_game()
  load("space_shooter.p8")

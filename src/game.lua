@@ -84,13 +84,22 @@ function _update()
 	local gs=game_state
 	if gs=="game" or gs=="dying"then
 		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
-		if game_state=="game" then if ship.dying then game_state="dying" elseif dr>0 then dr-=1 if dr<=0 then complete_mission() end end else if ship.dying and ship.death_t>=45 then game_state="gameover" end end
-	elseif gs=="gameover"then
-		if btnp(5) then
-			-- record last run score (scoreh thousands + score)
-			persist_store_last_run(score,scoreh)
-			persist_save_from_game(0)
-			load("ui.p8")
+		if game_state=="game" then
+			if ship.dying then
+				game_state="dying"
+			elseif dr>0 then
+				dr-=1
+				if dr<=0 then complete_mission() end
+			end
+		else
+			if ship.dying and ship.death_t>=45 then
+				ship.shield_pulse_level=0 -- reset per-run upgrade
+				-- CHANGED: store total accumulated run score (ts/tsh) instead of per‑mission score
+				persist_store_last_run(ts,tsh)
+				persist_save_from_game(2)
+				load("ui.p8")
+				return
+			end
 		end
 	end
 	prev_game_state=prev
@@ -106,9 +115,7 @@ function _draw()
 		draw_asteroid()
 		draw_comet()
 		draw_ship()
-		p_draw() -- Draw all particles
+		p_draw()
 		draw_hud()
-	elseif game_state=="gameover"then
-		draw_gameover()
-	end
+	end -- gameover never drawn here now (handled in ui cart)
 end

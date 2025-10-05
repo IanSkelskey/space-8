@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0} -- + magnet_t
+ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0}
 
 bullets={}
 
@@ -36,13 +36,18 @@ function ship_kill()
  sfx(-1,3)
  if ship.shield_active then
   local _,_,hit=sh_stats()
+  -- reduced hit drain per shield_pulse_level
+  hit=hit*(1-0.15*ship.shield_pulse_level)
   ship.shield_power=max(0,ship.shield_power-hit)
   ship.shield_invuln=30
   ship.shield_anim=0
   snd_sfx(31)
-  if ship.shield_power<=0 then
-     sh_off()
+  -- retaliation (debounced by shield_invuln frames)
+  if ship.shield_pulse_level>0 then
+   ship.shield_retaliate_t=2
+   ship.shield_retaliate_r=18+4*(ship.shield_pulse_level-1)
   end
+  if ship.shield_power<=0 then sh_off() end
   return
  end
  ship.hull-=1
@@ -63,6 +68,7 @@ function ship_init()
  ship.x,ship.y,ship.vx,ship.vy,ship.dying,ship.death_t,ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool,ship.laser_cd,ship.hull_invuln,ship.shield_free,ship.rfb=START_X,START_Y,0,0,false,0,false,0,0,0,0,0,0,0
  ship.shield_power=ship.shield_unlocked and 100 or 0
  ship.magnet_t=0
+ ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
  sfx(-1,3)
 end
 
@@ -106,24 +112,50 @@ function update_ship()
   end
   ub()
   if shield_invuln>0 then shield_invuln-=1 end
+
+  -- REPLACED SHIELD / PULSE BLOCK (previous version had mismatched else)
   if shield_unlocked or shield_free>0 then
-   local drain,rech=sh_stats()
-   if shield_active then
-    if shield_free>0 then shield_free-=1 else shield_power=max(0,shield_power-drain) end
-  if shield_power<=0 and shield_free<=0 then sh_off() end
-   end
-  -- auto-hold during free shield period (no button required)
-  if shield_free>0 then
-   shield_active=true
+    local drain,rech=sh_stats()
+    if shield_pulse_level>0 then drain=drain*(1-0.1*shield_pulse_level) end
+
+    -- drain while active
+    if shield_active then
+      if shield_free>0 then
+        shield_free-=1
+      else
+        shield_power=max(0,shield_power-drain)
+      end
+      if shield_power<=0 and shield_free<=0 then sh_off() end
+    end
+
+    -- auto-hold during free shield time
+    if shield_free>0 then
+      shield_active=true
+    end
+
+    -- manual toggle (only when not in free period)
+    if shield_free<=0 then
+      if btn(5) and shield_power>=10 and shield_cool<=0 and not dying and not shield_active then
+        shield_active=true snd_sfx(30)
+      elseif (not btn(5)) and shield_active then
+        shield_active=false sfx(-1,3)
+      end
+    end
+
+    -- recharge when inactive
+    if not shield_active then
+      if shield_cool>0 then
+        shield_cool-=1
+      elseif shield_power<100 and shield_invuln<=0 then
+        shield_power=min(100,shield_power+rech)
+      end
+    end
   else
-  if btn(5)and shield_power>=10 and shield_cool<=0 and not dying and not shield_active then shield_active=true snd_sfx(30)
-   elseif not btn(5)and shield_active then shield_active=false sfx(-1,3) end
+    -- shield locked & no free time
+    if shield_active then shield_active=false sfx(-1,3) end
+    shield_power=0 shield_free=0
   end
-   if not shield_active then if shield_cool>0 then shield_cool-=1 elseif shield_power<100 and shield_invuln<=0 then shield_power=min(100,shield_power+rech) end end
-  else
-   if shield_active then shield_active=false sfx(-1,3) end
-   shield_power=0 shield_free=0
-  end
+
   if shield_active then shield_anim=(shield_anim+1)%30 end
   if magnet_t>0 then magnet_t-=1 end
  end -- _ENV block
@@ -144,16 +176,26 @@ function draw_ship()
   -- overlay yellow tint: redraw bullets with brighter colors
   for b in all(bullets)do local x,y=flr(b.x),flr(b.y)pset(x,y,10)pset(x,y-1,9)end
  end
- if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and(ship.shield_invuln%4)<2)then
-  local cx,cy,t,cols=ship.x+4,ship.y+4,ship.shield_anim/30,thr_cols[2]
-  local flash=ship.shield_invuln>25 and 7 or nil
-  for i=1,3 do circ(cx,cy,10-i+sin(t+i*0.2)*2,flash or cols[i])end
+ if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and (ship.shield_invuln%4)<2) then
+  local cx,cy,t=ship.x+4,ship.y+4,ship.shield_anim/30
+  local base_r=10+ship.shield_pulse_level -- slight growth per level
+  local cols = (ship.shield_pulse_level>0) and {8,9,2} or thr_cols[2]
+  local flash=ship.shield_invuln>25 and (ship.shield_pulse_level>0 and 8 or 7) or nil
+  for i=1,3 do
+    circ(cx,cy,base_r-i+sin(t+i*0.2)*2,flash or cols[i])
+  end
  end
+ -- magnet aura simplified: single spinning dotted ring at effect radius
  if ship.magnet_t>0 then
-  -- pulsating magnet radius (base 40, slight pulse)
-  local r=40+sin(time()*2)*2
-  if ship.magnet_t<60 then r*=ship.magnet_t/60 end
-  circ(ship.x+4,ship.y+4,r, (flr(time()*8)%2==0) and 11 or 10)
+  local cx,cy=ship.x+4,ship.y+4
+  local r=44 -- matches pull radius in particle system
+  local aoff=time()*0.6
+  for i=0,47 do
+   if (i%2)==0 then
+    local a=aoff+i/48
+    pset(flr(cx+cos(a)*r+0.5),flr(cy+sin(a)*r+0.5),7)
+   end
+  end
  end
 end
 
@@ -165,6 +207,11 @@ end
 
 function ship_reset_upgrades()
  ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level,ship.thruster_level,ship.hull,ship.rfb=0,0,false,0,0,0,0,0,2,0
+ ship.shield_pulse_level=0
+ ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
 end
-
--- ship_trails_pull / ship_trails_absorb wrappers removed (inline where used)
+function ship_reset_upgrades()
+ ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level,ship.thruster_level,ship.hull,ship.rfb=0,0,false,0,0,0,0,0,2,0
+ ship.shield_pulse_level=0
+ ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
+end
