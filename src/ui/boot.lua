@@ -28,6 +28,8 @@ function _init()
  end
  -- init starfield for ui backgrounds
  if starfield_init then starfield_init() end
+ hs_init()        -- load table / initial entry
+ hs_process_new_run() -- insert last run if qualifies (and maybe start name entry)
  dset(0,0)
  snd_music(0)
 end

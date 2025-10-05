@@ -87,7 +87,8 @@ function _update()
 		if game_state=="game" then if ship.dying then game_state="dying" elseif dr>0 then dr-=1 if dr<=0 then complete_mission() end end else if ship.dying and ship.death_t>=45 then game_state="gameover" end end
 	elseif gs=="gameover"then
 		if btnp(5) then
-			-- go straight to main menu (ui_state=0) instead of landing on gameover screen again
+			-- record last run score (scoreh thousands + score)
+			persist_store_last_run(score,scoreh)
 			persist_save_from_game(0)
 			load("ui.p8")
 		end

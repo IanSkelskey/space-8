@@ -28,6 +28,10 @@ local I_TS=14
 local I_TSH=15
 local I_PAYOUT_READY=16
 local I_START_FLAG=17 -- 1 means gameplay cart should start a mission immediately
+local I_LAST_RUN_LO=18
+local I_LAST_RUN_HI=19
+local I_HS_COUNT=20
+local I_HS_BASE=21 -- entries: (hi,lo,name) * n
 
 -- write a value only if non-nil (saves a few tokens where used repeatedly)
 local function w(i,v) if v then dset(i,v) end end
@@ -129,3 +133,17 @@ function exit_to_ui(state)
 end
 
 function persist_consume_start_flag() dset(I_START_FLAG,0) end
+-- expose indices needed by ui/game for highscores
+function persist_store_last_run(score_lo,score_hi)
+ dset(I_LAST_RUN_LO,score_lo or 0) dset(I_LAST_RUN_HI,score_hi or 0)
+end
+function persist_fetch_last_run()
+ local hi=dget(I_LAST_RUN_HI) local lo=dget(I_LAST_RUN_LO)
+ return lo,hi
+end
+function persist_clear_last_run()
+ dset(I_LAST_RUN_LO,0) dset(I_LAST_RUN_HI,0)
+end
+function persist_hs_indices()
+ return I_HS_COUNT,I_HS_BASE
+end
