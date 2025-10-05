@@ -98,8 +98,8 @@ function shop_draw()
   cstr="$"..flr(repair_cost+0.5)
  else
   local lv,ul=sit[5]~="" and (ship[sit[5]] or 0) or 0,sit[6]~="" and ship[sit[6]]
-    if p==1 and s==2 and not ul then
-     cstr,desc="$"..flr(140*dm+0.5),"+ adds shield"
+  if p==1 and s==2 and not ul then
+   cstr,desc="$"..flr(140*dm+0.5),"+ adds shield"
   elseif lv<sit[2] then
    cstr="$"..flr((sit[3]+sit[4]*lv)*dm+0.5)
   else

@@ -55,13 +55,30 @@
 
 ## Running the Game
 1. Open PICO-8
-2. Run `load space_shooter.p8` to load the game
-3. Run `run space_shooter.p8` to start playing
-4. To export for web: `export -f space_shooter.html`
+2. This project now uses a multi-cart setup:
+    - `ui.p8` : menus, station, shop, game over
+    - `space_shooter.p8` : gameplay (action loop + entities)
+3. Launch the UI cart first: `load ui.p8` then `run`
+4. Selecting a difficulty / launch mission loads `space_shooter.p8` automatically (state passed via `cartdata`)
+5. When a mission ends or you die, the gameplay cart saves back to `cartdata` and loads `ui.p8` to show station or game over
+6. To export for web you must export both carts (PICO-8 will bundle dependencies if you chain from the UI cart). Example:
+    - `export space_8.html ui.p8` (PICO-8 will include the gameplay cart it loads)
+
+### Persisted Values Between Carts
+The following values are serialized with `dset/dget` (indices documented in `src/persist.lua`): difficulty, round, visible round, money, last payout + bonus, score totals (ts,tsh), upgrade levels (fire, shield, spread, hull, thruster), shield unlocked, current hull, payout-ready flag, and a start flag instructing gameplay cart to begin a mission immediately.
+
+To reset progress: from the UI cart run `cartdata("sp8") for i=0,32 do dset(i,0) end` then restart.
 
 ## Credits
 - Game by Ian Skelskey
 - Music and SFX by Ian Skelskey
+
+## Future Refinements
+- Preserve fanfare depart animation across cart switch (currently simplified)
+- Pack multiple small integers into single `dset` slots to reclaim indices
+- Add versioning / checksum for `cartdata` to allow safe format changes
+- Optional cloud/high score persistence layer using exported web wrapper
+- Title screen attract mode (demo playback) as third cart if tokens become tight
 
 ## License
 MIT License. See LICENSE file if present.

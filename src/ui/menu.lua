@@ -1,11 +1,10 @@
 local sel=1
 
 local function start_game(set_df)
-    df=set_df
-    round_number=sr[df] vr=1
-    game_state="game"
-    ship_init() asteroid_init() hud_init() comet_init() blackhole_init()
-    snd_sfx(63,3)
+ df=set_df
+ round_number=sr[df] vr=1
+ persist_save_for_game()
+ load("space_shooter.p8")
 end
 
 -- removed help/controls option

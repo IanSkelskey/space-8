@@ -12,7 +12,7 @@ function update_station()
             if sel<1 then sel=2 elseif sel>2 then sel=1 end
             if btnp(4) then
                 if sel == 1 then
-                    if level_fanfare_timer<=0 then station_confirm = true snd_sfx(63) end
+                    if (level_fanfare_timer or 0)<=0 then station_confirm = true snd_sfx(63) end
                 else
                     station_mode = "shop" snd_sfx(63)
                 end
@@ -23,9 +23,7 @@ function update_station()
                 level_fanfare_timer = 0
                 last_payout_ready = false
                 last_bonus=0 -- reset collected bonus for new mission
-                game_state = "game"
-                sl(round_number)
-                ship_init()
+                    launch_mission()
                 station_confirm = false
             elseif btnp(5) then
                 station_confirm = false snd_sfx(44)

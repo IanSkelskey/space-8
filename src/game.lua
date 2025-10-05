@@ -1,4 +1,4 @@
-game_state,prev_game_state="menu","menu"
+game_state,prev_game_state="game","game"
 -- shared small constants / helpers (token savings)
 FT=1/30
 dm=dm or split"0.7,0.8,0.9" -- difficulty multipliers (easy,normal,veteran)
@@ -40,65 +40,56 @@ function complete_mission()
 	snd_music(8)
 	level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
 end
-function reset_game()
-	snd_music()
-	starfield_init() ship_reset_upgrades() ie() station_init() menu_init() p_clear()
-	game_state,prev_game_state,round_number,current_mission,mission_distance,dr,money_total,ts,tsh,last_pay,last_bonus,last_payout_ready="menu","menu",sr[df],nil,0,0,0,0,0,0,0,false
-	vr=1 snd_music(0)
-end
+-- no local reset (handled by ui cart). When player chooses restart in ui cart it resets cartdata and relaunches.
 function _init()
-	-- Set up palette swap: use extended color 129 instead of color 15
-	-- 129 = 0x81 in hex (128 + 1)
-	pal(15, 0x81, 1)
-	
-	starfield_init() ship_reset_upgrades() ie() station_init() menu_init() p_clear()
-	round_number=sr[df] tsh=0 vr=1 snd_music(0)
+ pal(15,0x81,1)
+ starfield_init()
+ local resumed=persist_load_game_start()
+ if not resumed then
+  -- launched directly or stale flag after a reset: go to main menu
+  persist_save_from_game(0)
+  load("ui.p8")
+  return
+ end
+ -- mission handoff confirmed; consume flag so reset goes to menu
+ persist_consume_start_flag()
+ -- initialize entities & ship (preserves loaded upgrade levels)
+ ie() p_clear()
+ if not current_mission then generate_mission() end
+ snd_music(10)
 end
 function _update()
 	update_starfield()
 	if level_fanfare_timer>0 then level_fanfare_timer-=1 end
 
 	-- pause menu item: show round when active
-	if game_state=="game" or game_state=="station" or game_state=="fanfare_depart" then menuitem(1,"round "..vr) else menuitem(1) end
+	if game_state=="game" or game_state=="fanfare_depart" then menuitem(1,"round "..vr) else menuitem(1) end
 
 	if game_state=="fanfare_depart"then
-		if ship_departing then
-			ship.y-=1.5
-			if ship.y+ship.h<0 then ship_departing=false end
-		end
-		if not ship_departing and level_fanfare_timer<=0 then
-			ship_init()
-			game_state="station"
-		end
-		p_upd() -- Update particles during fanfare
-		prev_game_state="fanfare_depart"
-		return
+	 if ship_departing then
+	  ship.y-=1.5
+	  if ship.y+ship.h<0 then ship_departing=false end
+	 end
+	 p_upd()
+	 if not ship_departing and level_fanfare_timer<=0 then
+	  -- mission finished: return to station in ui cart
+	  persist_save_from_game(1) -- station state
+	  load("ui.p8")
+	 end
+	 prev_game_state="fanfare_depart"
+	 return
 	end
 	local prev=game_state
 	snd_update_music(game_state,prev_game_state,level_fanfare_timer)
 	local gs=game_state
-	if gs=="menu"then
-		update_menu()
-		if game_state=="game"then
-			game_state="station"
-			generate_mission()
-			snd_music(10)
-		end
-	elseif gs=="station"then
-		update_station()
-		p_clear() -- Clear particles when at station
-		-- Clear payout flag when leaving station to start new mission
-		if game_state=="game" and last_payout_ready then
-			last_payout_ready=false
-		end
-	elseif gs=="game" or gs=="dying"then
+	if gs=="game" or gs=="dying"then
 		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
 		if game_state=="game" then if ship.dying then game_state="dying" elseif dr>0 then dr-=1 if dr<=0 then complete_mission() end end else if ship.dying and ship.death_t>=45 then game_state="gameover" end end
 	elseif gs=="gameover"then
-		-- use ❎ (btn 5) per on-screen prompt; play select sfx after reset so ship_init doesn't cancel it
 		if btnp(5) then
-			reset_game()
-			snd_sfx(63,3)
+			-- go straight to main menu (ui_state=0) instead of landing on gameover screen again
+			persist_save_from_game(0)
+			load("ui.p8")
 		end
 	end
 	prev_game_state=prev
@@ -106,11 +97,7 @@ end
 function _draw()
 	cls()
 	draw_starfield()
-	if game_state=="menu"then
-		draw_menu()
-	elseif game_state=="station"then
-		draw_station()
-	elseif game_state=="fanfare_depart"then
+	if game_state=="fanfare_depart"then
 		draw_ship()
 		draw_hud()
 	elseif game_state=="game"or game_state=="dying"then
