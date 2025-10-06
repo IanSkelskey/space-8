@@ -33,6 +33,8 @@ local I_LAST_RUN_HI=19
 local I_HS_COUNT=20
 local I_HS_BASE=21 -- entries: (hi,lo,name) * n
 local I_PULSE=40 -- new: shield pulse upgrade (keep away from hs region)
+local I_LIFE_LO=41 -- lifetime money low (0-999)
+local I_LIFE_HI=42 -- lifetime money thousands
 
 -- write a value only if non-nil (saves a few tokens where used repeatedly)
 local function w(i,v) if v then dset(i,v) end end
@@ -57,6 +59,8 @@ function persist_save_for_game()
  end
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
+ -- lifetime money already tracked incrementally; just persist current copy
+ if money_life_lo then dset(I_LIFE_LO,money_life_lo) dset(I_LIFE_HI,money_life_hi) end
  dset(I_START_FLAG,1)
  dset(I_UI_STATE,0) -- clear pending ui state
 end
@@ -89,6 +93,7 @@ function persist_save_from_game(ui_state)
  end
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
+ if money_life_lo then dset(I_LIFE_LO,money_life_lo) dset(I_LIFE_HI,money_life_hi) end
 end
 
 -- load values into globals (used by both carts)
@@ -105,6 +110,7 @@ local function lg()
  vr=dget(I_VR)
  ts=dget(I_TS) tsh=dget(I_TSH)
  last_payout_ready=dget(I_PAYOUT_READY)==1
+ money_life_lo=dget(I_LIFE_LO) money_life_hi=dget(I_LIFE_HI)
  if ship then
   ship.fire_rate_level=dget(I_FIRE)
   ship.shield_level=dget(I_SHIELD)
@@ -193,4 +199,7 @@ function persist_reset_progress()
  dset(I_TS,0) dset(I_TSH,0)
  -- clear last run (score) so next session starts fresh (highscores unaffected)
  dset(I_LAST_RUN_LO,0) dset(I_LAST_RUN_HI,0)
+ -- reset lifetime money for a fresh game
+ money_life_lo,money_life_hi=0,0
+ dset(I_LIFE_LO,0) dset(I_LIFE_HI,0)
 end

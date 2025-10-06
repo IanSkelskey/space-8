@@ -23,6 +23,8 @@ local I_START_FLAG=17
 local I_LAST_RUN_LO=18
 local I_LAST_RUN_HI=19
 local I_PULSE=40
+local I_LIFE_LO=41
+local I_LIFE_HI=42
 
 local function w(i,v) if v then dset(i,v) end end
 
@@ -37,6 +39,7 @@ function persist_load_game_start()
  vr=dget(I_VR)
  ts=dget(I_TS) tsh=dget(I_TSH)
  last_payout_ready=dget(I_PAYOUT_READY)==1
+ money_life_lo=dget(I_LIFE_LO) money_life_hi=dget(I_LIFE_HI)
  if not ship then ship={} end
  ship.fire_rate_level=dget(I_FIRE)
  ship.shield_level=dget(I_SHIELD)
@@ -65,6 +68,7 @@ function persist_save_from_game(ui_state)
  end
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
+ if money_life_lo then dset(I_LIFE_LO,money_life_lo) dset(I_LIFE_HI,money_life_hi) end
 end
 
 -- store last run total (already pre-summed by caller)

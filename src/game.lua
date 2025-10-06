@@ -19,6 +19,9 @@ function complete_mission()
  local mult=dsc and dsc[df] or 1
  last_pay=flr((40+mission_distance\25)*mult)
  money_total+=last_pay
+ -- lifetime money accumulation
+ if not money_life_lo then money_life_lo,money_life_hi=0,0 end
+ money_life_lo+=last_pay while money_life_lo>=1000 do money_life_lo-=1000 money_life_hi+=1 end
  last_payout_ready=true
  score,scoreh,db=0,0,0
  round_number+=1 vr+=1
