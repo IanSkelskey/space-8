@@ -3,7 +3,6 @@ version 43
 __lua__
 #include src/util/sound.lua
 #include src/persist.lua
-#include src/ui/font.lua
 #include src/ui/hud.lua
 #include src/starfield.lua
 #include src/particles.lua

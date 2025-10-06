@@ -1,8 +1,6 @@
 game_state,prev_game_state="game","game"
 -- shared small constants / helpers (token savings)
 FT=1/30
-dm=dm or split"0.7,0.8,0.9" -- difficulty multipliers (easy,normal,veteran)
-function dmul()return dm[df] end
 function aabb(ax,ay,aw,ah,bx,by,bw,bh)
 	return ax<bx+bw and bx<ax+aw and ay<by+bh and by<ay+ah
 end
@@ -49,8 +47,7 @@ function _update()
 	update_starfield()
 	if level_fanfare_timer>0 then level_fanfare_timer-=1 end
 
-	-- pause menu item: show round when active
-	if game_state=="game" or game_state=="fanfare_depart" then menuitem(1,"round "..vr) else menuitem(1) end
+	-- pause menu removed (handled in UI cart to save tokens)
 
 	if game_state=="fanfare_depart"then
 	 if ship_departing then
@@ -66,7 +63,6 @@ function _update()
 	 prev_game_state="fanfare_depart"
 	 return
 	end
-	local prev=game_state
 	snd_update_music(game_state,prev_game_state,level_fanfare_timer)
 	local gs=game_state
 	if gs=="game" or gs=="dying"then
@@ -89,7 +85,7 @@ function _update()
 			end
 		end
 	end
-	prev_game_state=prev
+	prev_game_state=game_state
 end
 function _draw()
 	cls()
