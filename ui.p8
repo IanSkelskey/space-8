@@ -4,6 +4,7 @@ __lua__
 #include src/util/sound.lua
 #include src/persist.lua
 #include src/ui/font.lua
+#include src/ui/help.lua
 #include src/ui/highscores.lua
 #include src/ui/menu.lua
 #include src/ui/shop.lua

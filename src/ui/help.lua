@@ -1,11 +1,17 @@
-local hp,MP=1,4
+local hp,MP=1,5
 
 -- help pages as single strings with newlines
 local hd={
- "\fcgameplay loop\f6:\n\n 1. deliver tech packages\n 2. earn cash rewards\n 3. upgrade your ship\n 4. launch into space\n 5. survive obstacles\n 6. return to station\n\n\n\fccontrols\f6:\n\n move: arrow keys/d-pad\n shoot: 🅾️ button\n shield: ❎ (hold)",
- "\fcupgrades\f6:\n\n\f9fire rate\f6\n  faster weapon recharge\n\n\f9shield\f6\n  blocks damage when held\n\n\f9spread\f6\n  adds extra projectiles\n\n\f9hull\f6\n  increases max health\n\n\f9thrusters\f6\n  faster acceleration",
- "", -- page 3 will be custom drawn for sprites
- "\fctips\f6:\n\n • shield blocks all damage\n • prioritize dangerous foes\n • collect tech packages\n • upgrade before harder runs\n • comets move fast\n • black holes pull you in\n • asteroids drift slowly"
+ -- page 1: core loop + controls (expanded)
+ "\fcgameplay loop\f6:\n\n 1. choose difficulty\n 2. fill the \fddistance\f6 bar\n 3. dodge & shoot foes\n 4. grab \f9tech & loot\f6\n 5. land for payout\n 6. upgrade & relaunch\n\n\fccontrols\f6:\n move  arrows\n shoot 🅾️  shield ❎\n hold shield drains\n 🅾️/❎ confirm/back",
+ -- page 2: upgrades (add shield pulse)
+ "\fcupgrades\f6:\n\n\f9fire rate\f6 faster shots\n\f9shield\f6    stronger wall\n\f9spread\f6    side beams\n\f9hull\f6      +max hp\n\f9thrusters\f6 quicker accel\n\f9shock\f6     pulse on hit\n\nHold shield = drain.\nRelease to recharge.",
+ -- page 3: obstacles (custom drawn below)
+ "",
+ -- page 4: powerups & pickups
+ "\fcpowerups\f6:\n\n \f9hull\f6 +1 hp (if room)\n \f9charge\f6 full shield + free\n \f9credits\f6 +$ bonus payout\n \f9rapid\f6 faster fire burst\n \f9magnet\f6 attract loot\n\nCash survives missions;\nlose it only on death.",
+ -- page 5: tips (expanded)
+ "\fctips\f6:\n\n • only holes bypass shield\n • magnet = safer pickups\n • finish runs for cash\n • harder diff = +risk/+pay\n • spread + rate = dps ramp\n • shock hurts clusters\n • focus comets, then holes\n • run score -> highscores"
 }
 
 function help_init() hp=1 end

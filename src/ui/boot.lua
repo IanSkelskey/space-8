@@ -39,6 +39,7 @@ function _update()
  if update_starfield then update_starfield() end
  if game_state=="menu" then update_menu()
  elseif game_state=="station" then update_station()
+ elseif game_state=="help" then update_help()
  elseif game_state=="gameover" then
   if btnp(5) then
    persist_reset_progress() -- NEW: clear accumulated progress after game over
@@ -55,5 +56,6 @@ function _draw()
  if draw_starfield then draw_starfield() end
  if game_state=="menu" then draw_menu()
  elseif game_state=="station" then draw_station()
+ elseif game_state=="help" then draw_help()
  elseif game_state=="gameover" then draw_gameover() end
 end
