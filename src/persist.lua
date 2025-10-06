@@ -30,8 +30,13 @@ local I_PAYOUT_READY=16
 local I_START_FLAG=17 -- 1 means gameplay cart should start a mission immediately
 local I_LAST_RUN_LO=18
 local I_LAST_RUN_HI=19
-local I_HS_COUNT=20
-local I_HS_BASE=21 -- entries: (hi,lo,name) * n
+-- per-difficulty high score tables (each: count + entries (MAX_HS*3))
+local I_HS1_COUNT=20
+local I_HS1_BASE=21 -- easy
+local I_HS2_COUNT=50
+local I_HS2_BASE=51 -- normal
+local I_HS3_COUNT=80
+local I_HS3_BASE=81 -- veteran
 local I_PULSE=40 -- new: shield pulse upgrade (keep away from hs region)
 local I_LIFE_LO=41 -- lifetime money low (0-999)
 local I_LIFE_HI=42 -- lifetime money thousands
@@ -169,8 +174,10 @@ end
 function persist_clear_last_run()
  dset(I_LAST_RUN_LO,0) dset(I_LAST_RUN_HI,0)
 end
-function persist_hs_indices()
- return I_HS_COUNT,I_HS_BASE
+function persist_hs_indices() return I_HS1_COUNT,I_HS1_BASE end -- legacy (easy)
+function persist_hs_indices_for_df(d)
+ if d==2 then return I_HS2_COUNT,I_HS2_BASE elseif d==3 then return I_HS3_COUNT,I_HS3_BASE end
+ return I_HS1_COUNT,I_HS1_BASE
 end
 
 function persist_reset_progress()

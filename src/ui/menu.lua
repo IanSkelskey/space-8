@@ -21,7 +21,9 @@ end
 function update_menu()
  if hs_entering then hs_update_entry() return end
  if show_hs then
-  if btnp(5) or btnp(4) then show_hs=false snd_sfx(44,3) end
+    if btnp(0) then hs_change_tab(-1) snd_sfx(44,3) end
+    if btnp(1) then hs_change_tab(1) snd_sfx(44,3) end
+    if btnp(5) or btnp(4) then show_hs=false snd_sfx(44,3) end
   return
  end
  -- submenu: picking difficulty
