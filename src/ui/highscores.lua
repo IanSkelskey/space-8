@@ -37,6 +37,7 @@ function hs_init()
 end
 
 local diff_icons={19,34,6} -- difficulty icons easy/normal/veteran
+local hs_marq=0            -- marquee scroll offset (pixels)
 
 local function hs_save(di)
  di=di or hs_tab
@@ -216,14 +217,45 @@ function hs_draw_full()
 end
 
 -- compact (single-line) display
+-- marquee showing all 3 difficulties (trophy + diff icon + name + score)
 function hs_draw_compact()
  if hs_entering then return end
- local t=hs_sets[hs_tab]
- local e=t[1]
- if not e then return end
- local a,b,c=dec_name(e.nc) local nm=name_to_string(a,b,c) local sc=fmt_score(e.hi,e.lo)
- spr(diff_icons[hs_tab] or 50,2,4)
- print(nm.." "..sc,14,4,7)
+ -- build segments (skip difficulties with no score)
+ local segs={} local tw=0
+ for di=1,3 do
+  local t=hs_sets[di] local e=t[1]
+  if e then
+   local a,b,c=dec_name(e.nc)
+   local nm=name_to_string(a,b,c)
+   local sc=fmt_score(e.hi,e.lo)
+   local txt=" "..nm.." "..sc.."   " -- padding spaces
+   local w=16+#txt*4  -- 2 icons (trophy+diff) + text
+   add(segs,{di=di,txt=txt,w=w})
+   tw+=w
+  end
+ end
+ if #segs==0 then return end
+ -- advance scroll
+ hs_marq-=0.5
+ if hs_marq<=-tw then hs_marq+=tw end
+ -- draw (wrap)
+ local x=2+hs_marq
+ local y=4
+ if tw<1 then return end
+ while x<128 do
+  for s in all(segs) do
+   if x+s.w>0 then
+    -- gold trophy
+    spr(50,x,y)
+    -- difficulty icon
+    spr(diff_icons[s.di] or 50,x+8,y)
+    -- text
+    print(s.txt,x+16,y,7)
+   end
+   x+=s.w
+   if x>=128 then break end
+  end
+ end
 end
 
 -- adjust overlay so it centers above new panel (y shift)
