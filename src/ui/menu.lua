@@ -1,12 +1,14 @@
 local sel=1
 local show_hs=false -- new: full high score mode
 
+-- start a new run but remain in station before launching first mission
 local function start_game(set_df)
  df=set_df
- persist_reset_progress() -- NEW: wipe money/score/upgrades before new run
+ persist_reset_progress() -- wipe progress for fresh run
  round_number=sr[df] vr=1
- persist_save_for_game()
- load("space_shooter.p8")
+ -- station will synthesize mission name & distance via ensure_mission()
+ game_state="station"
+ station_init()
 end
 
 -- extend labels with highscores entry

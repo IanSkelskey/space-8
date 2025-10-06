@@ -10,35 +10,24 @@ end
 function scoll(x,y,w,h)
  return aabb(x,y,w,h,ship.x,ship.y,ship.w,ship.h)
 end
-current_mission,round_number,mission_distance,dr,level_fanfare_timer,ship_departing=nil,1,0,0,0,false
+-- gameplay-only state (mission name now owned by UI cart via station ensure_mission)
+round_number,mission_distance,dr,level_fanfare_timer,ship_departing=1,0,0,0,false
 vr=1 -- visible round counter (always starts at 1)
 sr=sr or split"1,2,4" -- start rounds per difficulty (easy,normal,veteran)
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
-sci_adj,sci_noun=split"quantum,plasma,ionic,fusion,nano,void",split"core,drive,matrix,relay,reactor,array"
 -- short init bundle (entities + hud + ship)
 function ie() ship_init() asteroid_init() hud_init() blackhole_init() comet_init() end
-function generate_mission()
-	local a,n=sci_adj,sci_noun
-	current_mission=a[flr(rnd(#a))+1].." "..n[flr(rnd(#n))+1]
-	mission_distance=400+round_number*80
-	dr=mission_distance
-	sl(round_number)
-end
 function complete_mission()
-	local mult=dsc and dsc[df] or 1
-	-- mission pay only; bonus collected in-level via shard pickups
-	last_pay=flr((40+mission_distance\25)*mult)
-	money_total+=last_pay
-	last_payout_ready=true
-	score,scoreh,db=0,0,0
-	round_number+=1
-	vr+=1
-	generate_mission()
-	asteroid_init()
-	blackhole_init()
-	comet_init()
-	snd_music(8)
-	level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
+ local mult=dsc and dsc[df] or 1
+ last_pay=flr((40+mission_distance\25)*mult)
+ money_total+=last_pay
+ last_payout_ready=true
+ score,scoreh,db=0,0,0
+ round_number+=1 vr+=1
+ -- flag distance for regen in UI (station ensure_mission will set new name+distance next visit)
+ mission_distance,dr=0,0
+ snd_music(8)
+ level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
 end
 -- no local reset (handled by ui cart). When player chooses restart in ui cart it resets cartdata and relaunches.
 function _init()
@@ -46,16 +35,14 @@ function _init()
  starfield_init()
  local resumed=persist_load_game_start()
  if not resumed then
-  -- launched directly or stale flag after a reset: go to main menu
   persist_save_from_game(0)
   load("ui.p8")
   return
  end
- -- mission handoff confirmed; consume flag so reset goes to menu
  persist_consume_start_flag()
- -- initialize entities & ship (preserves loaded upgrade levels)
  ie() p_clear()
- if not current_mission then generate_mission() end
+ -- mission distance & scaling (UI decides name; always recompute here)
+ mission_distance=400+round_number*80 dr=mission_distance sl(round_number)
  snd_music(10)
 end
 function _update()
