@@ -38,7 +38,8 @@ function update_comet()
 		spawn_t=(mi+rnd(rg))*(round_number<5 and 1.5 or 1)
 	end
 
-	local p_act,pr,prp=ship.pulse_active,ship.pulse_r,ship.pulse_prev
+	local kill_lvl=ship.shield_pulse_level
+	local sr=(ship.shield_active and kill_lvl>0) and (10+kill_lvl) or 0
 	for c in all(comets) do
 		-- pre-warning skip
 		if c.warning_t>0 then c.warning_t-=1 goto continue end
@@ -47,6 +48,13 @@ function update_comet()
 		 local dx=c.x+4-(ship.x+4) local dy=c.y+4-(ship.y+4)
 		 if dx*dx+dy*dy <= ship.shield_retaliate_r*ship.shield_retaliate_r then
 		  c.hp-=1 c.flash_t=4
+		 end
+		end
+		-- shield shock threshold kill (no continuous damage accumulation)
+		if sr>0 and c.flash_t==0 then
+		 local dx=c.x+4-(ship.x+4) local dy=c.y+4-(ship.y+4)
+		 if dx*dx+dy*dy <= sr*sr and c.hp<=kill_lvl then
+		  c.hp=0 c.flash_t=4
 		 end
 		end
 		-- movement

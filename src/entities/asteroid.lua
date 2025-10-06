@@ -58,10 +58,24 @@ function update_asteroid()
 		spawn_t=msmin+rnd(msrng)
 	end
 
+	-- shield shock threshold kill:
+	-- level1: destroy if asteroid hp<=1 inside shield radius
+	-- level2: destroy if hp<=2 inside shield radius
+	local kill_lvl=ship.shield_pulse_level
+	local sr=(ship.shield_active and kill_lvl>0) and (10+kill_lvl) or 0
 	for m in all(asteroids) do
 		m.y+=m.spd
 		m.x+=m.dx
 		m.flash_t=max(0,m.flash_t-1)
+
+		-- shield shock kill check (no continuous damage tick)
+		if sr>0 and m.flash_t==0 then
+			local dx=(m.x+m.w/2)-(ship.x+4) local dy=(m.y+m.h/2)-(ship.y+4)
+			if dx*dx+dy*dy <= sr*sr and m.hp<=kill_lvl then
+				-- simulate bullet kill path: award score and spawn debris like normal hp<=0 branch
+				m.hp=0 m.flash_t=4
+			end
+		end
 
 		if hit_by_player_bullet(m.x,m.y,m.w,m.h) then
 			m.hp-=1
@@ -98,6 +112,14 @@ function update_asteroid()
 		if p.t==4 then
 			if hit_by_player_bullet(p.x,p.y,4,4) then
 					hud_add_score(3) spawn_chunk_dust(p.x+2,p.y+2) p.l=0 if rnd()<0.2 then p_add(p.x+2,p.y+2,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+			-- shield shock (active shield aura destroys debris)
+			elseif ship.shield_pulse_level>0 and ship.shield_active then
+				local dx=(p.x+2)-(ship.x+4) local dy=(p.y+2)-(ship.y+4)
+				local r=10+ship.shield_pulse_level
+				if dx*dx+dy*dy <= r*r then
+					 hud_add_score(3) spawn_chunk_dust(p.x+2,p.y+2) p.l=0
+					 if rnd()<0.2 then p_add(p.x+2,p.y+2,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+				end
 			elseif scoll(p.x,p.y,4,4) then if game_state=="game" then ship_kill() end end
 		end
 	end
