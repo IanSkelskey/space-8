@@ -32,14 +32,14 @@ local I_LAST_RUN_LO=18
 local I_LAST_RUN_HI=19
 -- per-difficulty high score tables (each: count + entries (MAX_HS*3))
 local I_HS1_COUNT=20
-local I_HS1_BASE=21 -- easy
-local I_HS2_COUNT=50
-local I_HS2_BASE=51 -- normal
-local I_HS3_COUNT=80
-local I_HS3_BASE=81 -- veteran
-local I_PULSE=40 -- new: shield pulse upgrade (keep away from hs region)
-local I_LIFE_LO=41 -- lifetime money low (0-999)
-local I_LIFE_HI=42 -- lifetime money thousands
+local I_HS1_BASE=21 -- easy (21-33: 1 count + 4 entries * 3 values = 13 slots)
+local I_HS2_COUNT=34
+local I_HS2_BASE=35 -- normal (35-47: 1 count + 4 entries * 3 values = 13 slots)
+local I_HS3_COUNT=48
+local I_HS3_BASE=49 -- veteran (49-61: 1 count + 4 entries * 3 values = 13 slots)
+local I_PULSE=62 -- shield pulse upgrade (moved to avoid conflicts)
+local I_LIFE_LO=63 -- lifetime money low (0-999)
+local I_LIFE_HI=64 -- lifetime money thousands
 
 -- write a value only if non-nil (saves a few tokens where used repeatedly)
 local function w(i,v) if v then dset(i,v) end end
