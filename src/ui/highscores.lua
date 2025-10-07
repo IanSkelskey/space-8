@@ -97,16 +97,16 @@ end
 -- improved full-table renderer
 function hs_draw_full()
  local t=hs_entries
- -- layout constants (updated)
+ -- layout constants (adjusted to fit 4 rows)
  local y_title=4
- local y_tabs=28          -- moved tabs lower for breathing room under title
- local bar_h=11
+ local y_tabs=26          -- slightly higher for more room
+ local bar_h=10
  local panel_top=y_tabs+bar_h+2  -- gap under tabs
  local bottom_instr_y=118        -- fixed bottom line for back instruction
- local panel_bottom=bottom_instr_y-14
- local y_header=panel_top+6
- local first_row_y=y_header+14   -- larger gap header -> first row
- local row_gap=13
+ local panel_bottom=bottom_instr_y-8  -- less bottom margin
+ local y_header=panel_top+4       -- tighter header spacing
+ local first_row_y=y_header+10    -- tighter gap header -> first row
+ local row_gap=12                 -- slightly tighter row spacing
 
  -- title block (unchanged centering logic)
  local title1="high scores"
@@ -150,9 +150,6 @@ function hs_draw_full()
 
  -- panel (height fixed to avoid overlapping bottom instructions)
  rect(8,panel_top,120,panel_bottom,1)
- for yy=panel_top,panel_bottom,2 do
-  for xx=8,120,2 do pset(xx,yy,0) end
- end
 
  print("#",16,y_header-2,5)
  print("name",36,y_header-2,5)
@@ -161,25 +158,30 @@ function hs_draw_full()
  if #t==0 then
   cprint("(no scores yet)",y_header+10,5)
  else
-  local trophy_sprs={50,103,104}
-  for i=1,min(#t,MAX_HS) do
+  local trophy_sprs={50,103,104,108}
+  -- calculate even spacing for up to 4 entries
+  local content_start=y_header+8
+  local content_end=panel_bottom-6
+  local available_h=content_end-content_start-6  -- reduce total span by 6px (2px*3 gaps)
+  local num_entries=min(#t,MAX_HS)
+  local spacing=num_entries>1 and available_h/(num_entries-1) or 0
+  
+  for i=1,num_entries do
    local e=t[i]
    local a,b,c=dec_name(e.nc)
    local nm=name_to_string(a,b,c)
    local sc=fmt_score(e.hi,e.lo)
-   local y=first_row_y+(i-1)*row_gap
-   if y>panel_bottom-18 then break end -- safety: avoid overflow
-   if i<=3 then spr(trophy_sprs[i],14,y-6) end
-   print(i..".",24,y-6,(i==1 and 10) or (i==2 and 6) or (i==3 and 4) or 6)
-   print(nm,36,y-6,(i==1 and 7 or 6))
+   local y=content_start+(i-1)*spacing
+   spr(trophy_sprs[min(i,4)],14,y)
+   print(i..".",24,y,(i==1 and 10) or (i==2 and 6) or (i==3 and 4) or 6)
+   print(nm,36,y,(i==1 and 7 or 6))
    local sc_col=(i==1 and ((time()%0.5<0.25) and 11 or 10))
      or (i==2 and 6) or (i==3 and 4) or 13
-   print(sc,116-#sc*4,y-6,sc_col)
+   print(sc,116-#sc*4,y,sc_col)
   end
  end
 
- -- footer separator + fixed back instruction
- line(16,bottom_instr_y-10,112,bottom_instr_y-10,1)
+ -- footer instruction (no separator line)
  cprint("❎ back",bottom_instr_y,5)
 end
 
