@@ -3,14 +3,15 @@ version 43
 __lua__
 #include src/util/sound.lua
 #include src/persist.lua
-#include src/ui/font.lua
-#include src/ui/help.lua
-#include src/ui/highscores.lua
-#include src/ui/menu.lua
-#include src/ui/shop.lua
-#include src/ui/station.lua
-#include src/ui/gameover.lua
 #include src/starfield.lua
+#include src/ui/font.lua
+#include src/ui/highscores.lua
+#include src/ui/highscore_entry.lua
+#include src/ui/menu.lua
+#include src/ui/help.lua
+#include src/ui/station.lua
+#include src/ui/shop.lua
+#include src/ui/gameover.lua
 #include src/ui/boot.lua
 
 __gfx__

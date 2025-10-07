@@ -28,8 +28,8 @@ function _init()
  end
  -- init starfield for ui backgrounds
  if starfield_init then starfield_init() end
- hs_init()        -- load table / initial entry
- hs_process_new_run() -- insert last run if qualifies (and maybe start name entry)
+ hs_init()        -- load table
+ -- Remove automatic hs_process_new_run() call
  dset(0,0)
  snd_music(0)
 end
@@ -40,12 +40,38 @@ function _update()
  if game_state=="menu" then update_menu()
  elseif game_state=="station" then update_station()
  elseif game_state=="help" then update_help()
+ elseif game_state=="highscore_entry" then update_highscore_entry()
  elseif game_state=="gameover" then
-  if btnp(5) then
-   persist_reset_progress() -- NEW: clear accumulated progress after game over
-   game_state="menu"
-   menu_init()
-   dset(0,0)
+  -- Check for highscore qualification
+  local lo,hi=persist_fetch_last_run()
+  local qualified = false
+  if (lo or 0)>0 or (hi or 0)>0 then
+   local val=hi*1000+lo
+   local di=df or 1
+   local t=hs_sets[di]
+   qualified = #t<4 or val>((t[#t].hi or 0)*1000+(t[#t].lo or 0))
+  end
+  
+  if qualified then
+   if btnp(4) then -- O to enter name
+    game_state="highscore_entry"
+    highscore_entry_init()
+    snd_sfx(63)
+   elseif btnp(5) then -- X to skip
+    persist_clear_last_run()
+    persist_reset_progress()
+    game_state="menu"
+    menu_init()
+    dset(0,0)
+   end
+  else
+   if btnp(5) then -- X to return to menu
+    persist_clear_last_run()
+    persist_reset_progress()
+    game_state="menu"
+    menu_init()
+    dset(0,0)
+   end
   end
  end
 end
@@ -57,5 +83,6 @@ function _draw()
  if game_state=="menu" then draw_menu()
  elseif game_state=="station" then draw_station()
  elseif game_state=="help" then draw_help()
+ elseif game_state=="highscore_entry" then draw_highscore_entry()
  elseif game_state=="gameover" then draw_gameover() end
 end

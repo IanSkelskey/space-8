@@ -3,12 +3,9 @@
 local MAX_HS=4
 local letters="abcdefghijklmnopqrstuvwxyz"
 hs_entries={}
-local hs_sets={{},{},{}} -- per-difficulty tables: 1 easy,2 normal,3 veteran
+hs_sets={{},{},{}} -- per-difficulty tables: 1 easy,2 normal,3 veteran
 local hs_tab=1
-hs_entering=false
-local pending_score=0
-local name_idx={0,0,0}
-local name_pos=1
+local hs_marq=0            -- marquee scroll offset (pixels)
 
 local function enc_name(a,b,c) return a*676+b*26+c end
 local function dec_name(code)
@@ -37,7 +34,6 @@ function hs_init()
 end
 
 local diff_icons={19,34,6} -- difficulty icons easy/normal/veteran
-local hs_marq=0            -- marquee scroll offset (pixels)
 
 local function hs_save(di)
  di=di or hs_tab
@@ -61,43 +57,14 @@ local function insert_entry(hi,lo,nc,di)
 end
 
 function hs_process_new_run()
- local lo,hi=persist_fetch_last_run()
- if (lo or 0)==0 and (hi or 0)==0 then return end
- persist_clear_last_run()
- local val=score_value(hi,lo)
- local di=df or 1
- local t=hs_sets[di]
- if #t<MAX_HS or val>score_value(t[#t].hi,t[#t].lo) then
-  pending_score=val name_idx={0,0,0} name_pos=1 hs_entering=true hs_tab=di hs_entries=hs_sets[hs_tab]
- end
+ -- This is now handled by the gameover screen and highscore_entry screen
+ -- Keep empty for compatibility
 end
 
 local function commit_name()
  local hi=pending_score\1000 local lo=pending_score%1000
  insert_entry(hi,lo,enc_name(name_idx[1],name_idx[2],name_idx[3]),hs_tab)
  hs_entering=false
-end
-
-function hs_update_entry()
- if not hs_entering then return end
- -- left/right cycle letter
- if btnp(0) then
-  name_idx[name_pos]=(name_idx[name_pos]-1)%26
- elseif btnp(1) then
-  name_idx[name_pos]=(name_idx[name_pos]+1)%26
- end
- -- confirm letter / advance
- if btnp(4) then
-  if name_pos<3 then
-   name_pos+=1
-  else
-   commit_name()
-  end
- end
- -- cancel (skip entry)
- if btnp(5) then
-  hs_entering=false
- end
 end
 
 -- replace old fmt_score (returned number when hi==0 causing # on number)
@@ -256,17 +223,6 @@ function hs_draw_compact()
    if x>=128 then break end
   end
  end
-end
-
--- adjust overlay so it centers above new panel (y shift)
-function hs_draw_entry_overlay()
- if not hs_entering then return end
- local hi=pending_score\1000 local lo=pending_score%1000 local scs=fmt_score(hi,lo)
- local bw,bh=104,46 local ox=(128-bw)\2 local oy=40
- rectfill(ox,oy,ox+bw,oy+bh,0) rect(ox,oy,ox+bw,oy+bh,7)
- cprint("NEW HIGH SCORE!",oy+4,7) cprint(scs,oy+14,11)
- for i=1,3 do local ch=sub(letters,name_idx[i]+1,name_idx[i]+1) local sel=i==name_pos local col= sel and (time()%0.25<0.125 and 10 or 7) or 6 print(ch,64+(i-2)*8,oy+26,col) end
- cprint("🅾️ next  ❎ skip",oy+36,5)
 end
 
 function hs_change_tab(d)

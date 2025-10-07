@@ -19,7 +19,6 @@ function menu_init()
 end
 
 function update_menu()
- if hs_entering then hs_update_entry() return end
  if show_hs then
     if btnp(0) then hs_change_tab(-1) snd_sfx(44,3) end
     if btnp(1) then hs_change_tab(1) snd_sfx(44,3) end
@@ -66,7 +65,6 @@ end
 function draw_menu()
  if show_hs then
   hs_draw_full()
-  hs_draw_entry_overlay()
   return
  end
  print("\014sPACE 8",36,20,7)
@@ -81,5 +79,4 @@ function draw_menu()
  end
  print("made with \fe♥\f7 by ian skelskey",12,116,5)
  hs_draw_compact()
- hs_draw_entry_overlay()
 end
