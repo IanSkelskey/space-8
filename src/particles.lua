@@ -1,5 +1,6 @@
 -- Unified particle system
 local p={}
+local ppf=0 -- frame counter for shimmer
 Gp=p
 
 -- tiny shared halo (rotating 4-dot ring) reused by comets + powerups
@@ -8,6 +9,7 @@ function h(x,y,a,c1,c2)for i=0,3 do local g=a+i*0.25 pset(flr(x+cos(g)*3),flr(y+
 function p_add(x,y,dx,dy,life,typ,col,dat) add(p,{x=x,y=y,dx=dx,dy=dy,l=life,t=typ,c=col,d=dat}) end
 
 function p_upd()
+ ppf=(ppf+1)%60
  for i in all(p) do
   i.x+=i.dx i.y+=i.dy+((i.t==7 and cs*0.7) or 0) i.l-=1
   -- inline damp
@@ -31,6 +33,10 @@ function p_upd()
        elseif d==6 then ship.magnet_t=420 snd_sfx(63)
        end del(p,i) goto continue end
       ::skip_pick::
+      -- sparkle emission for money shards
+      if i.d==7 and rnd()<0.1 then
+        p_add(i.x+0.5+rnd()-0.5,i.y+0.5,(rnd()-0.5)*0.2,(rnd()-0.5)*0.2,5,1,(ppf%4<2 and 10 or 9))
+      end
    end
   if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end
   ::continue::
@@ -57,10 +63,13 @@ end
 
 function p_draw()
  for i in all(p) do
-    if i.t==7 then
+      if i.t==7 then
      local d=i.d
      if d==7 then
-       pset(i.x,i.y,10)pset(i.x+1,i.y,10)pset(i.x,i.y+1,10)pset(i.x+1,i.y+1,10)
+          -- shimmering 2x2 credit shard
+          local c=(ppf%8<4) and 10 or 9
+          pset(i.x,i.y,c)pset(i.x+1,i.y,c)pset(i.x,i.y+1,c)pset(i.x+1,i.y+1,c)
+          if ppf%15==0 then pset(i.x+1,i.y-1,7) end
      else
        h(i.x+2.5,i.y+2.5,time(),
         (d==2 and 12) or (d==5 and 9) or (d==6 and 10) or 11,
