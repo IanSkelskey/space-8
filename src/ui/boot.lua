@@ -61,30 +61,22 @@ function _update()
    qualified = #t<4 or val>((t[#t].hi or 0)*1000+(t[#t].lo or 0))
   end
   
-  if qualified then
-    if btnp(4) then -- O to enter name
-    game_state="highscore_entry"
-    highscore_entry_init()
-     -- ensure menu music is playing once jingle finished or was interrupted
-     if current_music~=0 and current_music~=9 then snd_music(0) end
-    snd_sfx(63)
-   elseif btnp(5) then -- X to skip
-    persist_clear_last_run()
-    persist_reset_progress()
-    game_state="menu"
-    menu_init()
-     if current_music~=0 then snd_music(0) end
-    dset(0,0)
-   end
-  else
-    if btnp(5) then -- X to return to menu
-    persist_clear_last_run()
-    persist_reset_progress()
-    game_state="menu"
-    menu_init()
-     if current_music~=0 then snd_music(0) end
-    dset(0,0)
-   end
+  if btnp(4) or btnp(5) then
+    if qualified then
+      -- enter highscore entry with either button
+      game_state="highscore_entry"
+      highscore_entry_init()
+      if current_music~=0 and current_music~=9 then snd_music(0) end
+      snd_sfx(63)
+    else
+      -- go back to menu
+      persist_clear_last_run()
+      persist_reset_progress()
+      game_state="menu"
+      menu_init()
+      if current_music~=0 then snd_music(0) end
+      dset(0,0)
+    end
   end
  end
 end

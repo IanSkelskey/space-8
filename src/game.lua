@@ -11,6 +11,7 @@ end
 -- gameplay-only state (mission name now owned by UI cart via station ensure_mission)
 round_number,mission_distance,dr,level_fanfare_timer,ship_departing=1,0,0,0,false
 death_jingle_t=death_jingle_t or 0 -- frames remaining for death jingle before gameover
+death_skip_pending=death_skip_pending or false -- whether first skip press has been made during jingle
 local DEATH_ANIM_MIN=45      -- minimum death animation duration (frames)
 local DEATH_JINGLE_LEN=210   -- full gameover jingle length; cart loads only after this ends
 vr=1 -- visible round counter (always starts at 1)
@@ -105,7 +106,18 @@ function _update()
 					snd_music(9)
 				end
 				if death_jingle_t>0 then death_jingle_t-=1 end
+				-- allow player to skip to gameover: first press shows prompt, second skips
+				if btnp and (btnp(4) or btnp(5)) then
+					if not death_skip_pending then
+						death_skip_pending=true
+					else
+						-- second press: force finish timers
+						death_jingle_t=0
+						ship.death_t=DEATH_ANIM_MIN
+					end
+				end
 				if ship.death_t>=DEATH_ANIM_MIN and death_jingle_t<=0 then
+					death_skip_pending=false
 					persist_save_from_game(2)
 					load("ui.p8")
 					return
@@ -128,5 +140,11 @@ function _draw()
 		draw_ship()
 		p_draw()
 		draw_hud()
+		if game_state=="dying" and death_skip_pending then
+			-- simple centered prompt (multi-line minimal tokens)
+			local t="🅾️/❎ skip"
+			local x=64-#t*2
+			print(t,x,62,7)
+		end
 	end -- gameover never drawn here now (handled in ui cart)
 end

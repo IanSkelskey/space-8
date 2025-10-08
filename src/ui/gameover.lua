@@ -31,9 +31,10 @@ function draw_gameover()
 			rectfill(20,84,107,94,1)
 		end
 		print("new high score!",32,86,time()%0.3<0.15 and 11 or 10)
-		print("🅾️ enter name",36,102,7)
-		print("❎ skip to menu",32,110,6)
+		local l="🅾️/❎ enter name"
+		print(l,64-#l*2,102,7)
 	else
-		print("❎ main menu",40,90,6)
+		local l="🅾️/❎ main menu"
+		print(l,64-#l*2,90,6)
 	end
 end
