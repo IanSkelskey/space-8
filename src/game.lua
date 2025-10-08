@@ -12,6 +12,7 @@ end
 round_number,mission_distance,dr,level_fanfare_timer,ship_departing=1,0,0,0,false
 death_jingle_t=death_jingle_t or 0 -- frames remaining for death jingle before gameover
 death_skip_pending=death_skip_pending or false -- whether first skip press has been made during jingle
+death_skip_lock=death_skip_lock or 0 -- frames before skip input is accepted (debounce)
 local DEATH_ANIM_MIN=45      -- minimum death animation duration (frames)
 local DEATH_JINGLE_LEN=210   -- full gameover jingle length; cart loads only after this ends
 vr=1 -- visible round counter (always starts at 1)
@@ -90,6 +91,7 @@ function _update()
 					-- force jingle; avoid any lingering sfx on music channels
 					snd_music(9)
 					death_jingle_t=DEATH_JINGLE_LEN
+					death_skip_lock=15 -- ~0.5s lockout before skip allowed
 				end
 			elseif dr>0 then
 				dr-=1
@@ -106,8 +108,15 @@ function _update()
 					snd_music(9)
 				end
 				if death_jingle_t>0 then death_jingle_t-=1 end
-				-- allow player to skip to gameover: first press shows prompt, second skips
-				if btnp and (btnp(4) or btnp(5)) then
+				-- skip lock: >0 counting down; ==0 waiting for release; <0 ready
+				if death_skip_lock>0 then
+					death_skip_lock-=1
+				elseif death_skip_lock==0 then
+					-- require both buttons released once after lock period before arming
+					if not (btn(4) or btn(5)) then death_skip_lock=-1 end
+				end
+				-- allow player to skip to gameover only when armed (lock<0)
+				if death_skip_lock<0 and btnp and (btnp(4) or btnp(5)) then
 					if not death_skip_pending then
 						death_skip_pending=true
 					else
@@ -117,7 +126,7 @@ function _update()
 					end
 				end
 				if ship.death_t>=DEATH_ANIM_MIN and death_jingle_t<=0 then
-					death_skip_pending=false
+					death_skip_pending=false death_skip_lock=0
 					persist_save_from_game(2)
 					load("ui.p8")
 					return
@@ -140,7 +149,7 @@ function _draw()
 		draw_ship()
 		p_draw()
 		draw_hud()
-		if game_state=="dying" and death_skip_pending then
+		if game_state=="dying" and death_skip_pending and death_skip_lock<0 then
 			-- simple centered prompt (multi-line minimal tokens)
 			local t="🅾️/❎ skip"
 			local x=64-#t*2
