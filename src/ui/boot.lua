@@ -1,5 +1,7 @@
 -- ui cart boot logic
 df=df or 2
+-- gameplay cart now retains control until jingle (pattern 9) fully completes,
+-- so no UI-side countdown or restart needed.
 function _init()
  pal(15,0x81,1)
  cartdata("sp8")
@@ -22,7 +24,9 @@ function _init()
  if st==1 then
   game_state="station" station_init()
  elseif st==2 then
-  game_state="gameover"
+  game_state="gameover" -- jingle expected to have finished in gameplay cart
+  -- if silent (e.g., jingle failed) fall back to menu loop for gameover ambience
+  if current_music<0 then snd_music(0) end
  else
   game_state="menu" menu_init()
  end
@@ -31,7 +35,12 @@ function _init()
  hs_init()        -- load table
  -- Remove automatic hs_process_new_run() call
  dset(0,0)
- snd_music(0)
+ -- start appropriate looping music for initial ui state
+ if game_state=="menu" then
+  snd_music(0)
+ elseif game_state=="station" then
+  snd_music(10)
+ end
 end
 
 function _update()
@@ -53,23 +62,27 @@ function _update()
   end
   
   if qualified then
-   if btnp(4) then -- O to enter name
+    if btnp(4) then -- O to enter name
     game_state="highscore_entry"
     highscore_entry_init()
+     -- ensure menu music is playing once jingle finished or was interrupted
+     if current_music~=0 and current_music~=9 then snd_music(0) end
     snd_sfx(63)
    elseif btnp(5) then -- X to skip
     persist_clear_last_run()
     persist_reset_progress()
     game_state="menu"
     menu_init()
+     if current_music~=0 then snd_music(0) end
     dset(0,0)
    end
   else
-   if btnp(5) then -- X to return to menu
+    if btnp(5) then -- X to return to menu
     persist_clear_last_run()
     persist_reset_progress()
     game_state="menu"
     menu_init()
+     if current_music~=0 then snd_music(0) end
     dset(0,0)
    end
   end

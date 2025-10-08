@@ -10,6 +10,9 @@ function scoll(x,y,w,h)
 end
 -- gameplay-only state (mission name now owned by UI cart via station ensure_mission)
 round_number,mission_distance,dr,level_fanfare_timer,ship_departing=1,0,0,0,false
+death_jingle_t=death_jingle_t or 0 -- frames remaining for death jingle before gameover
+local DEATH_ANIM_MIN=45      -- minimum death animation duration (frames)
+local DEATH_JINGLE_LEN=210   -- full gameover jingle length; cart loads only after this ends
 vr=1 -- visible round counter (always starts at 1)
 sr=sr or split"1,2,4" -- start rounds per difficulty (easy,normal,veteran)
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
@@ -30,10 +33,12 @@ function complete_mission()
  snd_music(8)
  level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
 end
--- no local reset (handled by ui cart). When player chooses restart in ui cart it resets cartdata and relaunches.
+
+-- gameplay cart init
 function _init()
  pal(15,0x81,1)
  starfield_init()
+ death_jingle_t=0
  local resumed=persist_load_game_start()
  if not resumed then
   persist_save_from_game(0)
@@ -44,7 +49,8 @@ function _init()
  ie() p_clear()
  -- mission distance & scaling (UI decides name; always recompute here)
  mission_distance=400+round_number*80 dr=mission_distance sl(round_number)
- snd_music(10)
+ -- start gameplay background music (pattern 4)
+ snd_music(4)
 end
 function _update()
 	update_starfield()
@@ -66,25 +72,44 @@ function _update()
 	 prev_game_state="fanfare_depart"
 	 return
 	end
-	snd_update_music(game_state,prev_game_state,level_fanfare_timer)
+	-- skip generic music state machine the exact frame we enter dying to avoid it overriding jingle
+	if not (prev_game_state=="game" and game_state=="dying") then
+		snd_update_music(game_state,prev_game_state,level_fanfare_timer)
+	end
 	local gs=game_state
 	if gs=="game" or gs=="dying"then
 		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
 		if game_state=="game" then
 			if ship.dying then
+				-- enter dying: start music immediately and set timer if first frame
 				game_state="dying"
+				if death_jingle_t<=0 then
+					ship.shield_pulse_level=0
+					persist_store_last_run_total(tsh*1000+ts)
+					-- force jingle; avoid any lingering sfx on music channels
+					snd_music(9)
+					death_jingle_t=DEATH_JINGLE_LEN
+				end
 			elseif dr>0 then
 				dr-=1
 				if dr<=0 then complete_mission() end
 			end
 		else
-			if ship.dying and ship.death_t>=45 then
-				ship.shield_pulse_level=0 -- reset per-run upgrade
-				-- CHANGED: store total accumulated run score (ts/tsh) instead of per‑mission score
-				persist_store_last_run_total(tsh*1000+ts) -- new robust call
-				persist_save_from_game(2)
-				load("ui.p8")
-				return
+			-- in dying state: count down jingle; only transition after both thresholds
+			if ship.dying then
+				-- safety: if somehow music was interrupted, restart it without resetting timer
+				if death_jingle_t>0 and current_music!=9 then snd_music(9) end
+				-- edge case: death flag set but jingle never started (death_jingle_t==0 & current_music!=9)
+				if death_jingle_t==0 and ship.death_t<DEATH_JINGLE_LEN and current_music!=9 then
+					death_jingle_t=DEATH_JINGLE_LEN-ship.death_t
+					snd_music(9)
+				end
+				if death_jingle_t>0 then death_jingle_t-=1 end
+				if ship.death_t>=DEATH_ANIM_MIN and death_jingle_t<=0 then
+					persist_save_from_game(2)
+					load("ui.p8")
+					return
+				end
 			end
 		end
 	end

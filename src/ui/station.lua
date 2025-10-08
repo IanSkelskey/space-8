@@ -18,9 +18,12 @@ local function ensure_mission()
  end
 end
 
-function station_init() station_mode="main" station_confirm=false sel=1
+function station_init()
+ station_mode="main" station_confirm=false sel=1
  ensure_mission()
  if shop_init then shop_init() end
+ -- ensure correct music (pattern 10) starts on first arrival from menu/start
+ if snd_music and current_music~=10 then snd_music(10) end
 end
 
 function update_station()
