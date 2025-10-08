@@ -5,6 +5,7 @@ local sel = sel or 1
 -- fallback mission word lists (only created if not already defined by gameplay cart)
 local sci_adj=sci_adj or split"quantum,plasma,ionic,fusion,nano,void"
 local sci_noun=sci_noun or split"core,drive,matrix,relay,reactor,array"
+local diff_labels=diff_labels or split"easy,normal,veteran"
 
 local function ensure_mission()
  -- if gameplay cart didn't persist name, synthesize deterministic one
@@ -27,16 +28,27 @@ function station_init()
 end
 
 function update_station()
+    local first_station = (vr==1 and not last_payout_ready)
     if station_mode == "main" then
         if not station_confirm then
+            local max_sel = first_station and 3 or 2
             if btnp(2) then sel -= 1 snd_sfx(44) end -- up
             if btnp(3) then sel += 1 snd_sfx(44) end -- down
-            if sel<1 then sel=2 elseif sel>2 then sel=1 end
+            if sel<1 then sel=max_sel elseif sel>max_sel then sel=1 end
+            -- left/right to change difficulty when diff row selected
+            if first_station and sel==3 then
+                if btnp(0) then df = (df-2+#diff_labels)%#diff_labels+1 snd_sfx(44) round_number=sr[df] vr=1 current_mission=nil mission_distance=400+round_number*80 end
+                if btnp(1) then df = (df%#diff_labels)+1 snd_sfx(44) round_number=sr[df] vr=1 current_mission=nil mission_distance=400+round_number*80 end
+            end
+            if btnp(5) then game_state="menu" menu_init() snd_sfx(44) return end
             if btnp(4) then
                 if sel == 1 then
                     if (level_fanfare_timer or 0)<=0 then station_confirm = true snd_sfx(63) end
-                else
+                elseif sel == 2 then
                     station_mode = "shop" snd_sfx(63)
+                elseif sel == 3 then
+                    -- acts like no-op (selector handled via left/right); provide confirm sound
+                    snd_sfx(63)
                 end
             end
         else
@@ -45,7 +57,7 @@ function update_station()
                 level_fanfare_timer = 0
                 last_payout_ready = false
                 last_bonus=0 -- reset collected bonus for new mission
-                    launch_mission()
+                launch_mission()
                 station_confirm = false
             elseif btnp(5) then
                 station_confirm = false snd_sfx(44)
@@ -96,14 +108,26 @@ function draw_station()
             print("launch mission?",10,64,7)
             print("🅾️ yes  ❎ no",12,76,6)
         else
+            local first_station = (vr==1 and not last_payout_ready)
             local y = 64
-            for i=1,2 do
+            local rows = first_station and 3 or 2
+            for i=1,rows do
                 local c = (i==sel) and 7 or 5
                 if i==sel then rectfill(6,y-2,121,y+6,1) end
-                local icon = (i==1) and 6 or 22
-                local sx,sy=(icon%16)*8,flr(icon/16)*8
-                sspr(sx,sy,5,5,10,y,5,5)
-                print(i==1 and "launch mission" or "shop",18,y,c)
+                if i<3 or not first_station then
+                    local icon = (i==1) and 6 or 22
+                    local sx,sy=(icon%16)*8,flr(icon/16)*8
+                    sspr(sx,sy,5,5,10,y,5,5)
+                    print(i==1 and "launch mission" or "shop",18,y,c)
+                else
+                    -- difficulty selector row
+                    print("difficulty",18,y,c)
+                    local dname=diff_labels[df]
+                    local dx=96-#dname*2
+                    print("<",70,y,c)
+                    print(dname,dx,y, (i==sel) and 11 or 6)
+                    print(">",116,y,c)
+                end
                 y += 12
             end
             print("🅾️ sel  ❎ back",8,108,6)
