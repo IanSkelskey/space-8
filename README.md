@@ -68,17 +68,3 @@
 The following values are serialized with `dset/dget` (indices documented in `src/persist.lua`): difficulty, round, visible round, money, last payout + bonus, score totals (ts,tsh), upgrade levels (fire, shield, spread, hull, thruster), shield unlocked, current hull, payout-ready flag, and a start flag instructing gameplay cart to begin a mission immediately.
 
 To reset progress: from the UI cart run `cartdata("sp8") for i=0,32 do dset(i,0) end` then restart.
-
-## Credits
-- Game by Ian Skelskey
-- Music and SFX by Ian Skelskey
-
-## Future Refinements
-- Preserve fanfare depart animation across cart switch (currently simplified)
-- Pack multiple small integers into single `dset` slots to reclaim indices
-- Add versioning / checksum for `cartdata` to allow safe format changes
-- Optional cloud/high score persistence layer using exported web wrapper
-- Title screen attract mode (demo playback) as third cart if tokens become tight
-
-## License
-MIT License. See LICENSE file if present.
