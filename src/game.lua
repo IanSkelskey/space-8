@@ -44,7 +44,7 @@ function _init()
  local resumed=persist_load_game_start()
  if not resumed then
   persist_save_from_game(0)
-  load("ui.p8")
+  load("ui.p8") load("ui.p8.png") load("#space_8_ui")
   return
  end
  persist_consume_start_flag()
@@ -69,7 +69,7 @@ function _update()
 	 if not ship_departing and level_fanfare_timer<=0 then
 	  -- mission finished: return to station in ui cart
 	  persist_save_from_game(1) -- station state
-	  load("ui.p8")
+	  load("ui.p8") load("ui.p8.png") load("#space_8_ui")
 	 end
 	 prev_game_state="fanfare_depart"
 	 return
@@ -128,7 +128,7 @@ function _update()
 				if ship.death_t>=DEATH_ANIM_MIN and death_jingle_t<=0 then
 					death_skip_pending=false death_skip_lock=0
 					persist_save_from_game(2)
-					load("ui.p8")
+					load("ui.p8") load("ui.p8.png") load("#space_8_ui")
 					return
 				end
 			end

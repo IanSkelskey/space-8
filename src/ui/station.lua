@@ -40,7 +40,7 @@ function update_station()
                 if btnp(0) then df = (df-2+#diff_labels)%#diff_labels+1 snd_sfx(44) round_number=sr[df] vr=1 current_mission=nil mission_distance=400+round_number*80 end
                 if btnp(1) then df = (df%#diff_labels)+1 snd_sfx(44) round_number=sr[df] vr=1 current_mission=nil mission_distance=400+round_number*80 end
             end
-            if btnp(5) then game_state="menu" menu_init() snd_sfx(44) return end
+            if first_station and btnp(5) then game_state="menu" menu_init() snd_sfx(44) return end
             if btnp(4) then
                 if sel == 1 then
                     if (level_fanfare_timer or 0)<=0 then station_confirm = true snd_sfx(63) end
@@ -130,7 +130,8 @@ function draw_station()
                 end
                 y += 12
             end
-            print("🅾️ sel  ❎ back",8,108,6)
+            local prompt = first_station and "🅾️ sel  ❎ back" or "🅾️ select"
+            print(prompt,8,108,6)
         end
     else
         if shop_draw then shop_draw() else print("shop",58,76,7) end

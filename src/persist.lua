@@ -144,13 +144,13 @@ end
 -- ui helper to launch mission
 function launch_mission()
  persist_save_for_game()
- load("space_shooter.p8")
+ load("space_shooter.p8") load("space_shooter.p8.png") load("#space_8")
 end
 
 -- gameplay helper to return to ui
 function exit_to_ui(state)
  persist_save_from_game(state)
- load("ui.p8")
+ load("ui.p8") load("ui.p8.png") load("#space_8_ui")
 end
 
 function persist_consume_start_flag() dset(I_START_FLAG,0) end
