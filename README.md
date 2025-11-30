@@ -1,4 +1,4 @@
-![Banner](preview/itch/banner.gif)
+![Banner](preview/banner.gif)
 
 # Space Shooter (PICO-8)
 
