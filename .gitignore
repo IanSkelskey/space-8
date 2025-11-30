@@ -2,3 +2,4 @@
 /.vscode
 /.venv
 /build/
+*.p8.png
