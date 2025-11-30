@@ -3,3 +3,5 @@
 /.venv
 /build/
 *.p8.png
+*.html
+*.js
