@@ -22,16 +22,7 @@
 
 ## Screenshots
 
-<img src="preview/screenshots/title.png" alt="Title Screen" width="256" height="256">
-<img src="preview/screenshots/shop.png" alt="Shop Page 1" width="256" height="256">
-<img src="preview/screenshots/shop_2.png" alt="Shop Page 2" width="256" height="256">
-<img src="preview/screenshots/highscores.png" alt="High Scores" width="256" height="256">
-<img src="preview/screenshots/difficulty.png" alt="Difficulty Selection" width="256" height="256">
-<img src="preview/screenshots/early_gameplay.png" alt="Early Gameplay" width="256" height="256">
-<img src="preview/screenshots/mid_gameplay.png" alt="Mid Gameplay" width="256" height="256">
-<img src="preview/screenshots/help_1.png" alt="Help Screen 1" width="256" height="256">
-<img src="preview/screenshots/station.png" alt="Station" width="256" height="256">
-<img src="preview/screenshots/gameover.png" alt="Game Over" width="256" height="256">
+<img src="preview/screenshots/title.png" alt="Title Screen" width="256" height="256"> <img src="preview/screenshots/shop.png" alt="Shop Page 1" width="256" height="256"> <img src="preview/screenshots/shop_2.png" alt="Shop Page 2" width="256" height="256"> <img src="preview/screenshots/highscores.png" alt="High Scores" width="256" height="256"> <img src="preview/screenshots/difficulty.png" alt="Difficulty Selection" width="256" height="256"> <img src="preview/screenshots/early_gameplay.png" alt="Early Gameplay" width="256" height="256"> <img src="preview/screenshots/mid_gameplay.png" alt="Mid Gameplay" width="256" height="256"> <img src="preview/screenshots/help_1.png" alt="Help Screen 1" width="256" height="256"> <img src="preview/screenshots/station.png" alt="Station" width="256" height="256"> <img src="preview/screenshots/gameover.png" alt="Game Over" width="256" height="256">
 
 ## Obstacles
 
