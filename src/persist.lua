@@ -144,7 +144,7 @@ end
 -- ui helper to launch mission
 function launch_mission()
  persist_save_for_game()
- load("space_shooter.p8") load("space_shooter.p8.png") load("#space_8")
+ load("space_8.p8") load("space_8.p8.png") load("#space_8")
 end
 
 -- gameplay helper to return to ui
