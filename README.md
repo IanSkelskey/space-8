@@ -1,12 +1,12 @@
 ![Banner](preview/banner.gif)
 
-# Space Shooter (PICO-8)
+# Space 8 (PICO-8)
 
 <p align="center">
     <img src="preview/cart-preview.png" alt="Cartridge Art" width="160">
 </p>
 
-**Space Shooter** is a retro-inspired arcade game for the PICO-8 fantasy console. Blast asteroids, dodge comets, and survive as long as you can!
+**Space 8** is a retro-inspired arcade game for the PICO-8 fantasy console. Blast asteroids, dodge comets, and survive as long as you can!
 
 ## Features
 - Classic arcade-style gameplay
@@ -22,16 +22,16 @@
 
 ## Screenshots
 
-![Shop](preview/screenshots/shop.png)
-![Gameplay](preview/screenshots/late_gameplay.png)
-![Help Screen 1](preview/screenshots/help_1.png)
-![Help Screen 2](preview/screenshots/help_2.png)
-![Help Screen 3](preview/screenshots/help_3.png)
-![Help Screen 4](preview/screenshots/help_4.png)
-![Early Gameplay](preview/screenshots/early_gameplay.png)
-![Station](preview/screenshots/station.png)
-![Station Late Game](preview/screenshots/station_late.png)
-![Game Over](preview/screenshots/gameover.png)
+<img src="preview/screenshots/title.png" alt="Title Screen" width="256" height="256">
+<img src="preview/screenshots/shop.png" alt="Shop Page 1" width="256" height="256">
+<img src="preview/screenshots/shop_2.png" alt="Shop Page 2" width="256" height="256">
+<img src="preview/screenshots/highscores.png" alt="High Scores" width="256" height="256">
+<img src="preview/screenshots/difficulty.png" alt="Difficulty Selection" width="256" height="256">
+<img src="preview/screenshots/early_gameplay.png" alt="Early Gameplay" width="256" height="256">
+<img src="preview/screenshots/mid_gameplay.png" alt="Mid Gameplay" width="256" height="256">
+<img src="preview/screenshots/help_1.png" alt="Help Screen 1" width="256" height="256">
+<img src="preview/screenshots/station.png" alt="Station" width="256" height="256">
+<img src="preview/screenshots/gameover.png" alt="Game Over" width="256" height="256">
 
 ## Obstacles
 
@@ -68,3 +68,9 @@
 The following values are serialized with `dset/dget` (indices documented in `src/persist.lua`): difficulty, round, visible round, money, last payout + bonus, score totals (ts,tsh), upgrade levels (fire, shield, spread, hull, thruster), shield unlocked, current hull, payout-ready flag, and a start flag instructing gameplay cart to begin a mission immediately.
 
 To reset progress: from the UI cart run `cartdata("sp8") for i=0,32 do dset(i,0) end` then restart.
+
+## Hardware
+
+I really wanted to try my game on actual hardware, so I picked up an Anbernic RG40XXH handheld console that supports PICO-8. Super satisfying to see it running on real hardware!
+
+![Space 8 Running on a Anbernic RG40XXH](preview/hardware.png)
