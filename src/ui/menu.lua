@@ -68,7 +68,7 @@ function draw_menu()
   return
  end
  print("\014sPACE 8",36,20,7)
- print("v2.0.0",48,32,6)
+ print("v2.1.0",48,32,6)
  if picking_diff then
   print("select difficulty",28,40,10)
   draw_list(diff_labels,diff_icons,56)
