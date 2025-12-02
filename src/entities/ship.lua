@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.1,flipx=false,vx=0,vy=0,acc=0.18,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.5,flipx=false,vx=0,vy=0,acc=0.24,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0}
 
 bullets={}
 
@@ -107,8 +107,8 @@ function update_ship()
     p_add(cx+((mi==1)and -1 or 1),by+1,ang*0.4+rnd(0.2)-0.1,-1.5-rnd(0.3),6+rnd(4)\1,1, (mi==1 and 10 or 9))
    end
   end
-   snd_sfx(62,2)
-  laser_cd=max(3,flr(15*(1-0.2*fire_rate_level)-(rfb>0 and 5 or 0)+0.5))
+  snd_sfx(62,2)
+  laser_cd=max(3,flr(12*(1-0.2*fire_rate_level)-(rfb>0 and 5 or 0)+0.5))
   end
   ub()
   if shield_invuln>0 then shield_invuln-=1 end
