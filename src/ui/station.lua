@@ -87,6 +87,14 @@ function draw_station()
         if current_mission then
             print(current_mission,6,30,11)
             print("dist:"..mission_distance,6,38,6)
+            -- draw hull meter like in HUD
+            spr(38,6,46)
+            local m=2+ship.hull_level local bw=min(20,m*10) local sw=bw/m 
+            for i=1,ship.hull do 
+                local sx=13+(i-1)*sw 
+                rectfill(sx,47,sx+sw-2,49,11) 
+            end 
+            rect(13,47,12+bw,49,5)
         else
             print("pending",6,30,5)
         end
