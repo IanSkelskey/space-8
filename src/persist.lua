@@ -37,9 +37,9 @@ local I_HS2_COUNT=34
 local I_HS2_BASE=35 -- normal (35-47: 1 count + 4 entries * 3 values = 13 slots)
 local I_HS3_COUNT=48
 local I_HS3_BASE=49 -- veteran (49-61: 1 count + 4 entries * 3 values = 13 slots)
-local I_PULSE=62 -- shield pulse upgrade (moved to avoid conflicts)
-local I_LIFE_LO=63 -- lifetime money low (0-999)
-local I_LIFE_HI=64 -- lifetime money thousands
+-- shield_pulse_level packed into high bits of I_SHIELD (level + pulse*8)
+local I_LIFE_LO=62 -- lifetime money low (0-999)
+local I_LIFE_HI=63 -- lifetime money thousands
 
 -- write a value only if non-nil (saves a few tokens where used repeatedly)
 local function w(i,v) if v then dset(i,v) end end
@@ -54,13 +54,12 @@ function persist_save_for_game()
  w(I_VR,vr)
  if ship then
   w(I_FIRE,ship.fire_rate_level)
-  w(I_SHIELD,ship.shield_level)
+  w(I_SHIELD,ship.shield_level+ship.shield_pulse_level*8)
   w(I_SPREAD,ship.spread_level)
   w(I_HULL_L,ship.hull_level)
   w(I_THRUST,ship.thruster_level)
   w(I_SHIELD_UNL,ship.shield_unlocked and 1 or 0)
   w(I_HULL,ship.hull)
-  w(I_PULSE,ship.shield_pulse_level) -- save between missions in a live run
  end
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
@@ -82,19 +81,13 @@ function persist_save_from_game(ui_state)
  w(I_VR,vr)
  if ship then
   w(I_FIRE,ship.fire_rate_level)
-  w(I_SHIELD,ship.shield_level)
+  if ui_state==2 then ship.shield_pulse_level=0 end -- gameover: drop shield shock
+  w(I_SHIELD,ship.shield_level+ship.shield_pulse_level*8)
   w(I_SPREAD,ship.spread_level)
   w(I_HULL_L,ship.hull_level)
   w(I_THRUST,ship.thruster_level)
   w(I_SHIELD_UNL,ship.shield_unlocked and 1 or 0)
   w(I_HULL,ship.hull)
-  if ui_state==2 then
-   -- gameover: do not persist shield shock upgrade
-   ship.shield_pulse_level=0
-   dset(I_PULSE,0)
-  else
-   w(I_PULSE,ship.shield_pulse_level)
-  end
  end
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
@@ -118,13 +111,12 @@ local function lg()
  money_life_lo=dget(I_LIFE_LO) money_life_hi=dget(I_LIFE_HI)
  if ship then
   ship.fire_rate_level=dget(I_FIRE)
-  ship.shield_level=dget(I_SHIELD)
+  local sv=dget(I_SHIELD) ship.shield_level=sv%8 ship.shield_pulse_level=sv\8
   ship.spread_level=dget(I_SPREAD)
   ship.hull_level=dget(I_HULL_L)
   ship.thruster_level=dget(I_THRUST)
   ship.shield_unlocked=dget(I_SHIELD_UNL)==1
   ship.hull=dget(I_HULL)>0 and dget(I_HULL) or ship.hull
-  ship.shield_pulse_level=dget(I_PULSE)
  end
 end
 
@@ -202,7 +194,7 @@ function persist_reset_progress()
  dset(I_MONEY,0) dset(I_LAST_PAY,0) dset(I_LAST_BONUS,0)
  dset(I_PAYOUT_READY,0) dset(I_VR,1)
  dset(I_FIRE,0) dset(I_SHIELD,0) dset(I_SPREAD,0) dset(I_HULL_L,0)
- dset(I_THRUST,0) dset(I_SHIELD_UNL,0) dset(I_HULL,2) dset(I_PULSE,0)
+ dset(I_THRUST,0) dset(I_SHIELD_UNL,0) dset(I_HULL,2)
  dset(I_TS,0) dset(I_TSH,0)
  -- clear last run (score) so next session starts fresh (highscores unaffected)
  dset(I_LAST_RUN_LO,0) dset(I_LAST_RUN_HI,0)

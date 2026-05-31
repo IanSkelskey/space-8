@@ -22,9 +22,9 @@ local I_PAYOUT_READY=16
 local I_START_FLAG=17
 local I_LAST_RUN_LO=18
 local I_LAST_RUN_HI=19
-local I_PULSE=40
-local I_LIFE_LO=41
-local I_LIFE_HI=42
+-- shield_pulse_level packed into high bits of I_SHIELD (level + pulse*8)
+local I_LIFE_LO=62
+local I_LIFE_HI=63
 
 local function w(i,v) if v then dset(i,v) end end
 
@@ -42,13 +42,12 @@ function persist_load_game_start()
  money_life_lo=dget(I_LIFE_LO) money_life_hi=dget(I_LIFE_HI)
  if not ship then ship={} end
  ship.fire_rate_level=dget(I_FIRE)
- ship.shield_level=dget(I_SHIELD)
+ local sv=dget(I_SHIELD) ship.shield_level=sv%8 ship.shield_pulse_level=sv\8
  ship.spread_level=dget(I_SPREAD)
  ship.hull_level=dget(I_HULL_L)
  ship.thruster_level=dget(I_THRUST)
  ship.shield_unlocked=dget(I_SHIELD_UNL)==1
  ship.hull=dget(I_HULL)
- ship.shield_pulse_level=dget(I_PULSE)
  return true
 end
 
@@ -61,10 +60,10 @@ function persist_save_from_game(ui_state)
  w(I_DF,df) w(I_ROUND,round_number) w(I_MONEY,money_total)
  w(I_LAST_PAY,last_pay) w(I_LAST_BONUS,last_bonus) w(I_VR,vr)
  if ship then
-  w(I_FIRE,ship.fire_rate_level) w(I_SHIELD,ship.shield_level) w(I_SPREAD,ship.spread_level)
+  if ui_state==2 then ship.shield_pulse_level=0 end
+  w(I_FIRE,ship.fire_rate_level) w(I_SHIELD,ship.shield_level+ship.shield_pulse_level*8) w(I_SPREAD,ship.spread_level)
   w(I_HULL_L,ship.hull_level) w(I_THRUST,ship.thruster_level)
   w(I_SHIELD_UNL,ship.shield_unlocked and 1 or 0) w(I_HULL,ship.hull)
-  if ui_state==2 then dset(I_PULSE,0) else w(I_PULSE,ship.shield_pulse_level) end
  end
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
@@ -77,5 +76,3 @@ function persist_store_last_run_total(total)
  dset(I_LAST_RUN_HI,hi)
  dset(I_LAST_RUN_LO,total-hi*1000)
 end
-
-function persist_clear_pulse() dset(I_PULSE,0) end
