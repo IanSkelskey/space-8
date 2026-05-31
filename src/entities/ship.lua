@@ -210,8 +210,3 @@ function ship_reset_upgrades()
  ship.shield_pulse_level=0
  ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
 end
-function ship_reset_upgrades()
- ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level,ship.thruster_level,ship.hull,ship.rfb=0,0,false,0,0,0,0,0,2,0
- ship.shield_pulse_level=0
- ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
-end
