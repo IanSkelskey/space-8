@@ -67,8 +67,10 @@ function draw_menu()
   hs_draw_full()
   return
  end
- print("\014sPACE 8",36,20,7)
- print("v2.1.0",48,32,6)
+ -- title logo: flashes between two 8x2 frames (tiles 112 & 144), centered
+ -- in the band between the header and the menu list
+ spr(time()%0.8<0.4 and 112 or 144,32,22,8,2)
+ print("v2.1.0",52,40,6)
  if picking_diff then
   print("select difficulty",28,40,10)
   draw_list(diff_labels,diff_icons,56)

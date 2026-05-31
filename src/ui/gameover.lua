@@ -9,9 +9,8 @@ local function check_highscore_qualified()
 end
 
 function draw_gameover()
-	-- Header with pulsing text
-	local c=time()%1<0.5 and 8 or 7
-	print("\014game over",28,32,c)
+	-- animated game-over logo: flashes between two 10x2 frames (tiles 176 & 208)
+	spr(time()%0.8<0.4 and 176 or 208,24,26,10,2)
 	
 	-- Stats display
 	local tls="00"..(ts or 0)
