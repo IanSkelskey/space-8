@@ -5,7 +5,7 @@ local hd={
  -- page 1: loop + controls (updated and concise)
  "\fcmission flow\f6:\n\n 1. pick difficulty\n 2. fill \fddistance\f6 bar\n 3. dodge, shoot, collect\n 4. land for payout\n 5. upgrade & relaunch\n\n\fccontrols\f6:\n\n move ship      \f9⬅️⬆️⬇️➡️\f6\n shoot lasers   \f9🅾️\f6\n shield (hold)  \f9❎\f6\n\n shield drains power;\n release to recharge",
  -- page 2: upgrades (current items)
- "\fcupgrades\f6:\n\n\f9fire rate\f6   faster shots\n\f9shield\f6      stronger wall\n\f9spread\f6      side beams\n\f9hull\f6        +max hp\n\f9thrusters\f6   quicker accel\n\f9shock\f6       pulse on hit\n\nTip: spread + rate = DPS ramp",
+ "\fcupgrades\f6:\n\n\f9fire rate\f6   faster shots\n\f9shield\f6      stronger wall\n\f9spread\f6      side beams\n\f9hull\f6        +max hp\n\f9thrusters\f6   more top speed\n\f9shock\f6       pulse on hit\n\nTip: spread + rate = DPS ramp",
  -- page 3: obstacles part 1 (asteroids & comets)
  "",
  -- page 4: obstacles part 2 (black holes)
@@ -40,7 +40,7 @@ function draw_help()
    {10,"shield","stronger wall"},
    {25,"spread","side beams"},
    {38,"hull","+max hp"},
-   {55,"thrusters","quicker accel"},
+   {55,"thrusters","more top speed"},
    {105,"shock","pulse on hit"}
   }
   local y=32

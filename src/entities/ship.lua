@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.5,flipx=false,vx=0,vy=0,acc=0.24,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.5,flipx=false,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0}
 
 bullets={}
 
@@ -82,13 +82,12 @@ function update_ship()
   if hull_invuln>0 then hull_invuln-=1 end
   local dx,dy=btn(0)and -1 or(btn(1)and 1 or 0),btn(2)and -1 or(btn(3)and 1 or 0)
   local mag=sqrt(dx*dx+dy*dy) if mag>0 then dx/=mag dy/=mag end
+  -- direct (no-accel) control: instant velocity = input * speed
+  local s=spd*(1+0.12*thruster_level)
+  vx,vy=dx*s,dy*s
   flipx=vx<-0.05 or(vx==0 and dx<0)
-  local tx,ty,ea=dx*spd,dy*spd,acc*(1+0.15*thruster_level)
-  vx+=mid(-ea,tx-vx,ea) vy+=mid(-ea,ty-vy,ea)
   x+=vx y+=vy
   x=mid(0,x,120) y=mid(10,y,120)
-    if (x==0 and vx<0)or(x==120 and vx>0)then vx=0 end
-  if (y==10 and vy<0)or(y==120 and vy>0)then vy=0 end
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
   if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 2 or 5) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end

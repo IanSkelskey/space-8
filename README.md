@@ -49,7 +49,7 @@ Purchasables available at the Station shop.
 | ![Shield](preview/entities/upgrade-shield.png) | Shield | Unlocks shield, then strengthens it per level (max 3). |
 | ![Spread](preview/entities/upgrade-spread.png) | Phaser Spread | Adds side beams per level (max 2). |
 | ![Hull](preview/entities/upgrade-hull.png) | Hull | +1 hull segment per level (max 2). Grants +1 HP when purchased. |
-| ![Thrusters](preview/entities/upgrade-thrusters.png) | Thrusters | Faster acceleration per level (max 3). |
+| ![Thrusters](preview/entities/upgrade-thrusters.png) | Thrusters | Higher top speed per level (max 3). |
 | ![Shock](preview/entities/upgrade-shock.png) | Shield Shock | Emits a damaging pulse on hit (max 2). Requires Shield. |
 | ![Repair](preview/entities/upgrade-repair.png) | Repair Hull | Restores 1 hull, up to current max. Cost scales with round. |
 
