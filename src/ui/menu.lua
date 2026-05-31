@@ -70,12 +70,12 @@ function draw_menu()
  -- title logo: flashes between two 8x2 frames (tiles 112 & 144), centered
  -- in the band between the header and the menu list
  spr(time()%0.8<0.4 and 112 or 144,32,22,8,2)
- print("v2.1.0",52,40,6)
  if picking_diff then
   print("select difficulty",28,40,10)
   draw_list(diff_labels,diff_icons,56)
   print("🅾️ select  ❎ back",22,104,5)
  else
+  print("v2.1.0",52,40,6)
   draw_list(root_labels,root_icons,56)
   print("🅾️ select",40,104,5)
  end
