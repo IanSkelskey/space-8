@@ -95,10 +95,10 @@ function update_ship()
   -- rapid fire burst timer
   if rfb>0 then rfb-=1 end
   if laser_cd<=0 and btn(4)then
-  local cx,by,iv,lvl=flr(x+3),y-2,vx*0.3,spread_level
+  local cx,by,iv,lvl=flr(x+3),y-2,vx*0.12,spread_level
    local sdx=lvl>1 and 0.7 or 0
-   if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-2})end
-   if lvl>=1 then add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-2}) add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-2}) end
+   if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-3})end
+   if lvl>=1 then add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-3}) add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-3}) end
   -- muzzle flash particles (slight spread) when rapid fire active
   if rfb>0 then
    for mi=1,2 do
