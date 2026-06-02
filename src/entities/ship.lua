@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spr=16,spd=2.5,flipx=false,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0}
 
 bullets={}
 
@@ -89,7 +89,6 @@ function update_ship()
   -- direct (no-accel) control: instant velocity = input * speed
   local s=spd*(1+0.12*thruster_level)
   vx,vy=dx*s,dy*s
-  flipx=vx<-0.05 or(vx==0 and dx<0)
   x+=vx y+=vy
   x=mid(0,x,120) y=mid(10,y,120)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
@@ -201,16 +200,4 @@ function draw_ship()
    end
   end
  end
-end
-
--- accessors removed (inline bullets, ship.hull, 2+ship.hull_level for tokens)
-
-function ship_unlock_shield()
- ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool=true,max(1,ship.shield_level),100,0
-end
-
-function ship_reset_upgrades()
- ship.fire_rate_level,ship.spread_level,ship.shield_unlocked,ship.shield_level,ship.shield_power,ship.shield_cool,ship.hull_level,ship.thruster_level,ship.hull,ship.rfb=0,0,false,0,0,0,0,0,2,0
- ship.shield_pulse_level=0
- ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
 end
