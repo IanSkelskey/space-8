@@ -83,6 +83,7 @@ function update_ship()
  end
  do local _ENV=setmetatable(ship,{__index=_ENV})
   if hull_invuln>0 then hull_invuln-=1 end
+  if shield_retaliate_t>0 then shield_retaliate_t-=1 end
   local dx,dy=btn(0)and -1 or(btn(1)and 1 or 0),btn(2)and -1 or(btn(3)and 1 or 0)
   local mag=sqrt(dx*dx+dy*dy) if mag>0 then dx/=mag dy/=mag end
   -- direct (no-accel) control: instant velocity = input * speed
