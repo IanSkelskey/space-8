@@ -189,16 +189,33 @@ function draw_ship()
     circ(cx,cy,base_r-i+sin(t+i*0.2)*2,flash or cols[i])
   end
  end
- -- magnet aura simplified: single spinning dotted ring at effect radius
- if ship.magnet_t>0 then
-  local cx,cy=ship.x+4,ship.y+4
-  local r=44 -- matches pull radius in particle system
-  local aoff=time()*0.6
-  for i=0,47 do
-   if (i%2)==0 then
-    local a=aoff+i/48
-    pset(flr(cx+cos(a)*r+0.5),flr(cy+sin(a)*r+0.5),7)
-   end
+ -- magnet aura: twin counter-rotating dotted rings in the gravity-well palette
+ -- (pink 14 / purple 2, shared with pink comets + black holes). the radius
+ -- breathes gently around the 44px pull range and the ring flickers out as the
+ -- effect expires, so it reads as a field without becoming a distraction.
+ if ship.magnet_t>0 and not(ship.magnet_t<20 and ship.magnet_t%4<2) then
+  local cx,cy,t=ship.x+4,ship.y+4,time()
+  local r=43+sin(t*0.5)*1.5
+  -- outer ring: alternating pink/purple, slow clockwise sweep
+  local ao=t*0.6
+  for i=0,23 do
+   local a=ao+i/24
+   pset(flr(cx+cos(a)*r+0.5),flr(cy+sin(a)*r+0.5),i%2==0 and 14 or 2)
+  end
+  -- inner ring: dim purple, counter-rotating, with travelling pink sparkles
+  local ri,ai=r-4,t*-0.9
+  for i=0,15 do
+   local a=ai+i/16
+   pset(flr(cx+cos(a)*ri+0.5),flr(cy+sin(a)*ri+0.5),flr(t*8+i)%5==0 and 14 or 2)
+  end
+  -- in-falling sparks: pink heads stream from the ring toward the ship,
+  -- accelerating inward (radius=r*(1-u^2)) with a short purple trail behind so
+  -- the pull direction is unmistakable.
+  for i=0,5 do
+   local u=(t*0.7+i/6)%1
+   local a,rr=i/6+t*0.1,r*(1-u*u)
+   pset(flr(cx+cos(a)*rr+0.5),flr(cy+sin(a)*rr+0.5),14)
+   pset(flr(cx+cos(a)*(rr+2)+0.5),flr(cy+sin(a)*(rr+2)+0.5),2)
   end
  end
 end
