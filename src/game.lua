@@ -17,7 +17,6 @@ death_skip_lock=death_skip_lock or 0 -- frames before skip input is accepted (de
 local DEATH_ANIM_MIN=45      -- minimum death animation duration (frames)
 local DEATH_JINGLE_LEN=210   -- full gameover jingle length; cart loads only after this ends
 vr=1 -- visible round counter (always starts at 1)
-sr=sr or split"1,2,4" -- start rounds per difficulty (easy,normal,veteran)
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
 -- short init bundle (entities + hud + ship)
 function ie() ship_init() asteroid_init() hud_init() blackhole_init() comet_init() end
