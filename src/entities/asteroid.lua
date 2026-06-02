@@ -148,12 +148,6 @@ function asteroid_absorb(hx,hy,hw,hh)
 	end
 	-- Also absorb debris particles
 	p_absorb(hx,hy,hw,hh,{[4]=true})
-	-- Spawn dust when debris is absorbed
-	for p in all(Gp) do
-		if p.t==4 and p.x>=hx and p.x<hx+hw and p.y>=hy and p.y<hy+hh then
-			spawn_chunk_dust(p.x+2,p.y+2)
-		end
-	end
 end
 
 -- asteroid_debris_pull wrapper removed (inline p_pull with {[PT_DEBRIS]=true})
