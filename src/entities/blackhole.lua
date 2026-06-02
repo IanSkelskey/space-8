@@ -63,7 +63,7 @@ function update_blackhole()
 		end
 		-- inline bullet pull (reuse cx,cy and r2)
 		for b in all(bullets) do
-			if aabb(b.x,b.y,2,2,h.x,h.y,h.w,h.h) then
+			if aabb(b.x,b.y,5,5,h.x,h.y,h.w,h.h) then
 				del(bullets,b)
 			else
 				local dx,dy=cx-b.x,cy-b.y local d2=dx*dx+dy*dy

@@ -68,7 +68,7 @@ function update_comet()
 			p_add(c.x+4-ux*2+rnd()-0.5,c.y+4-uy*2+rnd()-0.5,-ux*(0.2+rnd(0.2))+rnd(0.1)-0.05,-uy*(0.2+rnd(0.2))+rnd(0.1)-0.05,18+rnd(10)\1,5,col)
 		end
 		for b in all(bullets) do
-			if aabb(c.x,c.y,8,8,b.x,b.y,2,2) then
+			if aabb(c.x,c.y,8,8,b.x,b.y,5,5) then
 				del(bullets,b) c.hp-=1
 				if c.hp<=0 then
 					local cx,cy=c.x+4,c.y+4

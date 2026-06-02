@@ -6,7 +6,8 @@ function aabb(ax,ay,aw,ah,bx,by,bw,bh)
 end
 -- ship collision shorthand
 function scoll(x,y,w,h)
- return aabb(x,y,w,h,ship.x,ship.y,ship.w,ship.h)
+ -- ship hitbox: 5x5 centered on the ship (smaller than the 16x16 sprite)
+ return aabb(x,y,w,h,ship.x+1.5,ship.y+1.5,5,5)
 end
 -- gameplay-only state (mission name now owned by UI cart via station ensure_mission)
 round_number,mission_distance,dr,level_fanfare_timer,ship_departing=1,0,0,0,false

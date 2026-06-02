@@ -93,15 +93,17 @@ function update_ship()
   x=mid(0,x,120) y=mid(10,y,120)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
-  if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 2 or 5) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end
+  if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 1 or 5) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end
   if laser_cd>0 then laser_cd-=1 end
   -- rapid fire burst timer
   if rfb>0 then rfb-=1 end
   if laser_cd<=0 and btn(4)then
-  local cx,by,iv,lvl=flr(x+3),y-2,vx*0.12,spread_level
+  local cx,by,iv,lvl=flr(x+1),y-3,vx*0.12,spread_level
    local sdx=lvl>1 and 0.7 or 0
+   -- spawn spread wide enough that the 5px bullet sprites don't overlap
+   local so=lvl>1 and 6 or 3
    if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-3})end
-   if lvl>=1 then add(bullets,{x=cx-1,y=by,dx=iv-sdx,dy=-3}) add(bullets,{x=cx+1,y=by,dx=iv+sdx,dy=-3}) end
+   if lvl>=1 then add(bullets,{x=cx-so,y=by,dx=iv-sdx,dy=-3}) add(bullets,{x=cx+so,y=by,dx=iv+sdx,dy=-3}) end
   -- muzzle flash particles (slight spread) when rapid fire active
   if rfb>0 then
    for mi=1,2 do
@@ -167,20 +169,19 @@ function draw_ship()
  if ship.dying then
   -- Death particles drawn by particle system
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
-  spr(abs(ship.vx)>0.05 and 17 or 16,ship.x,ship.y,1,1,ship.vx>0)
+  -- 16x16 ship sprite (straight 137 / turning 139), centered on the 8x8 hitbox
+  spr(abs(ship.vx)>0.05 and 139 or 137,ship.x-4,ship.y-4,2,2,ship.vx>0)
  end
  
  -- Skip bullets and shield during fanfare
  if game_state=="fanfare_depart" then return end
  
- for b in all(bullets)do local x,y=flr(b.x),flr(b.y)pset(x,y,9)pset(x,y-1,8)end
- if ship.rfb>0 then
-  -- overlay yellow tint: redraw bullets with brighter colors
-  for b in all(bullets)do local x,y=flr(b.x),flr(b.y)pset(x,y,10)pset(x,y-1,9)end
- end
+ -- bullets: animated 5x6 sprite over the 5x5 hitbox; rapid-fire swaps 120/121 -> 122/123
+ local bsx=ship.rfb>0 and 80 or 64
+ for b in all(bullets)do sspr(bsx+(flr(time()*16+b.x+b.y)%2)*8,56,5,6,flr(b.x),flr(b.y)-1) end
  if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and (ship.shield_invuln%4)<2) then
-  local cx,cy,t=ship.x+4,ship.y+4,ship.shield_anim/30
-  local base_r=10+ship.shield_pulse_level -- slight growth per level
+  local cx,cy,t=ship.x+3,ship.y+4,ship.shield_anim/30
+  local base_r=12+ship.shield_pulse_level -- slight growth per level
   local cols = (ship.shield_pulse_level>0) and {8,9,2} or thr_cols[2]
   local flash=ship.shield_invuln>25 and (ship.shield_pulse_level>0 and 8 or 7) or nil
   for i=1,3 do
