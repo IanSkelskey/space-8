@@ -26,7 +26,7 @@ function p_upd()
       if i.d==7 then local cx,cy=ship.x+2,ship.y+2 if not (i.x>=cx and i.x<cx+4 and i.y>=cy and i.y<cy+4) then goto skip_pick end end
       if scoll(i.x,i.y,8,8) then local d=i.d
    if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(30)
-       elseif d==1 or d==nil then if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
+       elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
        elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
    if not money_life_lo then money_life_lo,money_life_hi=0,0 end money_life_lo+=4 while money_life_lo>=1000 do money_life_lo-=1000 money_life_hi+=1 end
        elseif d==5 then ship.rfb=120 snd_sfx(63)
@@ -146,7 +146,7 @@ end
 function p_pull(cx,cy,r,str,types)
  local r2=r*r
  for i in all(p) do
-  if not types or types[i.t] then
+  if types[i.t] then
    local dx,dy=cx-i.x,cy-i.y
    local d2=dx*dx+dy*dy
    if d2>0.5 and d2<r2 then
@@ -169,7 +169,7 @@ end
 -- Absorb particles in rect
 function p_absorb(hx,hy,hw,hh,types)
  for i in all(p) do
-  if (not types or types[i.t]) and i.x>=hx and i.x<hx+hw and i.y>=hy and i.y<hy+hh then
+  if types[i.t] and i.x>=hx and i.x<hx+hw and i.y>=hy and i.y<hy+hh then
    del(p,i)
   end
  end

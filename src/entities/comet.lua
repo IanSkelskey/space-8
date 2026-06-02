@@ -17,7 +17,7 @@ local function spawn_comet()
 	local use_angled=norm_ang>0.0625 and norm_ang<0.1875
 	
 	add(comets,{
-		x=x,y=y,w=8,h=8,
+		x=x,y=y,
 		dx=cos(ang)*spd,dy=sin(ang)*spd,
 		c8=C8[i+1],c9=C9[i+1],
 		sid=use_angled and SIDS_ANGLED[i+1] or SIDS_STRAIGHT[i+1],
@@ -91,7 +91,7 @@ function update_comet()
 				break
 			end
 		end
-		if c.hp>0 then if scoll(c.x,c.y,c.w,c.h) then ship_kill() end if c.x<-12 or c.x>140 or c.y<-12 or c.y>140 then del(comets,c) end end
+		if c.hp>0 then if scoll(c.x,c.y,8,8) then ship_kill() end if c.x<-12 or c.x>140 or c.y<-12 or c.y>140 then del(comets,c) end end
 		::continue::
 	end
 end

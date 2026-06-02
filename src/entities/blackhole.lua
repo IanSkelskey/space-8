@@ -4,7 +4,6 @@ local function spawn_hole()
 	add(holes,{
 		x=flr(rnd(120)),
 		y=10-10,
-		w=8,h=8,
 		spd=0.8,
 		r=50,
 		spin_t=0
@@ -43,16 +42,16 @@ function update_blackhole()
 			ship.x=mid(0,ship.x+dx*invd*str,128-ship.w)
 			ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
 		end
-		if scoll(h.x,h.y,h.w,h.h) and not ship.dying then
+		if scoll(h.x,h.y,8,8) and not ship.dying then
 			ship.shield_power,ship.shield_active=0,false
 			ship_kill()
 		end
 
 		if h.y>136 then del(holes,h) end
 
-		asteroid_absorb(h.x,h.y,h.w,h.h)
+		asteroid_absorb(h.x,h.y,8,8)
 		-- inline ship_trails_absorb
-		p_absorb(h.x,h.y,h.w,h.h,{[2]=true,[3]=true})
+		p_absorb(h.x,h.y,8,8,{[2]=true,[3]=true})
 
 		-- inlined spawn_particles(h)
 		for i=1,(rnd()<0.5 and 2 or 1) do
@@ -63,7 +62,7 @@ function update_blackhole()
 		end
 		-- inline bullet pull (reuse cx,cy and r2)
 		for b in all(bullets) do
-			if aabb(b.x,b.y,5,5,h.x,h.y,h.w,h.h) then
+			if aabb(b.x,b.y,5,5,h.x,h.y,8,8) then
 				del(bullets,b)
 			else
 				local dx,dy=cx-b.x,cy-b.y local d2=dx*dx+dy*dy
