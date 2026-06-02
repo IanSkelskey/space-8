@@ -82,18 +82,9 @@ function _update()
 	if gs=="game" or gs=="dying"then
 		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
 		if game_state=="game" then
-			if ship.dying then
-				-- enter dying: start music immediately and set timer if first frame
-				game_state="dying"
-				if death_jingle_t<=0 then
-					ship.shield_pulse_level=0
-					persist_store_last_run_total(tsh*1000+ts)
-					-- force jingle; avoid any lingering sfx on music channels
-					snd_music(9)
-					death_jingle_t=DEATH_JINGLE_LEN
-					death_skip_lock=15 -- ~0.5s lockout before skip allowed
-				end
-			elseif dr>0 then
+			-- death is handled in ship_kill (sets game_state="dying" + stores run score);
+			-- here we only advance mission distance
+			if dr>0 then
 				dr-=1
 				if dr<=0 then complete_mission() end
 			end
