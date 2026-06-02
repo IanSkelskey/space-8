@@ -1,4 +1,4 @@
-game_state,prev_game_state="game","game"
+game_state="game"
 -- shared small constants / helpers (token savings)
 FT=1/30
 function aabb(ax,ay,aw,ah,bx,by,bw,bh)
@@ -71,12 +71,7 @@ function _update()
 	  persist_save_from_game(1) -- station state
 	  load("ui.p8") load("ui.p8.png") load("#space_8_ui")
 	 end
-	 prev_game_state="fanfare_depart"
 	 return
-	end
-	-- skip generic music state machine the exact frame we enter dying to avoid it overriding jingle
-	if not (prev_game_state=="game" and game_state=="dying") then
-		snd_update_music(game_state,prev_game_state,level_fanfare_timer)
 	end
 	local gs=game_state
 	if gs=="game" or gs=="dying"then
@@ -125,7 +120,6 @@ function _update()
 			end
 		end
 	end
-	prev_game_state=game_state
 end
 function _draw()
 	cls()
