@@ -20,6 +20,7 @@ vr=1 -- visible round counter (always starts at 1)
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
 -- short init bundle (entities + hud + ship)
 function ie() ship_init() asteroid_init() hud_init() blackhole_init() comet_init() end
+function tu(s) persist_save_from_game(s) load("ui.p8") load("ui.p8.png") load("#space_8_ui") end
 function complete_mission()
  local mult=dsc and dsc[df] or 1
  last_pay=flr((40+mission_distance\25)*mult)
@@ -43,8 +44,7 @@ function _init()
  death_jingle_t=0
  local resumed=persist_load_game_start()
  if not resumed then
-  persist_save_from_game(0)
-  load("ui.p8") load("ui.p8.png") load("#space_8_ui")
+  tu(0)
   return
  end
  persist_consume_start_flag()
@@ -68,8 +68,7 @@ function _update()
 	 p_upd()
 	 if not ship_departing and level_fanfare_timer<=0 then
 	  -- mission finished: return to station in ui cart
-	  persist_save_from_game(1) -- station state
-	  load("ui.p8") load("ui.p8.png") load("#space_8_ui")
+	  tu(1)
 	 end
 	 return
 	end
@@ -113,8 +112,7 @@ function _update()
 				end
 				if ship.death_t>=DEATH_ANIM_MIN and death_jingle_t<=0 then
 					death_skip_pending=false death_skip_lock=0
-					persist_save_from_game(2)
-					load("ui.p8") load("ui.p8.png") load("#space_8_ui")
+					tu(2)
 					return
 				end
 			end
