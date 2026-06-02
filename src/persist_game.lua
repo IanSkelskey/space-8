@@ -20,8 +20,6 @@ local I_TS=14
 local I_TSH=15
 local I_PAYOUT_READY=16
 local I_START_FLAG=17
-local I_LAST_RUN_LO=18
-local I_LAST_RUN_HI=19
 -- shield_pulse_level packed into high bits of I_SHIELD (level + pulse*8)
 local I_LIFE_LO=62
 local I_LIFE_HI=63
@@ -40,7 +38,6 @@ function persist_load_game_start()
  ts=dget(I_TS) tsh=dget(I_TSH)
  last_payout_ready=dget(I_PAYOUT_READY)==1
  money_life_lo=dget(I_LIFE_LO) money_life_hi=dget(I_LIFE_HI)
- if not ship then ship={} end
  ship.fire_rate_level=dget(I_FIRE)
  local sv=dget(I_SHIELD) ship.shield_level=sv%8 ship.shield_pulse_level=sv\8
  ship.spread_level=dget(I_SPREAD)
@@ -48,10 +45,9 @@ function persist_load_game_start()
  ship.thruster_level=dget(I_THRUST)
  ship.shield_unlocked=dget(I_SHIELD_UNL)==1
  ship.hull=dget(I_HULL)
+ dset(I_START_FLAG,0)
  return true
 end
-
-function persist_consume_start_flag() dset(I_START_FLAG,0) end
 
 -- save minimal state when leaving gameplay (station/gameover)
 function persist_save_from_game(ui_state)
@@ -59,20 +55,11 @@ function persist_save_from_game(ui_state)
  dset(I_START_FLAG,0)
  w(I_DF,df) w(I_ROUND,round_number) w(I_MONEY,money_total)
  w(I_LAST_PAY,last_pay) w(I_LAST_BONUS,last_bonus) w(I_VR,vr)
- if ship then
-  if ui_state==2 then ship.shield_pulse_level=0 end
-  w(I_FIRE,ship.fire_rate_level) w(I_SHIELD,ship.shield_level+ship.shield_pulse_level*8) w(I_SPREAD,ship.spread_level)
-  w(I_HULL_L,ship.hull_level) w(I_THRUST,ship.thruster_level)
-  w(I_SHIELD_UNL,ship.shield_unlocked and 1 or 0) w(I_HULL,ship.hull)
- end
+ if ui_state==2 then ship.shield_pulse_level=0 end
+ w(I_FIRE,ship.fire_rate_level) w(I_SHIELD,ship.shield_level+ship.shield_pulse_level*8) w(I_SPREAD,ship.spread_level)
+ w(I_HULL_L,ship.hull_level) w(I_THRUST,ship.thruster_level)
+ w(I_SHIELD_UNL,ship.shield_unlocked and 1 or 0) w(I_HULL,ship.hull)
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
  if money_life_lo then dset(I_LIFE_LO,money_life_lo) dset(I_LIFE_HI,money_life_hi) end
-end
-
--- store last run total (already pre-summed by caller)
-function persist_store_last_run_total(total)
- local hi=total\1000
- dset(I_LAST_RUN_HI,hi)
- dset(I_LAST_RUN_LO,total-hi*1000)
 end

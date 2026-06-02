@@ -47,7 +47,6 @@ function _init()
   tu(0)
   return
  end
- persist_consume_start_flag()
  ie() p_clear()
  -- mission distance & scaling (UI decides name; always recompute here)
  mission_distance=400+round_number*80 dr=mission_distance sl(round_number)

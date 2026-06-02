@@ -57,7 +57,8 @@ function ship_kill()
   ship.dying,ship.death_t,ship.vx,ship.vy,game_state=true,0,0,0,"dying"
   -- store run score here: game.lua's death-entry block is unreachable because
   -- game_state is already "dying" by the time it re-checks for it
-  persist_store_last_run_total(tsh*1000+ts)
+  local t=tsh*1000+ts
+  dset(19,t\1000) dset(18,t%1000)
   for i=1,22 do
     local a,sp=rnd(1),0.7+rnd(1.3)
     p_add(ship.x+4,ship.y+4,cos(a)*sp,sin(a)*sp,flr(10+rnd(20)),3)
