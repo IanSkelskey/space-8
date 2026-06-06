@@ -102,23 +102,26 @@ function draw_comet()
 			local cx,cy=c.left and 4 or 123,max(c.y+4,14)
 			h(cx,cy,(20-c.warning_t)*0.15,c.c8,c.c9)
 		else
-			local sid=c.sid
-			if c.flash_t>0 then sid=c.use_angled and 35 or 51 end
+			-- hit flash via palette whiteout (no dedicated flash sprites)
+			local sid,flash=c.sid,c.flash_t>0
+			if flash then for i=1,15 do pal(i,7) end end
 			if c.use_angled then
 				spr(sid,c.x,c.y,1,1,c.dx<0,c.dy>0)
 			elseif abs(c.dx)>abs(c.dy) then
 				spr(sid,c.x,c.y,1,1,c.dx<0,false)
 			else
+				-- rotated branch draws pixel-by-pixel; tint to white inline when flashing
 				local sx,sy=sid%16*8,flr(sid/16)*8
 				for px=0,7 do
 					for py=0,7 do
 						local col=sget(sx+px,sy+py)
 						if col!=0 then
-							if c.dy>0 then pset(c.x+py,c.y+7-px,col) else pset(c.x+7-py,c.y+px,col) end
+							if c.dy>0 then pset(c.x+py,c.y+7-px,flash and 7 or col) else pset(c.x+7-py,c.y+px,flash and 7 or col) end
 						end
 					end
 				end
 			end
+			if flash then pal() end
 		end
 	end
 end

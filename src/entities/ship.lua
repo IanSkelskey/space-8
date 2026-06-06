@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0,vlean=0}
 
 bullets={}
 
@@ -72,6 +72,7 @@ function ship_init()
  ship.x,ship.y,ship.vx,ship.vy,ship.dying,ship.death_t,ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool,ship.laser_cd,ship.hull_invuln,ship.shield_free,ship.rfb=START_X,START_Y,0,0,false,0,false,0,0,0,0,0,0,0
  ship.shield_power=ship.shield_unlocked and 100 or 0
  ship.magnet_t=0
+ ship.vlean=0
  ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
  sfx(-1,3)
 end
@@ -92,6 +93,8 @@ function update_ship()
   vx,vy=dx*s,dy*s
   x+=vx y+=vy
   x=mid(0,x,120) y=mid(10,y,120)
+  -- visual lean: ease toward heading so direction changes roll through the level frame (no gameplay effect)
+  vlean+=mid(-0.3,(vx>0.05 and 1 or(vx<-0.05 and -1 or 0))-vlean,0.3)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
   if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 1 or 5) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end
@@ -170,8 +173,12 @@ function draw_ship()
  if ship.dying then
   -- Death particles drawn by particle system
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
-  -- 16x16 ship sprite (straight 137 / turning 139), centered on the 8x8 hitbox
-  spr(abs(ship.vx)>0.05 and 139 or 137,ship.x-4,ship.y-4,2,2,ship.vx>0)
+  -- 16x16 ship sprite, centered on the 8x8 hitbox; visual lean picks level (137) vs banked (139)
+  if abs(ship.vlean)<0.35 then
+   spr(137,ship.x-4,ship.y-4,2,2)
+  else
+   spr(139,ship.x-4,ship.y-4,2,2,ship.vlean>0)
+  end
  end
  
  -- Skip bullets and shield during fanfare

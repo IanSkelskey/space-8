@@ -3,7 +3,6 @@ df=df or 2
 -- gameplay cart now retains control until jingle (pattern 9) fully completes,
 -- so no UI-side countdown or restart needed.
 function _init()
- pal(15,0x81,1)
  cartdata("sp8")
  local st=persist_load_ui_state()
  -- set defaults if empty

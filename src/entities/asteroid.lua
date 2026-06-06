@@ -127,15 +127,18 @@ end
 
 function draw_asteroid()
 	for m in all(asteroids) do
-		local flash=m.flash_t>0 and m.flash_t%2==0
+		-- hit flash via palette whiteout (no dedicated flash sprites)
+		if m.flash_t>0 and m.flash_t%2==0 then
+			for i=1,15 do pal(i,7) end
+		end
 		if m.large then
-			local base
-			if flash then base=14 else local o=m.alt and 5 or 0 base=7+o end
+			local base=7+(m.alt and 5 or 0)
 			-- draw 2x2 block
 			spr(base,m.x,m.y) spr(base+1,m.x+8,m.y) spr(base+16,m.x,m.y+8) spr(base+17,m.x+8,m.y+8)
 		else
-			spr(flash and 1 or(m.alt and 26 or 2),m.x,m.y)
+			spr(m.alt and 26 or 2,m.x,m.y)
 		end
+		pal()
 	end
 	-- Debris and dust now drawn by particle system
 end

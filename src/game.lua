@@ -39,7 +39,6 @@ end
 
 -- gameplay cart init
 function _init()
- pal(15,0x81,1)
  starfield_init()
  death_jingle_t=0
  local resumed=persist_load_game_start()
