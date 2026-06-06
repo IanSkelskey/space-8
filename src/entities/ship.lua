@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0,vlean=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0,vlean=0,muzzle_t=0}
 
 bullets={}
 
@@ -10,6 +10,9 @@ local thr_cols={
  {11,3,1},
  {7,6,5}
 }
+
+-- rapid-fire recolor: shift warm bullet/flash colors one step hotter (yellow->white, orange->yellow, red->orange)
+local function rfpal() pal(10,7)pal(9,10)pal(8,9) end
 
 -- update bullets (movement + cull)
 local function ub()
@@ -73,6 +76,7 @@ function ship_init()
  ship.shield_power=ship.shield_unlocked and 100 or 0
  ship.magnet_t=0
  ship.vlean=0
+ ship.muzzle_t=0
  ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
  sfx(-1,3)
 end
@@ -106,6 +110,7 @@ function update_ship()
    end
   end
   if laser_cd>0 then laser_cd-=1 end
+  if muzzle_t>0 then muzzle_t-=1 end
   -- rapid fire burst timer
   if rfb>0 then rfb-=1 end
   if laser_cd<=0 and btn(4)then
@@ -115,13 +120,9 @@ function update_ship()
    local so=lvl>1 and 6 or 3
    if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-3})end
    if lvl>=1 then add(bullets,{x=cx-so,y=by,dx=iv-sdx,dy=-3}) add(bullets,{x=cx+so,y=by,dx=iv+sdx,dy=-3}) end
-  -- muzzle flash particles (slight spread) when rapid fire active
-  if rfb>0 then
-   for mi=1,2 do
-    local ang=rnd(0.2)-0.1
-    p_add(cx+((mi==1)and -1 or 1),by+1,ang*0.4+rnd(0.2)-0.1,-1.5-rnd(0.3),6+rnd(4)\1,1, (mi==1 and 10 or 9))
-   end
-  end
+  muzzle_t=4 -- two-frame muzzle flash (72 then 73) at the nose
+  -- 2-3 hot muzzle sparks: warm ramp that darkens with distance, then vanishes
+  for i=1,2+rnd(2)\1 do p_add(x+4+rnd()*2-1,y-4,iv+(rnd()-0.5)*1.2,-(0.6+rnd()*1.1),8+rnd(3)\1,8) end
   snd_sfx(62,2)
   laser_cd=max(3,flr(12*(1-0.2*fire_rate_level)-(rfb>0 and 5 or 0)+0.5))
   end
@@ -189,12 +190,25 @@ function draw_ship()
   end
  end
  
+ -- muzzle flash at the nose: frame1 always 72; frame2 is 73/74/75 by lean stage (flipped to match the bank)
+ if ship.muzzle_t>0 then
+  if ship.rfb>0 then rfpal() end
+  local st=abs(ship.vlean)
+  st=st<0.33 and 0 or(st<0.66 and 1 or 2)
+  local f1=ship.muzzle_t>2
+  -- at max lean, nudge frame-1 (72) 1px left (right when flipped)
+  local ox=(f1 and st==2)and(ship.vlean>0 and 1 or -1)or 0
+  spr(f1 and 72 or 73+st,ship.x+ox,ship.y-9,1,1,st>0 and ship.vlean>0)
+  pal()
+ end
+
  -- Skip bullets and shield during fanfare
  if game_state=="fanfare_depart" then return end
- 
- -- bullets: animated 5x6 sprite over the 5x5 hitbox; rapid-fire swaps 120/121 -> 122/123
- local bsx=ship.rfb>0 and 80 or 64
- for b in all(bullets)do sspr(bsx+(flr(time()*16+b.x+b.y)%2)*8,56,5,6,flr(b.x),flr(b.y)-1) end
+
+ -- bullets: animated 5x6 sprite over the 5x5 hitbox; rapid fire recolors the base sprite hotter via palette
+ if ship.rfb>0 then rfpal() end
+ for b in all(bullets)do sspr(64+(flr(time()*16+b.x+b.y)%2)*8,56,5,6,flr(b.x),flr(b.y)-1) end
+ pal()
  if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and (ship.shield_invuln%4)<2) then
   local cx,cy,t=ship.x+3,ship.y+4,ship.shield_anim/30
   local base_r=12+ship.shield_pulse_level -- slight growth per level

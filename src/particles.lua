@@ -86,6 +86,7 @@ function p_draw()
          or (t==2 and (l>3 and (i.d and i.d[1] or 10) or l>1 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
          or (t==3 and (l>16 and 10 or l>8 and 9 or 8))
          or (t==6 and (l>16 and 14 or l>8 and 2 or 1))
+         or (t==8 and (ship.rfb>0 and (l>6 and 7 or l>4 and 10 or l>2 and 9 or 5) or (l>6 and 10 or l>4 and 9 or l>2 and 8 or 5))) -- muzzle spark; rapid fire shifts hotter (white->yellow->orange->gray)
          or 7
      end
      pset(flr(i.x),flr(i.y),c)
