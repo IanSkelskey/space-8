@@ -97,7 +97,14 @@ function update_ship()
   vlean+=mid(-0.2,(vx>0.05 and 1 or(vx<-0.05 and -1 or 0))-vlean,0.2)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
-  if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 2 or 6) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end
+  if str>0 then
+   -- tight twin exhaust flames: short-lived cluster that leans opposite to strafing and stretches with forward thrust
+   local yy,cols,life=y+7,thr_cols[min(4,thruster_level+1)],flr(3+4*str)
+   local lx,ly=-vx*0.18,0.7+0.7*str-vy*0.12
+   for i=0,1 do local ox=i==0 and 2 or 6
+    for j=1,2 do if rnd()<str then p_add(x+ox+rnd()-0.5,yy+rnd()*1.5,lx+(rnd()-0.5)*0.4,ly+rnd()*0.3,life,2,nil,cols) end end
+   end
+  end
   if laser_cd>0 then laser_cd-=1 end
   -- rapid fire burst timer
   if rfb>0 then rfb-=1 end

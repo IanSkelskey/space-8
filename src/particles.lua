@@ -13,7 +13,7 @@ function p_upd()
  for i in all(p) do
   i.x+=i.dx i.y+=i.dy+((i.t==7 and cs*0.7) or 0) i.l-=1
   -- inline damp
-  if i.t==4 then i.dx*=0.99 i.dy*=0.99 elseif i.t==2 or i.t==3 then i.dx*=0.98 i.dy*=0.98 end
+  if i.t==4 then i.dx*=0.99 i.dy*=0.99 elseif i.t==2 then i.dx*=0.9 i.dy*=0.9 elseif i.t==3 then i.dx*=0.98 i.dy*=0.98 end
    -- money shard settle: apply stronger friction once speed low
     if i.t==7 and i.d==7 then
          local dx,dy=ship.x+4-(i.x+1),ship.y+4-(i.y+1) local d2=dx*dx+dy*dy
@@ -83,7 +83,7 @@ function p_draw()
      if not c then
         local t,l=i.t,i.l
         c=(t==1 and (l>12 and 6 or l>6 and 5 or 7))
-         or (t==2 and (l>8 and (i.d and i.d[1] or 10) or l>4 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
+         or (t==2 and (l>3 and (i.d and i.d[1] or 10) or l>1 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
          or (t==3 and (l>16 and 10 or l>8 and 9 or 8))
          or (t==6 and (l>16 and 14 or l>8 and 2 or 1))
          or 7
