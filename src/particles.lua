@@ -89,7 +89,9 @@ function p_draw()
          or (t==8 and (ship.rfb>0 and (l>6 and 7 or l>4 and 10 or l>2 and 9 or 5) or (l>6 and 10 or l>4 and 9 or l>2 and 8 or 5))) -- muzzle spark; rapid fire shifts hotter (white->yellow->orange->gray)
          or 7
      end
-     pset(flr(i.x),flr(i.y),c)
+     -- muzzle sparks stretch to 2px tall mid-life for a speedy streak
+     if i.t==8 and i.l>2 and i.l<7 then local fx,fy=flr(i.x),flr(i.y) pset(fx,fy,c)pset(fx,fy+1,c)
+     else pset(flr(i.x),flr(i.y),c) end
     end
  end
 end
