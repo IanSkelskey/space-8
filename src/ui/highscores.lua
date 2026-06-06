@@ -98,7 +98,7 @@ end
 function hs_draw_full()
  local t=hs_entries
  -- layout constants (adjusted to fit 4 rows)
- local y_title=4
+ local y_title=9 -- centered vertically in the band above the tabs
  local y_tabs=26          -- slightly higher for more room
  local bar_h=10
  local panel_top=y_tabs+bar_h+2  -- gap under tabs
@@ -108,12 +108,9 @@ function hs_draw_full()
  local first_row_y=y_header+10    -- tighter gap header -> first row
  local row_gap=12                 -- slightly tighter row spacing
 
- -- title block (unchanged centering logic)
- local title1="high scores"
- local title2="\014sPACE 8\15"
- local tbw=max(tw(title1),tw(title2))
- cprint(title1,y_title,7,tbw)
- cprint(title2,y_title+8,7,tbw)
+ -- title: block-letter logo, gold flash with a darker drop layer for depth
+ local fl=time()%0.8<0.4
+ draw_logo("high scores",y_title,fl and 9 or 10,fl and 4 or 9,fl and 9 or 10,fl and 4 or 9)
 
  -- unified tab bar (outer border removed) WITH padding + no separators
  local bar_x0,bar_x1=8,120

@@ -98,12 +98,9 @@ function update_highscore_entry()
 end
 
 function draw_highscore_entry()
- -- Title (properly centered like highscore screen)
- local title = "new high score!"
- -- The \014 doesn't affect positioning, but we need to account for the actual text width
- local title_width = #title * 4
- local title_x = 2
- print("\014"..title, title_x, 16, 7)
+ -- Title: block-letter logo, gold flash with a darker drop layer for depth
+ local fl=time()%0.8<0.4
+ draw_logo("high score!",14,fl and 9 or 10,fl and 4 or 9,fl and 9 or 10,fl and 4 or 9,1.5)
  
  -- Score display
  local score_str = ""..entry_score
