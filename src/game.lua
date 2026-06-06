@@ -34,6 +34,7 @@ function complete_mission()
  -- flag distance for regen in UI (station ensure_mission will set new name+distance next visit)
  mission_distance,dr=0,0
  snd_music(8)
+ p_clear() -- start the fly-off with a clean field so only the boost trail shows
  level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
 end
 
@@ -61,6 +62,8 @@ function _update()
 	if game_state=="fanfare_depart"then
 	 if ship_departing then
 	  ship.y-=1.5
+	  ship_thrust(0.8,0,-1.5) -- boost trail while flying off
+	  ship.vlean+=mid(-0.2,-ship.vlean,0.2) -- roll lean back to level
 	  if ship.y+ship.h<0 then ship_departing=false end
 	 end
 	 p_upd()
@@ -122,6 +125,7 @@ function _draw()
 	draw_starfield()
 	if game_state=="fanfare_depart"then
 		draw_ship()
+		p_draw()
 		draw_hud()
 	elseif game_state=="game"or game_state=="dying"then
 		draw_blackhole()

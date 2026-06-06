@@ -14,6 +14,16 @@ local thr_cols={
 -- rapid-fire recolor: shift warm bullet/flash colors one step hotter (yellow->white, orange->yellow, red->orange)
 local function rfpal() pal(10,7)pal(9,10)pal(8,9) end
 
+-- twin exhaust flames for a given thrust strength + velocity (shared by live flight and the round-clear fly-off)
+function ship_thrust(str,vx,vy)
+ if str<=0 then return end
+ local yy,cols,life=ship.y+7,thr_cols[min(4,ship.thruster_level+1)],flr(3+4*str)
+ local lx,ly=-vx*0.18,0.7+0.7*str-vy*0.12
+ for i=0,1 do local ox=ship.x+(i==0 and 2 or 6)
+  for j=1,2 do if rnd()<str then p_add(ox+rnd()-0.5,yy+rnd()*1.5,lx+(rnd()-0.5)*0.4,ly+rnd()*0.3,life,2,nil,cols) end end
+ end
+end
+
 -- update bullets (movement + cull)
 local function ub()
  for b in all(bullets)do
@@ -100,15 +110,7 @@ function update_ship()
   -- visual lean: ease toward heading so direction changes roll through every lean frame (no gameplay effect)
   vlean+=mid(-0.2,(vx>0.05 and 1 or(vx<-0.05 and -1 or 0))-vlean,0.2)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
-  str=mid(0,str,1)
-  if str>0 then
-   -- tight twin exhaust flames: short-lived cluster that leans opposite to strafing and stretches with forward thrust
-   local yy,cols,life=y+7,thr_cols[min(4,thruster_level+1)],flr(3+4*str)
-   local lx,ly=-vx*0.18,0.7+0.7*str-vy*0.12
-   for i=0,1 do local ox=i==0 and 2 or 6
-    for j=1,2 do if rnd()<str then p_add(x+ox+rnd()-0.5,yy+rnd()*1.5,lx+(rnd()-0.5)*0.4,ly+rnd()*0.3,life,2,nil,cols) end end
-   end
-  end
+  ship_thrust(mid(0,str,1),vx,vy)
   if laser_cd>0 then laser_cd-=1 end
   if muzzle_t>0 then muzzle_t-=1 end
   -- rapid fire burst timer
@@ -177,17 +179,20 @@ function update_ship()
  end -- _ENV block
 end
 
+-- draw the 16x16 hull at its current visual lean (level 137 / bank 139 / max 141)
+local function draw_hull()
+ local al=abs(ship.vlean)
+ if al<0.33 then spr(137,ship.x-4,ship.y-4,2,2)
+ else spr(al<0.66 and 139 or 141,ship.x-4,ship.y-4,2,2,ship.vlean>0) end
+end
+
 function draw_ship()
+ -- flying off after a round clear: roll through the lean frames back to level, but no blink/muzzle/effects
+ if game_state=="fanfare_depart" then draw_hull() return end
  if ship.dying then
   -- Death particles drawn by particle system
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
-  -- 16x16 ship sprite, centered on the 8x8 hitbox; lean ramps level(137)->bank(139)->max(141)
-  local al=abs(ship.vlean)
-  if al<0.33 then
-   spr(137,ship.x-4,ship.y-4,2,2)
-  else
-   spr(al<0.66 and 139 or 141,ship.x-4,ship.y-4,2,2,ship.vlean>0)
-  end
+  draw_hull()
  end
  
  -- muzzle flash at the nose: frame1 always 72; frame2 is 73/74/75 by lean stage (flipped to match the bank)
@@ -201,9 +206,6 @@ function draw_ship()
   spr(f1 and 72 or 73+st,ship.x+ox,ship.y-9,1,1,st>0 and ship.vlean>0)
   pal()
  end
-
- -- Skip bullets and shield during fanfare
- if game_state=="fanfare_depart" then return end
 
  -- bullets: animated 5x6 sprite over the 5x5 hitbox; rapid fire recolors the base sprite hotter via palette
  if ship.rfb>0 then rfpal() end
