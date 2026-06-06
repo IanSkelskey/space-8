@@ -97,12 +97,12 @@ function update_ship()
   vlean+=mid(-0.2,(vx>0.05 and 1 or(vx<-0.05 and -1 or 0))-vlean,0.2)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
-  if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 1 or 5) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end
+  if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 2 or 6) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end
   if laser_cd>0 then laser_cd-=1 end
   -- rapid fire burst timer
   if rfb>0 then rfb-=1 end
   if laser_cd<=0 and btn(4)then
-  local cx,by,iv,lvl=flr(x+1),y-3,vx*0.12,spread_level
+  local cx,by,iv,lvl=flr(x+2),y-3,vx*0.12,spread_level
    local sdx=lvl>1 and 0.7 or 0
    -- spawn spread wide enough that the 5px bullet sprites don't overlap
    local so=lvl>1 and 6 or 3
