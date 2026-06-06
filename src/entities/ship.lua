@@ -93,8 +93,8 @@ function update_ship()
   vx,vy=dx*s,dy*s
   x+=vx y+=vy
   x=mid(0,x,120) y=mid(10,y,120)
-  -- visual lean: ease toward heading so direction changes roll through the level frame (no gameplay effect)
-  vlean+=mid(-0.3,(vx>0.05 and 1 or(vx<-0.05 and -1 or 0))-vlean,0.3)
+  -- visual lean: ease toward heading so direction changes roll through every lean frame (no gameplay effect)
+  vlean+=mid(-0.2,(vx>0.05 and 1 or(vx<-0.05 and -1 or 0))-vlean,0.2)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
   str=mid(0,str,1)
   if str>0 then local yy=y+8 local bdy=0.5+0.9*str local life=flr(6+10*str) local cols=thr_cols[min(4,thruster_level+1)] for i=0,1 do if rnd()<str then local ox=(i==0 and 1 or 5) p_add(x+ox+rnd()-0.5,yy,(rnd(0.6)-0.3)*str,bdy+rnd(0.4*str),life,2,nil,cols) end end end
@@ -173,11 +173,12 @@ function draw_ship()
  if ship.dying then
   -- Death particles drawn by particle system
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
-  -- 16x16 ship sprite, centered on the 8x8 hitbox; visual lean picks level (137) vs banked (139)
-  if abs(ship.vlean)<0.35 then
+  -- 16x16 ship sprite, centered on the 8x8 hitbox; lean ramps level(137)->bank(139)->max(141)
+  local al=abs(ship.vlean)
+  if al<0.33 then
    spr(137,ship.x-4,ship.y-4,2,2)
   else
-   spr(139,ship.x-4,ship.y-4,2,2,ship.vlean>0)
+   spr(al<0.66 and 139 or 141,ship.x-4,ship.y-4,2,2,ship.vlean>0)
   end
  end
  
