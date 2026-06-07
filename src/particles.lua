@@ -15,7 +15,7 @@ function p_upd()
   -- inline damp
   if i.t==4 then i.dx*=0.99 i.dy*=0.99 elseif i.t==2 then i.dx*=0.9 i.dy*=0.9 elseif i.t==3 then i.dx*=0.98 i.dy*=0.98 end
    -- money shard settle: apply stronger friction once speed low
-    if i.t==7 and i.d==7 then
+    if i.t==7 and i.d==7 and not ship.dying then
          local dx,dy=ship.x+4-(i.x+1),ship.y+4-(i.y+1) local d2=dx*dx+dy*dy
          if d2<196 and d2>0 then local inv=1/sqrt(d2)
             if d2<49 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
@@ -24,7 +24,7 @@ function p_upd()
    -- pickup handling with tighter coin capture (center 4x4)
    if i.t==7 then
       if i.d==7 then local cx,cy=ship.x+2,ship.y+2 if not (i.x>=cx and i.x<cx+4 and i.y>=cy and i.y<cy+4) then goto skip_pick end end
-      if scoll(i.x,i.y,8,8) then local d=i.d
+      if not ship.dying and scoll(i.x,i.y,8,8) then local d=i.d
    if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(30)
        elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end hud_add_score(20) snd_sfx(63)
        elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
@@ -42,7 +42,7 @@ function p_upd()
   ::continue::
  end
  -- global magnet pull (after per-particle updates for smoother feel)
- if ship.magnet_t and ship.magnet_t>0 then
+ if ship.magnet_t and ship.magnet_t>0 and not ship.dying then
   local cx,cy=ship.x+4,ship.y+4
   local r=44
   local r2=r*r

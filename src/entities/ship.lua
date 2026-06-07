@@ -204,7 +204,7 @@ function draw_ship()
  end
  
  -- muzzle flash at the nose: frame1 always 72; frame2 is 73/74/75 by lean stage (flipped to match the bank)
- if ship.muzzle_t>0 then
+ if ship.muzzle_t>0 and not ship.dying then
   if ship.rfb>0 then rfpal() end
   local st=abs(ship.vlean)
   st=st<0.33 and 0 or(st<0.66 and 1 or 2)
@@ -232,7 +232,7 @@ function draw_ship()
  -- (pink 14 / purple 2, shared with pink comets + black holes). the radius
  -- breathes gently around the 44px pull range and the ring flickers out as the
  -- effect expires, so it reads as a field without becoming a distraction.
- if ship.magnet_t>0 and not(ship.magnet_t<20 and ship.magnet_t%4<2) then
+ if ship.magnet_t>0 and not ship.dying and not(ship.magnet_t<20 and ship.magnet_t%4<2) then
   local cx,cy,t=ship.x+4,ship.y+4,time()
   local r=43+sin(t*0.5)*1.5
   -- outer ring: alternating pink/purple, slow clockwise sweep
