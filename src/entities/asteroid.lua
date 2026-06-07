@@ -131,12 +131,15 @@ function draw_asteroid()
 		if m.flash_t>0 and m.flash_t%2==0 then
 			for i=1,15 do pal(i,7) end
 		end
+		-- per-object hit shake: jitter the draw position +-1px while flashing
+		local dx,dy=m.x,m.y
+		if m.flash_t>0 then dx+=rnd(3)\1-1 dy+=rnd(3)\1-1 end
 		if m.large then
 			local base=7+(m.alt and 5 or 0)
 			-- draw 2x2 block
-			spr(base,m.x,m.y) spr(base+1,m.x+8,m.y) spr(base+16,m.x,m.y+8) spr(base+17,m.x+8,m.y+8)
+			spr(base,dx,dy) spr(base+1,dx+8,dy) spr(base+16,dx,dy+8) spr(base+17,dx+8,dy+8)
 		else
-			spr(m.alt and 26 or 2,m.x,m.y)
+			spr(m.alt and 26 or 2,dx,dy)
 		end
 		pal()
 	end

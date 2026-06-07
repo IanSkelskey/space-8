@@ -74,10 +74,6 @@ function ship_kill()
   -- game_state is already "dying" by the time it re-checks for it
   local t=tsh*1000+ts
   dset(19,t\1000) dset(18,t%1000)
-  for i=1,22 do
-    local a,sp=rnd(1),0.7+rnd(1.3)
-    p_add(ship.x+4,ship.y+4,cos(a)*sp,sin(a)*sp,flr(10+rnd(20)),3)
-  end
  end
 end
 
@@ -192,7 +188,9 @@ function draw_ship()
  -- flying off after a round clear: roll through the lean frames back to level, but no blink/muzzle/effects
  if game_state=="fanfare_depart" then draw_hull() return end
  if ship.dying then
-  -- Death particles drawn by particle system
+  -- death explosion: 7 frames of 16x16 sprites (top-left tiles 160,162,...,172), 6 frames each
+  local f=ship.death_t\6
+  if f<7 then spr(160+f*2,ship.x-4,ship.y-4,2,2) end
  elseif ship.hull_invuln>45 then
   -- red hit flash: blink the hull red<->transparent for the first ~half-second before the normal invuln blink
   if (ship.hull_invuln%4)>=2 then

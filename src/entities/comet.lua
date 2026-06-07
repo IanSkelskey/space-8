@@ -104,11 +104,14 @@ function draw_comet()
 		else
 			-- hit flash via palette whiteout (no dedicated flash sprites)
 			local sid,flash=c.sid,c.flash_t>0
-			if flash then for i=1,15 do pal(i,7) end end
+			-- per-object hit shake: jitter the draw position +-1px while flashing
+			local jx,jy=0,0
+			if flash then for i=1,15 do pal(i,7) end jx=rnd(3)\1-1 jy=rnd(3)\1-1 end
+			local cx,cy=c.x+jx,c.y+jy
 			if c.use_angled then
-				spr(sid,c.x,c.y,1,1,c.dx<0,c.dy>0)
+				spr(sid,cx,cy,1,1,c.dx<0,c.dy>0)
 			elseif abs(c.dx)>abs(c.dy) then
-				spr(sid,c.x,c.y,1,1,c.dx<0,false)
+				spr(sid,cx,cy,1,1,c.dx<0,false)
 			else
 				-- rotated branch draws pixel-by-pixel; tint to white inline when flashing
 				local sx,sy=sid%16*8,flr(sid/16)*8
@@ -116,7 +119,7 @@ function draw_comet()
 					for py=0,7 do
 						local col=sget(sx+px,sy+py)
 						if col!=0 then
-							if c.dy>0 then pset(c.x+py,c.y+7-px,flash and 7 or col) else pset(c.x+7-py,c.y+px,flash and 7 or col) end
+							if c.dy>0 then pset(cx+py,cy+7-px,flash and 7 or col) else pset(cx+7-py,cy+px,flash and 7 or col) end
 						end
 					end
 				end
