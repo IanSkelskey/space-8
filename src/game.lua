@@ -135,9 +135,9 @@ function _draw()
 	elseif game_state=="game"or game_state=="dying"then
 		draw_blackhole()
 		draw_asteroid()
-		draw_comet()
 		draw_ship()
 		p_draw()
+		draw_comet() -- after p_draw so comet sprites sit above their trail particles
 		camera()
 		draw_hud()
 		if game_state=="dying" and death_skip_pending and death_skip_lock<0 then

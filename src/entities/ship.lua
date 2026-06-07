@@ -188,8 +188,8 @@ function draw_ship()
  -- flying off after a round clear: roll through the lean frames back to level, but no blink/muzzle/effects
  if game_state=="fanfare_depart" then draw_hull() return end
  if ship.dying then
-  -- death explosion: 7 frames of 16x16 sprites (top-left tiles 160,162,...,172), 6 frames each
-  local f=ship.death_t\6
+  -- death explosion: 7 frames of 16x16 sprites (top-left tiles 160,162,...,172), 4 frames each
+  local f=ship.death_t\4
   if f<7 then spr(160+f*2,ship.x-4,ship.y-4,2,2) end
  elseif ship.hull_invuln>45 then
   -- red hit flash: blink the hull red<->transparent for the first ~half-second before the normal invuln blink

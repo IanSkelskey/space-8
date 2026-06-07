@@ -33,6 +33,7 @@ function update_blackhole()
 		-- inline asteroid_debris_pull / ship_trails_pull
 		p_pull(cx,cy,h.r,0.35,{[4]=true})
 		p_pull(cx,cy,h.r,0.22,{[2]=true,[3]=true})
+		comet_pull(cx,cy,h.r,0.3)
 
 		local dx,dy=cx-ship.x-ship.w/2,cy-ship.y-ship.h/2
 		local d2=dx*dx+dy*dy
@@ -41,8 +42,8 @@ function update_blackhole()
 			local invd,str=1/sqrt(d2),0.75*(1-d2/r2)
 			ship.x=mid(0,ship.x+dx*invd*str,128-ship.w)
 			ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
-			-- gravity drama: shake builds as the ship is dragged deeper into the well
-			shake=max(shake or 0,1+str*4)
+			-- gravity drama: subtle shake builds as the ship is dragged deeper into the well
+			shake=max(shake or 0,str*2)
 		end
 		if scoll(h.x,h.y,8,8) and not ship.dying then
 			ship.shield_power,ship.shield_active=0,false
