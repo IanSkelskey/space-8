@@ -1,16 +1,17 @@
 local comets,spawn_t={},0
 -- use split strings for ids (cheaper than table literals)
--- removed red comet variant (first entries) since it had no drop; arrays now align to: pink, yellow, green, blue
-local C8,C9=split"2,10,3,1",split"14,9,11,12"
+-- arrays align to: pink, yellow, green, blue, red. red has no drop (DROP_ODDS 0)
+local C8,C9=split"2,10,3,1,8",split"14,9,11,12,2"
 -- all comets use the green comet art (angled 46 / straight 62) recoloured by palette swap.
 -- the green body ramp is colours 1,2,3,11 (dark->light); RAMPS replaces those per variant.
--- order matches C8/C9: pink, yellow, green, blue. yellow tops out at white (7).
+-- order matches C8/C9: pink, yellow, green, blue, red. yellow tops out at white (7).
 -- blue draws with colour 15, which the screen palette remaps to hidden colour 140
 -- (see pal(15,140,1) at the end of _draw); colour 15 is otherwise unused.
 local SRC=split"1,3,11,10"
-local RAMPS={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6"}
--- one colour-keyed powerup drop per variant (pink,yellow,green,blue): shard d / odds / life
-local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2",split".2,.17,1,.14",split"150,150,170,140"
+local RAMPS={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6",split"2,8,9,10"}
+-- one colour-keyed powerup drop per variant (pink,yellow,green,blue,red): shard d / odds / life
+-- red odds 0 => never drops, so its DROP_D/DROP_LIFE entries are never indexed (left at 4)
+local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2",split".2,.17,0.1,.14,0",split"150,150,170,140"
 -- apply a variant's ramp to the draw palette (call pal() to reset afterwards)
 local function setramp(rp) for k=1,4 do pal(SRC[k],rp[k]) end end
 -- kill a comet: drop + score + start the death animation (shared by bullet hits and black holes)
@@ -44,7 +45,7 @@ local function spawn_comet()
 	local left=rnd()<0.5
 	local x,y=left and -8 or 128,10+flr(rnd(110))
 	local base_angles=left and split"0.125,0,0.875" or split"0.375,0.5,0.625"
-	local ang,spd,i=base_angles[flr(rnd(3))+1]+(rnd()-0.5)*0.08,1.2+rnd(0.9),flr(rnd(4))
+	local ang,spd,i=base_angles[flr(rnd(3))+1]+(rnd()-0.5)*0.08,1.2+rnd(0.9),flr(rnd(5))
 	add(comets,{
 		x=x,y=y,
 		dx=cos(ang)*spd,dy=sin(ang)*spd,
