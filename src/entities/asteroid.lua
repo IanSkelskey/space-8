@@ -91,8 +91,8 @@ function update_asteroid()
 				else
 						hud_add_score(m.alt and 50 or 35)
 						-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt; 4 credits each
-						for i=1,rnd(4)\1+(m.alt and 2 or 0) do p_add(m.x+(m.w-8)/2+4,m.y+(m.h-8)/2+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
-					spawn_asteroid_debris(m.x+(m.w-8)/2,m.y+(m.h-8)/2,m.alt)
+						for i=1,rnd(4)\1+(m.alt and 2 or 0) do p_add(m.x+4,m.y+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+					spawn_asteroid_debris(m.x,m.y,m.alt)
 				end
 				snd_sfx(1)
 				del(asteroids,m)

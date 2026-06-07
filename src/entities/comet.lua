@@ -10,7 +10,7 @@ local C8,C9=split"2,10,3,1",split"14,9,11,12"
 local SRC=split"1,3,11,10"
 local RAMPS={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6"}
 -- one colour-keyed powerup drop per variant (pink,yellow,green,blue): shard d / odds / life
-local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2",split".2,.17,.05,.14",split"150,150,170,140"
+local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2",split".2,.17,1,.14",split"150,150,170,140"
 -- apply a variant's ramp to the draw palette (call pal() to reset afterwards)
 local function setramp(rp) for k=1,4 do pal(SRC[k],rp[k]) end end
 -- kill a comet: drop + score + start the death animation (shared by bullet hits and black holes)

@@ -3,7 +3,7 @@ local holes,spawn_t={},0
 local function spawn_hole()
 	add(holes,{
 		x=flr(rnd(120)),
-		y=10-10,
+		y=0,
 		spd=0.8,
 		r=50,
 		spin_t=0

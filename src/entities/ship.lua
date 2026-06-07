@@ -1,5 +1,5 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0,vlean=0,muzzle_t=0}
+ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0,vlean=0,muzzle_t=0,heal_t=0}
 
 bullets={}
 
@@ -191,6 +191,12 @@ function draw_ship()
   -- death explosion: 7 frames of 16x16 sprites (top-left tiles 160,162,...,172), 4 frames each
   local f=ship.death_t\4
   if f<7 then spr(160+f*2,ship.x-4,ship.y-4,2,2) end
+ elseif ship.heal_t>t() then
+  -- heal shimmer: alternate two 3-colour slices of the green ramp (1,3,11,10) up the hull greys (5,13,6)
+  if flr(t()*8)%2<1 then pal(5,1) pal(13,3) pal(6,11)
+  else pal(5,3) pal(13,11) pal(6,10) end
+  draw_hull()
+  pal()
  elseif ship.hull_invuln>45 then
   -- red hit flash: blink the hull red<->transparent for the first ~half-second before the normal invuln blink
   if (ship.hull_invuln%4)>=2 then
