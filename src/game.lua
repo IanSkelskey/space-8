@@ -147,4 +147,6 @@ function _draw()
 			print(t,x,62,7)
 		end
 	end -- gameover never drawn here now (handled in ui cart)
+	-- map screen-palette slot 15 -> hidden colour 140 (blue comet ramp); set last so per-entity pal() resets don't clobber it before flip
+	pal(15,140,1)
 end

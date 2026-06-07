@@ -1,8 +1,18 @@
 local comets,spawn_t={},0
 -- use split strings for ids (cheaper than table literals)
 -- removed red comet variant (first entries) since it had no drop; arrays now align to: pink, yellow, green, blue
-local SIDS_ANGLED,SIDS_STRAIGHT=split"44,45,46,47",split"60,61,62,63"
 local C8,C9=split"2,10,3,1",split"14,9,11,12"
+-- all comets use the green comet art (angled 46 / straight 62) recoloured by palette swap.
+-- the green body ramp is colours 1,2,3,11 (dark->light); RAMPS replaces those per variant.
+-- order matches C8/C9: pink, yellow, green, blue. yellow tops out at white (7).
+-- blue draws with colour 15, which the screen palette remaps to hidden colour 140
+-- (see pal(15,140,1) at the end of _draw); colour 15 is otherwise unused.
+local SRC=split"1,2,3,11"
+local RAMPS={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6"}
+-- one colour-keyed powerup drop per variant (pink,yellow,green,blue): shard d / odds / life
+local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2",split".2,.17,.05,.14",split"150,150,170,140"
+-- apply a variant's ramp to the draw palette (call pal() to reset afterwards)
+local function setramp(rp) for k=1,4 do pal(SRC[k],rp[k]) end end
 
 function comet_init()
 	comets,spawn_t={},0
@@ -20,7 +30,8 @@ local function spawn_comet()
 		x=x,y=y,
 		dx=cos(ang)*spd,dy=sin(ang)*spd,
 		c8=C8[i+1],c9=C9[i+1],
-		sid=use_angled and SIDS_ANGLED[i+1] or SIDS_STRAIGHT[i+1],
+		ramp=RAMPS[i+1],ci=i,
+		sid=use_angled and 200 or 201,
 		use_angled=use_angled,
 		warning_t=20,
 		left=left,
@@ -41,6 +52,15 @@ function update_comet()
 	local kill_lvl=ship.shield_pulse_level
 	local sr=(ship.shield_active and kill_lvl>0) and (10+kill_lvl) or 0
 	for c in all(comets) do
+		-- death animation: flash the hit sprite (death_t<3), then a 6-frame explosion (3 frames each), then remove
+		if c.dying then
+			c.death_t+=1
+			-- coast along the comet's trajectory, decelerating, so the blast drifts then settles
+			c.x+=c.dx*cs c.y+=c.dy*cs
+			c.dx*=0.85 c.dy*=0.85
+			if c.death_t>=21 then del(comets,c) end
+			goto continue
+		end
 		-- pre-warning skip
 		if c.warning_t>0 then c.warning_t-=1 goto continue end
 		-- retaliation splash
@@ -71,22 +91,11 @@ function update_comet()
 			if aabb(c.x,c.y,8,8,b.x,b.y,5,5) then
 				del(bullets,b) c.hp-=1
 				if c.hp<=0 then
-					local cx,cy=c.x+4,c.y+4
-					p_add(cx,cy,0,0,10,1,7)
-					for i=1,10 do local a=rnd() local sp=rnd(1.3) p_add(cx,cy,cos(a)*sp,sin(a)*sp,12+rnd(10)\1,5,(i%2==0 and c.c8 or c.c9)) end
-					-- existing drop logic (money shards removed)
-					local green=(c.c8==3 or c.c9==11)
-					local blue=(c.c9==12)
-					local yellow=(c.c8==10)
-					local pink=(c.c8==2 or c.c9==14)
-					-- green: 5% hull repair only (no money shard anymore)
-					if green and rnd()<0.05 then
-					 p_add(c.x,c.y,0,0,170,7,nil,1) -- hull repair
-					end
-					if blue and rnd()<0.14 then p_add(c.x,c.y,0,0,140,7,nil,2) end
-					if yellow and rnd()<0.17 then p_add(c.x,c.y,0,0,150,7,nil,5) end
-					if pink and rnd()<0.20 then p_add(c.x,c.y,0,0,150,7,nil,6) end
-					hud_add_score(55) snd_sfx(1) del(comets,c) goto continue
+					-- single colour-keyed drop (green=hull repair d1, blue d2, yellow d5, pink d6)
+					local k=c.ci+1
+					if rnd()<DROP_ODDS[k] then p_add(c.x,c.y,0,0,DROP_LIFE[k],7,nil,DROP_D[k]) end
+					hud_add_score(55) snd_sfx(1)
+					c.dying,c.death_t,c.fx,c.fy=true,0,rnd()<.5,rnd()<.5 goto continue
 				else c.flash_t=4 end
 				break
 			end
@@ -98,15 +107,20 @@ end
 
 function draw_comet()
 	for c in all(comets) do
-		if c.warning_t>0 then
+		if c.dying and c.death_t>=3 then
+			-- 6-frame explosion (8x8) starting at tile 202, held 3 game-frames each
+			local f=(c.death_t-3)\3
+			if f<6 then setramp(c.ramp) spr(202+f,c.x,c.y,1,1,c.fx,c.fy) pal() end
+		elseif c.warning_t>0 then
 			local cx,cy=c.left and 4 or 123,max(c.y+4,14)
 			h(cx,cy,(20-c.warning_t)*0.15,c.c8,c.c9)
 		else
-			-- hit flash via palette whiteout (no dedicated flash sprites)
-			local sid,flash=c.sid,c.flash_t>0
+			-- hit flash via palette whiteout; dying<3 frames force-flashes the hit sprite before the boom
+			local sid,flash=c.sid,c.flash_t>0 or c.dying
 			-- per-object hit shake: jitter the draw position +-1px while flashing
 			local jx,jy=0,0
-			if flash then for i=1,15 do pal(i,7) end jx=rnd(3)\1-1 jy=rnd(3)\1-1 end
+			if flash then for i=1,15 do pal(i,7) end jx=rnd(3)\1-1 jy=rnd(3)\1-1
+			else setramp(c.ramp) end
 			local cx,cy=c.x+jx,c.y+jy
 			if c.use_angled then
 				spr(sid,cx,cy,1,1,c.dx<0,c.dy>0)
@@ -124,7 +138,7 @@ function draw_comet()
 					end
 				end
 			end
-			if flash then pal() end
+			pal()
 		end
 	end
 end
