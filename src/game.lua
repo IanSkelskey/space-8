@@ -17,6 +17,7 @@ death_skip_lock=death_skip_lock or 0 -- frames before skip input is accepted (de
 local DEATH_ANIM_MIN=45      -- minimum death animation duration (frames)
 local DEATH_JINGLE_LEN=210   -- full gameover jingle length; cart loads only after this ends
 vr=1 -- visible round counter (always starts at 1)
+shake=0 -- screen-shake intensity (px), decays each frame, set on hits in ship_kill
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
 -- short init bundle (entities + hud + ship)
 function ie() ship_init() asteroid_init() hud_init() blackhole_init() comet_init() end
@@ -54,6 +55,7 @@ function _init()
  snd_music(4)
 end
 function _update()
+	if shake>0 then shake-=1 end
 	update_starfield()
 	if level_fanfare_timer>0 then level_fanfare_timer-=1 end
 
@@ -122,10 +124,13 @@ function _update()
 end
 function _draw()
 	cls()
+	-- screen shake: jitter the world camera; reset before HUD so it stays fixed
+	if shake>0 then camera(rnd(shake)-shake/2,rnd(shake)-shake/2) end
 	draw_starfield()
 	if game_state=="fanfare_depart"then
 		draw_ship()
 		p_draw()
+		camera()
 		draw_hud()
 	elseif game_state=="game"or game_state=="dying"then
 		draw_blackhole()
@@ -133,6 +138,7 @@ function _draw()
 		draw_comet()
 		draw_ship()
 		p_draw()
+		camera()
 		draw_hud()
 		if game_state=="dying" and death_skip_pending and death_skip_lock<0 then
 			-- simple centered prompt (multi-line minimal tokens)

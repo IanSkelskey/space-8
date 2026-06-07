@@ -65,8 +65,10 @@ function ship_kill()
  end
  ship.hull-=1
  ship.hull_invuln=60
+ shake=max(shake or 0,5) -- kick the screen on a hull hit
   snd_sfx(1)
  if ship.hull<=0 then
+  shake=12 -- bigger jolt on death
   ship.dying,ship.death_t,ship.vx,ship.vy,game_state=true,0,0,0,"dying"
   -- store run score here: game.lua's death-entry block is unreachable because
   -- game_state is already "dying" by the time it re-checks for it
@@ -191,6 +193,14 @@ function draw_ship()
  if game_state=="fanfare_depart" then draw_hull() return end
  if ship.dying then
   -- Death particles drawn by particle system
+ elseif ship.hull_invuln>45 then
+  -- red hit flash: blink the hull red<->transparent for the first ~half-second before the normal invuln blink
+  if (ship.hull_invuln%4)>=2 then
+   -- swap the hull greys (6 light, 13 mid, 5 dark) for a red ramp
+   pal(6,14) pal(13,8) pal(5,2) pal(9,14) pal(4,14)
+   draw_hull()
+   pal()
+  end
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
   draw_hull()
  end
