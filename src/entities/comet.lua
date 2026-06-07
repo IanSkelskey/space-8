@@ -31,7 +31,7 @@ local function spawn_comet()
 		dx=cos(ang)*spd,dy=sin(ang)*spd,
 		c8=C8[i+1],c9=C9[i+1],
 		ramp=RAMPS[i+1],ci=i,
-		sid=use_angled and 200 or 201,
+		sid=use_angled and 198 or 200,
 		use_angled=use_angled,
 		warning_t=20,
 		left=left,
@@ -116,7 +116,8 @@ function draw_comet()
 			h(cx,cy,(20-c.warning_t)*0.15,c.c8,c.c9)
 		else
 			-- hit flash via palette whiteout; dying<3 frames force-flashes the hit sprite before the boom
-			local sid,flash=c.sid,c.flash_t>0 or c.dying
+			-- 2-frame flight anim: +0/+1 from the base sprite, desynced per comet via c.x
+			local sid,flash=c.sid+flr(t()*6+c.x)%2,c.flash_t>0 or c.dying
 			-- per-object hit shake: jitter the draw position +-1px while flashing
 			local jx,jy=0,0
 			if flash then for i=1,15 do pal(i,7) end jx=rnd(3)\1-1 jy=rnd(3)\1-1
