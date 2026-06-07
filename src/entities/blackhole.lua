@@ -41,6 +41,8 @@ function update_blackhole()
 			local invd,str=1/sqrt(d2),0.75*(1-d2/r2)
 			ship.x=mid(0,ship.x+dx*invd*str,128-ship.w)
 			ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
+			-- gravity drama: shake builds as the ship is dragged deeper into the well
+			shake=max(shake or 0,1+str*4)
 		end
 		if scoll(h.x,h.y,8,8) and not ship.dying then
 			ship.shield_power,ship.shield_active=0,false
