@@ -198,14 +198,14 @@ function draw_ship()
  elseif ship.heal_t>t() then
   -- heal shimmer: alternate two 3-colour slices of the green ramp (1,3,11,10) up the hull greys (5,13,6)
   if flr(t()*8)%2<1 then pal(5,1) pal(13,3) pal(6,11)
-  else pal(5,3) pal(13,11) pal(6,10) end
+  else pal(5,3) pal(13,3) pal(6,11) end
   draw_hull()
   pal()
  elseif ship.hull_invuln>45 then
   -- red hit flash: blink the hull red<->transparent for the first ~half-second before the normal invuln blink
   if (ship.hull_invuln%4)>=2 then
    -- swap the hull greys (6 light, 13 mid, 5 dark) for a red ramp
-   pal(6,14) pal(13,8) pal(5,2) pal(9,14) pal(4,14)
+   pal(6,8) pal(13,2) pal(5,2) pal(9,8) pal(4,8)
    draw_hull()
    pal()
   end
