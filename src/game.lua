@@ -18,7 +18,7 @@ vr=1 -- visible round counter (always starts at 1)
 shake=0 -- screen-shake intensity (px), decays each frame, set on hits in ship_kill
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
 -- short init bundle (entities + hud + ship)
-function ie() ship_init() asteroid_init() hud_init() blackhole_init() comet_init() end
+function ie() ship_init() asteroid_init() hud_init() blackhole_init() comet_init() popcorn_init() end
 function tu(s) persist_save_from_game(s) load("ui.p8") load("ui.p8.png") load("#space_8_ui") end
 function complete_mission()
  local mult=dsc[df]
@@ -73,7 +73,7 @@ function _update()
 	end
 	local gs=game_state
 	if gs=="game" or gs=="dying"then
-		update_blackhole() update_asteroid() update_comet() update_ship() p_upd()
+		update_blackhole() update_asteroid() update_comet() update_popcorn() update_ship() p_upd()
 		if game_state=="game" then
 			-- death is handled in ship_kill (sets game_state="dying" + stores run score);
 			-- here we only advance mission distance
@@ -133,6 +133,7 @@ function _draw()
 		draw_asteroid()
 		draw_ship()
 		p_draw()
+		draw_popcorn()
 		draw_comet() -- after p_draw so comet sprites sit above their trail particles
 		camera()
 		draw_hud()
