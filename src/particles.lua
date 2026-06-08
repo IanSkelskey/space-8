@@ -2,6 +2,7 @@
 local p={}
 local ppf=0 -- frame counter for shimmer
 Gp=p
+local PC1,PC2,PS=split"11,12,0,0,9,10",split"7,1,0,0,10,8",split"38,10,0,0,11,56"
 
 -- shared token-saving helpers (used across gameplay files)
 function rndi(n) return rnd(n)\1 end                         -- integer rnd
@@ -21,7 +22,7 @@ function p_upd()
   if i.t==4 then i.dx*=0.99 i.dy*=0.99 elseif i.t==2 then i.dx*=0.9 i.dy*=0.9 elseif i.t==3 then i.dx*=0.98 i.dy*=0.98 end
    -- money shard settle: apply stronger friction once speed low
     if i.t==7 and i.d==7 and not ship.dying then
-         local dx,dy=ship.x+4-(i.x+1),ship.y+4-(i.y+1) local d2=dx*dx+dy*dy
+         local dx,dy=ship.x+3-i.x,ship.y+3-i.y local d2=dx*dx+dy*dy
          if d2<196 and d2>0 then local inv=1/sqrt(d2)
             if d2<49 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
          else i.dx*=0.94 i.dy*=0.94 end
@@ -39,7 +40,7 @@ function p_upd()
       ::skip_pick::
       -- sparkle emission for money shards
       if i.d==7 and rnd()<0.1 then
-        p_add(i.x+0.5+rnd()-0.5,i.y+0.5,(rnd()-0.5)*0.2,(rnd()-0.5)*0.2,5,1,(ppf%4<2 and 10 or 9))
+        p_add(i.x+rnd(),i.y+0.5,(rnd()-0.5)*0.2,(rnd()-0.5)*0.2,5,1,(ppf%4<2 and 10 or 9))
       end
    end
   if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end
@@ -75,10 +76,8 @@ function p_draw()
           pset(i.x,i.y,c)pset(i.x+1,i.y,c)pset(i.x,i.y+1,c)pset(i.x+1,i.y+1,c)
           if ppf%15==0 then pset(i.x+1,i.y-1,7) end
      else
-       h(i.x+2.5,i.y+2.5,time(),
-        (d==2 and 12) or (d==5 and 9) or (d==6 and 10) or 11,
-        (d==2 and 1)  or (d==5 and 10) or (d==6 and 8)  or 7)
-       spr((d==2 and 10) or (d==5 and 11) or (d==6 and 56) or 38,i.x,i.y)
+       h(i.x+2.5,i.y+2.5,time(),PC1[d],PC2[d])
+       spr(PS[d],i.x,i.y)
      end
     elseif i.t==4 and i.d then
      sspr(i.d[1],i.d[2],4,4,i.x,i.y)
@@ -119,7 +118,8 @@ function p_hole_pull(holes)
     local dx,dy=cx-i.x,cy-i.y
     local d2=dx*dx+dy*dy
     if d2>0.1 then
-     local invd,d=sqrt(d2) and 1/sqrt(d2),sqrt(d2)
+     local d=sqrt(d2)
+     local invd=1/d
      local fall=1-min(d/(hh and hh.r or 32),1)
      local rg,sg=0.3*fall,0.8*max(fall,0.2)
      local vx,vy=i.dx,i.dy

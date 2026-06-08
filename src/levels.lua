@@ -1,5 +1,5 @@
 cs,cm,cmin,crng,mspd,mm,msmin,msrng,mlc,ss=1,1,1.5,1.2,0.9,1,1.8,1.4,0,1
-df=df or 2
+df=2
 -- mult tables: speed, spawn counts, score/cash
 dms,dmm,dsc=split"0.9,1,1.12",split"0.85,1,1.25",split"0.85,1,1.18"
 function sl(r)

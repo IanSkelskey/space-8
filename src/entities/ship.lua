@@ -8,7 +8,8 @@ local thr_cols={
  {10,9,8},
  {12,13,1},
  {11,3,1},
- {7,6,5}
+ {7,6,5},
+ {8,9,2}
 }
 
 -- rapid-fire recolor: shift warm bullet/flash colors one step hotter (yellow->white, orange->yellow, red->orange)
@@ -35,10 +36,10 @@ local function ub()
  end
 end
 
+local sd,sr,sh=split"1.25,.85,.6",split".55,.75,1.05",split"26,21,15"
 local function sh_stats()
- local l=ship.shield_level
- -- higher drain, slower recharge, larger hit chunks at low level
- return l<=1 and 1.25 or(l==2 and 0.85 or 0.6), l<=1 and 0.55 or(l==2 and 0.75 or 1.05), l<=1 and 26 or(l==2 and 21 or 15)
+ local l=mid(1,ship.shield_level,3)
+ return sd[l],sr[l],sh[l]
 end
 
 -- unified shield shutdown (set vars + sfx)
@@ -231,8 +232,8 @@ function draw_ship()
  if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and (ship.shield_invuln%4)<2) then
   local cx,cy,t=ship.x+3,ship.y+4,ship.shield_anim/30
   local base_r=12+ship.shield_pulse_level -- slight growth per level
-  local cols = (ship.shield_pulse_level>0) and {8,9,2} or thr_cols[2]
-  local flash=ship.shield_invuln>25 and (ship.shield_pulse_level>0 and 8 or 7) or nil
+  local cols=thr_cols[ship.shield_pulse_level>0 and 5 or 2]
+  local flash=ship.shield_invuln>25 and (ship.shield_pulse_level>0 and 8 or 7)
   for i=1,3 do
     circ(cx,cy,base_r-i+sin(t+i*0.2)*2,flash or cols[i])
   end

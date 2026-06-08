@@ -16,6 +16,14 @@ local function spawn_chunk_dust(x,y)
 	end
 end
 
+local function cash(x,y,n)for i=1,n do p_add(x,y,rnd()-0.5,rnd()-0.5,999,7,nil,7)end end
+
+local function kill_debris(p)
+	local x,y=p.x+2,p.y+2
+	hud_add_score(3) spawn_chunk_dust(x,y) p.l=0
+	if rnd()<0.2 then cash(x,y,1) end
+end
+
 local function spawn_asteroid_debris(x,y,alt)
 	local l=alt and 27 or 5
 	local sx,sy=l%16*8,flr(l/16)*8
@@ -38,7 +46,7 @@ end
 
 local function spawn_asteroid()
 	local spd,alt=mspd,round_number>6 and rnd()<min(0.12+0.06*(round_number-6),0.65)
-	local large=round_number>=3 and rnd()<(mlc or 0.3)
+	local large=round_number>=3 and rnd()<mlc
 	local sz=large and 16 or 8
 	add(asteroids,{
 		x=flr(rnd(large and 112 or 120)),
@@ -84,14 +92,14 @@ function update_asteroid()
 						-- alt (tougher) variants award more score + money for the extra hits
 						hud_add_score(m.alt and 85 or 60)
 						-- money shards (large): 0-5 (avg ~2.5), +4 flat for alt; 4 credits each
-						for i=1,rndi(6)+(m.alt and 4 or 0) do p_add(m.x+4,m.y+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+						cash(m.x+4,m.y+4,rndi(6)+(m.alt and 4 or 0))
 					-- inlined spawn_child_asteroids
-					for i=0,1 do local ag=i*0.25+rnd(0.1) add(asteroids,{x=i%2*m.w-i%2*8+m.x+2,y=m.y+2,w=8,h=8,dx=cos(ag)*(0.4+rnd(0.3)),dy=sin(ag)*(0.4+rnd(0.3))*0.5+0.9,spd=mspd or 0.9,hp=m.alt and 4 or 2,large=false,alt=m.alt,flash_t=0}) end
+					for i=0,1 do local ag=i*0.25+rnd(0.1) add(asteroids,{x=i%2*m.w-i%2*8+m.x+2,y=m.y+2,w=8,h=8,dx=cos(ag)*(0.4+rnd(0.3)),dy=sin(ag)*(0.4+rnd(0.3))*0.5+0.9,spd=mspd,hp=m.alt and 4 or 2,large=false,alt=m.alt,flash_t=0}) end
 					spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
 				else
 						hud_add_score(m.alt and 50 or 35)
 						-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt; 4 credits each
-						for i=1,rndi(4)+(m.alt and 2 or 0) do p_add(m.x+4,m.y+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+						cash(m.x+4,m.y+4,rndi(4)+(m.alt and 2 or 0))
 					spawn_asteroid_debris(m.x,m.y,m.alt)
 				end
 				snd_sfx(1)
@@ -112,14 +120,13 @@ function update_asteroid()
 	for p in all(Gp) do
 		if p.t==4 then
 			if hit_by_player_bullet(p.x,p.y,4,4) then
-					hud_add_score(3) spawn_chunk_dust(p.x+2,p.y+2) p.l=0 if rnd()<0.2 then p_add(p.x+2,p.y+2,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+					kill_debris(p)
 			-- shield shock (active shield aura destroys debris)
 			elseif ship.shield_pulse_level>0 and ship.shield_active then
 				local dx=(p.x+2)-(ship.x+4) local dy=(p.y+2)-(ship.y+4)
 				local r=10+ship.shield_pulse_level
 				if dx*dx+dy*dy <= r*r then
-					 hud_add_score(3) spawn_chunk_dust(p.x+2,p.y+2) p.l=0
-					 if rnd()<0.2 then p_add(p.x+2,p.y+2,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+					 kill_debris(p)
 				end
 			elseif scoll(p.x,p.y,4,4) then if game_state=="game" then ship_kill() end end
 		end

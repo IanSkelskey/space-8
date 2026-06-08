@@ -60,7 +60,7 @@ end
 function update_comet()
 	if round_number<3 then return end
 	spawn_t-=FT
-	local mx,mi,rg=cm or 3,cmin or 1,crng or 1.2
+	local mx,mi,rg=cm,cmin,crng
 	if round_number<5 then mx=min(mx,1) end
 	if spawn_t<=0 and #comets<mx then
 		spawn_comet()
@@ -94,13 +94,10 @@ function update_comet()
 		for i=1,rnd()<0.4 and 2 or 1 do
 			p_add(c.x+3+rnd(2),c.y+3+rnd(2),-c.dx*0.2,-c.dy*0.2,18+rndi(10),5,rnd()<0.5 and c.c8 or c.c9)
 		end
-		for b in all(bullets) do
-			if aabb(c.x,c.y,8,8,b.x,b.y,5,5) then
-				del(bullets,b) c.hp-=1
-				if c.hp<=0 then comet_die(c) goto continue
-				else c.flash_t=4 end
-				break
-			end
+		if hit_by_player_bullet(c.x,c.y,8,8) then
+			c.hp-=1
+			if c.hp<=0 then comet_die(c) goto continue
+			else c.flash_t=4 end
 		end
 		if c.hp>0 then if scoll(c.x,c.y,8,8) then ship_kill() end if c.x<-12 or c.x>140 or c.y<-12 or c.y>140 then del(comets,c) end end
 		::continue::

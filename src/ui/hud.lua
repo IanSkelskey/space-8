@@ -1,13 +1,9 @@
-score=score or 0 -- run low part
-scoreh=scoreh or 0 -- run thousands
-ts=ts or 0     -- total low part
-tsh=tsh or 0   -- total thousands
-db=db or 0
+score,scoreh,ts,tsh,db=0,0,0,0,0
 
 function hud_init()score,scoreh=0,0 end
 
 function hud_add_score(n)
- local m=flr(((n or 0)*(dsc and dsc[df] or 1))+0.5)
+ local m=flr(n*dsc[df]+0.5)
  score+=m ts+=m
  while score>=1000 do score-=1000 scoreh+=1 end
  while ts>=1000 do ts-=1000 tsh+=1 end

@@ -11,9 +11,7 @@ function scoll(x,y,w,h)
 end
 -- gameplay-only state (mission name now owned by UI cart via station ensure_mission)
 round_number,mission_distance,dr,level_fanfare_timer,ship_departing=1,0,0,0,false
-death_jingle_t=death_jingle_t or 0 -- frames remaining for death jingle before gameover
-death_skip_pending=death_skip_pending or false -- whether first skip press has been made during jingle
-death_skip_lock=death_skip_lock or 0 -- frames before skip input is accepted (debounce)
+death_jingle_t,death_skip_pending,death_skip_lock=0,false,0
 local DEATH_ANIM_MIN=45      -- minimum death animation duration (frames)
 local DEATH_JINGLE_LEN=210   -- full gameover jingle length; cart loads only after this ends
 vr=1 -- visible round counter (always starts at 1)
@@ -23,7 +21,7 @@ money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
 function ie() ship_init() asteroid_init() hud_init() blackhole_init() comet_init() end
 function tu(s) persist_save_from_game(s) load("ui.p8") load("ui.p8.png") load("#space_8_ui") end
 function complete_mission()
- local mult=dsc and dsc[df] or 1
+ local mult=dsc[df]
  last_pay=flr((40+mission_distance\25)*mult)
  money_total+=last_pay
  -- lifetime money now folded in by the ui cart on arrival (saves gameplay tokens)
