@@ -89,4 +89,5 @@ function _draw()
  elseif game_state=="help" then draw_help()
  elseif game_state=="highscore_entry" then draw_highscore_entry()
  elseif game_state=="gameover" then draw_gameover() end
+ pal(15,140,1)
 end

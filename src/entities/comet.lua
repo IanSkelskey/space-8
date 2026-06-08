@@ -2,7 +2,7 @@ local comets,spawn_t={},0
 -- use split strings for ids (cheaper than table literals)
 -- arrays align to: pink, yellow, green, blue, red. red has no drop (DROP_ODDS 0)
 local C8,C9=split"2,10,3,1,8",split"14,9,11,12,2"
--- all comets use the green comet art (angled 46 / straight 62) recoloured by palette swap.
+-- all comets use the green comet art (angled 198 / straight 200) recoloured by palette swap.
 -- the green body ramp is colours 1,2,3,11 (dark->light); RAMPS replaces those per variant.
 -- order matches C8/C9: pink, yellow, green, blue, red. yellow tops out at white (7).
 -- blue draws with colour 15, which the screen palette remaps to hidden colour 140

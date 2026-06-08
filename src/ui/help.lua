@@ -78,22 +78,24 @@ function draw_help()
     y+=8
     print("shoot for powerups:",8,y,6)
     y+=8
+    -- live comet art (200) recoloured per variant: pink/yellow/green/blue
+    -- (comet.lua swaps body colours 1,3,11,10 -> RAMPS). order = magnet/rapid/hull/charge
+    local csrc=split"1,3,11,10"
+    local cramps={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6"}
     local comets={
-     {60,56,"magnet"},
-     {61,11,"rapid"},
-     {62,38,"hull"},
-     {63,10,"charge"}
+     {56,"magnet"},
+     {11,"rapid"},
+     {38,"hull"},
+     {10,"charge"}
     }
-    for i=1,2 do
-     spr(comets[i][1],8+(i-1)*60,y)
-     spr(comets[i][2],18+(i-1)*60,y)
-     print(comets[i][3],28+(i-1)*60,y+2,6)
-    end
-    y+=10
-    for i=3,4 do
-     spr(comets[i][1],8+(i-3)*60,y)
-     spr(comets[i][2],18+(i-3)*60,y)
-     print(comets[i][3],28+(i-3)*60,y+2,6)
+    for i=1,4 do
+     local cx=8+((i-1)%2)*60
+     local cy=y+((i-1)\2)*10
+     for k=1,4 do pal(csrc[k],cramps[i][k]) end
+     spr(200,cx,cy)
+     pal()
+     spr(comets[i][1],cx+10,cy)
+     print(comets[i][2],cx+20,cy+2,6)
     end
  elseif hp==4 then
     -- obstacles page 2: black holes
