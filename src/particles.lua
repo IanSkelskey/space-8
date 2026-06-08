@@ -3,6 +3,11 @@ local p={}
 local ppf=0 -- frame counter for shimmer
 Gp=p
 
+-- shared token-saving helpers (used across gameplay files)
+function rndi(n) return rnd(n)\1 end                         -- integer rnd
+function wt() for i=1,15 do pal(i,7) end end                 -- whiteout palette (hit flash)
+function capv(o,m) local s=sqrt(o.dx*o.dx+o.dy*o.dy) if s>m then o.dx*=m/s o.dy*=m/s end end -- cap a {dx,dy} speed
+
 -- tiny shared halo (rotating 4-dot ring) reused by comets + powerups
 function h(x,y,a,c1,c2)for i=0,3 do local g=a+i*0.25 pset(flr(x+cos(g)*3),flr(y+sin(g)*3),i%2==0 and c1 or c2)end end
 
@@ -28,7 +33,6 @@ function p_upd()
    if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(30)
        elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end ship.heal_t=t()+0.4 hud_add_score(20) snd_sfx(63)
        elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
-   if not money_life_lo then money_life_lo,money_life_hi=0,0 end money_life_lo+=4 while money_life_lo>=1000 do money_life_lo-=1000 money_life_hi+=1 end
        elseif d==5 then ship.rfb=120 snd_sfx(63)
        elseif d==6 then ship.magnet_t=420 snd_sfx(63)
        end del(p,i) goto continue end
@@ -42,7 +46,7 @@ function p_upd()
   ::continue::
  end
  -- global magnet pull (after per-particle updates for smoother feel)
- if ship.magnet_t and ship.magnet_t>0 and not ship.dying then
+ if ship.magnet_t>0 and not ship.dying then
   local cx,cy=ship.x+4,ship.y+4
   local r=44
   local r2=r*r
@@ -135,11 +139,7 @@ function p_hole_pull(holes)
    else
     i.dx*=0.65
     i.dy=i.dy*0.65+0.2
-    local sp=sqrt(i.dx*i.dx+i.dy*i.dy)
-    if sp>0.6 then
-     i.dx*=0.6/sp
-     i.dy*=0.6/sp
-    end
+    capv(i,0.6)
    end
   end
  end
@@ -158,11 +158,7 @@ function p_pull(cx,cy,r,str,types)
     i.dy+=dy*invd*acc
     -- Limit debris speed like original
  if i.t==4 then
-     local sp=sqrt(i.dx*i.dx+i.dy*i.dy)
-     if sp>2 then
-      i.dx*=2/sp
-      i.dy*=2/sp
-     end
+     capv(i,2)
     end
    end
   end

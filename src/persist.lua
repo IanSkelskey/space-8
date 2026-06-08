@@ -9,6 +9,9 @@ sr=sr or split"1,2,4"
 dm=dm or split"0.7,0.8,0.9"
 function dmul()return dm[df] end
 
+-- lifetime money carry (now owned by the ui cart; gameplay no longer tracks it)
+function add_life(n) if not money_life_lo then money_life_lo,money_life_hi=0,0 end money_life_lo+=n while money_life_lo>=1000 do money_life_lo-=1000 money_life_hi+=1 end end
+
 -- indices
 local I_UI_STATE=0   -- 0 menu (default) |1 station |2 gameover
 local I_DF=1         -- difficulty
@@ -28,17 +31,19 @@ local I_TS=14
 local I_TSH=15
 local I_PAYOUT_READY=16
 local I_START_FLAG=17 -- 1 means gameplay cart should start a mission immediately
-local I_LAST_RUN_LO=18
+local I_LAST_RUN_LO=18 -- written directly by gameplay ship_kill (raw dset)
 local I_LAST_RUN_HI=19
--- per-difficulty high score tables (each: count + entries (MAX_HS*3))
+-- per-difficulty high score tables. each block: count at I_HSx_COUNT, then
+-- MAX_HS(4) entries of 3 slots (hi,lo,name_code) at I_HSx_BASE = 13 slots used,
+-- on a 14-slot stride, so slots 33/47/61 are spare. full map: see CARTDATA.md
 local I_HS1_COUNT=20
-local I_HS1_BASE=21 -- easy (21-33: 1 count + 4 entries * 3 values = 13 slots)
+local I_HS1_BASE=21 -- easy:    count 20, entries 21-32 (slot 33 spare)
 local I_HS2_COUNT=34
-local I_HS2_BASE=35 -- normal (35-47: 1 count + 4 entries * 3 values = 13 slots)
+local I_HS2_BASE=35 -- normal:  count 34, entries 35-46 (slot 47 spare)
 local I_HS3_COUNT=48
-local I_HS3_BASE=49 -- veteran (49-61: 1 count + 4 entries * 3 values = 13 slots)
+local I_HS3_BASE=49 -- veteran: count 48, entries 49-60 (slot 61 spare)
 -- shield_pulse_level packed into high bits of I_SHIELD (level + pulse*8)
-local I_LIFE_LO=62 -- lifetime money low (0-999)
+local I_LIFE_LO=62 -- lifetime money low (0-999); ui-cart owned (gameplay no longer touches)
 local I_LIFE_HI=63 -- lifetime money thousands
 
 -- write a value only if non-nil (saves a few tokens where used repeatedly)
@@ -129,7 +134,12 @@ end
 -- ui cart startup: returns ui_state (0 menu,1 station,2 gameover) after loading
 function persist_load_ui_state()
  local st=dget(I_UI_STATE)
- if st==1 or st==2 then lg() end
+ if st==1 or st==2 then lg()
+  -- fold this run's earnings into lifetime money (gameplay cart no longer does this):
+  -- completed mission gets base pay + collected bonus; a fatal run gets only the bonus
+  add_life(st==1 and last_pay+last_bonus or last_bonus)
+  dset(I_LIFE_LO,money_life_lo) dset(I_LIFE_HI,money_life_hi)
+ end
  return st or 0
 end
 

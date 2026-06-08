@@ -10,9 +10,9 @@ local function hit_by_player_bullet(x,y,w,h)
 end
 
 local function spawn_chunk_dust(x,y)
-	for i=1,3+rnd(3)\1 do
+	for i=1,3+rndi(3) do
 		local a=rnd()
-		p_add(x,y,cos(a)*(0.6+rnd(0.6)),sin(a)*(0.6+rnd(0.6)),8+rnd(6)\1,1)
+		p_add(x,y,cos(a)*(0.6+rnd(0.6)),sin(a)*(0.6+rnd(0.6)),8+rndi(6),1)
 	end
 end
 
@@ -84,14 +84,14 @@ function update_asteroid()
 						-- alt (tougher) variants award more score + money for the extra hits
 						hud_add_score(m.alt and 85 or 60)
 						-- money shards (large): 0-5 (avg ~2.5), +4 flat for alt; 4 credits each
-						for i=1,rnd(6)\1+(m.alt and 4 or 0) do p_add(m.x+4,m.y+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+						for i=1,rndi(6)+(m.alt and 4 or 0) do p_add(m.x+4,m.y+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
 					-- inlined spawn_child_asteroids
 					for i=0,1 do local ag=i*0.25+rnd(0.1) add(asteroids,{x=i%2*m.w-i%2*8+m.x+2,y=m.y+2,w=8,h=8,dx=cos(ag)*(0.4+rnd(0.3)),dy=sin(ag)*(0.4+rnd(0.3))*0.5+0.9,spd=mspd or 0.9,hp=m.alt and 4 or 2,large=false,alt=m.alt,flash_t=0}) end
 					spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
 				else
 						hud_add_score(m.alt and 50 or 35)
 						-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt; 4 credits each
-						for i=1,rnd(4)\1+(m.alt and 2 or 0) do p_add(m.x+4,m.y+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
+						for i=1,rndi(4)+(m.alt and 2 or 0) do p_add(m.x+4,m.y+4,rnd()-0.5,rnd()-0.5,999,7,nil,7) end
 					spawn_asteroid_debris(m.x,m.y,m.alt)
 				end
 				snd_sfx(1)
@@ -130,11 +130,11 @@ function draw_asteroid()
 	for m in all(asteroids) do
 		-- hit flash via palette whiteout (no dedicated flash sprites)
 		if m.flash_t>0 and m.flash_t%2==0 then
-			for i=1,15 do pal(i,7) end
+			wt()
 		end
 		-- per-object hit shake: jitter the draw position +-1px while flashing
 		local dx,dy=m.x,m.y
-		if m.flash_t>0 then dx+=rnd(3)\1-1 dy+=rnd(3)\1-1 end
+		if m.flash_t>0 then dx+=rndi(3)-1 dy+=rndi(3)-1 end
 		if m.large then
 			local base=7+(m.alt and 5 or 0)
 			-- draw 2x2 block

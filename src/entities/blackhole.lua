@@ -43,7 +43,7 @@ function update_blackhole()
 			ship.x=mid(0,ship.x+dx*invd*str,128-ship.w)
 			ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
 			-- gravity drama: subtle shake builds as the ship is dragged deeper into the well
-			shake=max(shake or 0,str*2)
+			shake=max(shake,str*2)
 		end
 		if scoll(h.x,h.y,8,8) and not ship.dying then
 			ship.shield_power,ship.shield_active=0,false
@@ -61,7 +61,7 @@ function update_blackhole()
 			local ang,rad=rnd(),2+rnd(2)
 			local px,py=h.x+4+cos(ang)*rad,h.y+4+sin(ang)*rad
 			local tx,ty,spd=-sin(ang),cos(ang),0.45+rnd(0.45)
-			p_add(px,py,tx*spd+rnd(0.2)-0.1+cos(ang)*0.08,ty*spd+rnd(0.2)-0.1+sin(ang)*0.08,20+rnd(10)\1,6)
+			p_add(px,py,tx*spd+rnd(0.2)-0.1+cos(ang)*0.08,ty*spd+rnd(0.2)-0.1+sin(ang)*0.08,20+rndi(10),6)
 		end
 		-- inline bullet pull (reuse cx,cy and r2)
 		for b in all(bullets) do
@@ -69,7 +69,7 @@ function update_blackhole()
 				del(bullets,b)
 			else
 				local dx,dy=cx-b.x,cy-b.y local d2=dx*dx+dy*dy
-				if d2>0.1 and d2<r2 then local invd,acc=1/sqrt(d2),0.25*(1-d2/r2) b.dx+=dx*invd*acc b.dy+=dy*invd*acc local sp=b.dx*b.dx+b.dy*b.dy if sp>16 then local s=sqrt(sp) b.dx*=4/s b.dy*=4/s end end
+				if d2>0.1 and d2<r2 then local invd,acc=1/sqrt(d2),0.25*(1-d2/r2) b.dx+=dx*invd*acc b.dy+=dy*invd*acc capv(b,4) end
 			end
 		end
 	end

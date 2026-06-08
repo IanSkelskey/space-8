@@ -14,6 +14,9 @@ local thr_cols={
 -- rapid-fire recolor: shift warm bullet/flash colors one step hotter (yellow->white, orange->yellow, red->orange)
 local function rfpal() pal(10,7)pal(9,10)pal(8,9) end
 
+-- polar pset: plot colour c at angle a / radius r around (cx,cy), rounded to nearest pixel
+local function pp(cx,cy,a,r,c) pset(flr(cx+cos(a)*r+0.5),flr(cy+sin(a)*r+0.5),c) end
+
 -- twin exhaust flames for a given thrust strength + velocity (shared by live flight and the round-clear fly-off)
 function ship_thrust(str,vx,vy)
  if str<=0 then return end
@@ -65,7 +68,7 @@ function ship_kill()
  end
  ship.hull-=1
  ship.hull_invuln=60
- shake=max(shake or 0,5) -- kick the screen on a hull hit
+ shake=max(shake,5) -- kick the screen on a hull hit
   snd_sfx(1)
  if ship.hull<=0 then
   shake=12 -- bigger jolt on death
@@ -122,7 +125,7 @@ function update_ship()
    if lvl>=1 then add(bullets,{x=cx-so,y=by,dx=iv-sdx,dy=-3}) add(bullets,{x=cx+so,y=by,dx=iv+sdx,dy=-3}) end
   muzzle_t=4 -- two-frame muzzle flash (72 then 73) at the nose
   -- 2-3 hot muzzle sparks: warm ramp that darkens with distance, then vanishes
-  for i=1,2+rnd(2)\1 do p_add(x+4+rnd()*2-1,y-4,iv+(rnd()-0.5)*1.2,-(0.6+rnd()*1.1),8+rnd(3)\1,8) end
+  for i=1,2+rndi(2) do p_add(x+4+rnd()*2-1,y-4,iv+(rnd()-0.5)*1.2,-(0.6+rnd()*1.1),8+rndi(3),8) end
   snd_sfx(62,2)
   laser_cd=max(3,flr(12*(1-0.2*fire_rate_level)-(rfb>0 and 5 or 0)+0.5))
   end
@@ -244,14 +247,12 @@ function draw_ship()
   -- outer ring: alternating pink/purple, slow clockwise sweep
   local ao=t*0.6
   for i=0,23 do
-   local a=ao+i/24
-   pset(flr(cx+cos(a)*r+0.5),flr(cy+sin(a)*r+0.5),i%2==0 and 14 or 2)
+   pp(cx,cy,ao+i/24,r,i%2==0 and 14 or 2)
   end
   -- inner ring: dim purple, counter-rotating, with travelling pink sparkles
   local ri,ai=r-4,t*-0.9
   for i=0,15 do
-   local a=ai+i/16
-   pset(flr(cx+cos(a)*ri+0.5),flr(cy+sin(a)*ri+0.5),flr(t*8+i)%5==0 and 14 or 2)
+   pp(cx,cy,ai+i/16,ri,flr(t*8+i)%5==0 and 14 or 2)
   end
   -- in-falling sparks: pink heads stream from the ring toward the ship,
   -- accelerating inward (radius=r*(1-u^2)) with a short purple trail behind so
@@ -259,8 +260,8 @@ function draw_ship()
   for i=0,5 do
    local u=(t*0.7+i/6)%1
    local a,rr=i/6+t*0.1,r*(1-u*u)
-   pset(flr(cx+cos(a)*rr+0.5),flr(cy+sin(a)*rr+0.5),14)
-   pset(flr(cx+cos(a)*(rr+2)+0.5),flr(cy+sin(a)*(rr+2)+0.5),2)
+   pp(cx,cy,a,rr,14)
+   pp(cx,cy,a,rr+2,2)
   end
  end
 end

@@ -35,7 +35,7 @@ function comet_pull(cx,cy,r,str)
 			if d2<36 then comet_die(c) -- swallowed: play the normal death animation
 			elseif d2<r2 then
 				local invd,acc=1/sqrt(d2),str*(1-d2/r2) c.dx+=dx*invd*acc c.dy+=dy*invd*acc
-				local sp=sqrt(c.dx*c.dx+c.dy*c.dy) if sp>3 then c.dx*=3/sp c.dy*=3/sp end
+				capv(c,3)
 			end
 		end
 	end
@@ -92,7 +92,7 @@ function update_comet()
 		if c.flash_t>0 then c.flash_t-=1 end
 		-- trail: a couple of colour particles drifting opposite the (speed-capped) velocity
 		for i=1,rnd()<0.4 and 2 or 1 do
-			p_add(c.x+3+rnd(2),c.y+3+rnd(2),-c.dx*0.2,-c.dy*0.2,18+rnd(10)\1,5,rnd()<0.5 and c.c8 or c.c9)
+			p_add(c.x+3+rnd(2),c.y+3+rnd(2),-c.dx*0.2,-c.dy*0.2,18+rndi(10),5,rnd()<0.5 and c.c8 or c.c9)
 		end
 		for b in all(bullets) do
 			if aabb(c.x,c.y,8,8,b.x,b.y,5,5) then
@@ -124,7 +124,7 @@ function draw_comet()
 			local sid,flash=(angled and 198 or 200)+flr(t()*6+c.x)%2,c.flash_t>0 or c.dying
 			-- per-object hit shake: jitter the draw position +-1px while flashing
 			local cx,cy=c.x,c.y
-			if flash then for i=1,15 do pal(i,7) end cx+=rnd(3)\1-1 cy+=rnd(3)\1-1
+			if flash then wt() cx+=rndi(3)-1 cy+=rndi(3)-1
 			else setramp(c.ramp) end
 			-- angled or mostly-horizontal: plain spr (flip_y only meaningful for angled); else rotate 90
 			if angled or ax>ay then

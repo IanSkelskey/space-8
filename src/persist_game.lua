@@ -21,8 +21,7 @@ local I_TSH=15
 local I_PAYOUT_READY=16
 local I_START_FLAG=17
 -- shield_pulse_level packed into high bits of I_SHIELD (level + pulse*8)
-local I_LIFE_LO=62
-local I_LIFE_HI=63
+-- lifetime money (slots 62/63) is owned by the ui cart now; gameplay never touches it
 
 local function w(i,v) if v then dset(i,v) end end
 
@@ -37,7 +36,6 @@ function persist_load_game_start()
  vr=dget(I_VR)
  ts=dget(I_TS) tsh=dget(I_TSH)
  last_payout_ready=dget(I_PAYOUT_READY)==1
- money_life_lo=dget(I_LIFE_LO) money_life_hi=dget(I_LIFE_HI)
  ship.fire_rate_level=dget(I_FIRE)
  local sv=dget(I_SHIELD) ship.shield_level=sv%8 ship.shield_pulse_level=sv\8
  ship.spread_level=dget(I_SPREAD)
@@ -61,5 +59,4 @@ function persist_save_from_game(ui_state)
  w(I_SHIELD_UNL,ship.shield_unlocked and 1 or 0) w(I_HULL,ship.hull)
  w(I_TS,ts) w(I_TSH,tsh)
  w(I_PAYOUT_READY,last_payout_ready and 1 or 0)
- if money_life_lo then dset(I_LIFE_LO,money_life_lo) dset(I_LIFE_HI,money_life_hi) end
 end
