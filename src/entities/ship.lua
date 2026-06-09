@@ -188,13 +188,18 @@ local function draw_hull()
  else spr(al<0.66 and 139 or 141,ship.x-4,ship.y-4,2,2,ship.vlean>0) end
 end
 
+-- the ship's red hit-flash: swap the hull greys (6,13,5) for a red ramp, draw the hull, reset
+local function hitflash() pal(6,8) pal(13,2) pal(5,2) pal(9,8) pal(4,8) draw_hull() pal() end
+
 function draw_ship()
  -- flying off after a round clear: roll through the lean frames back to level, but no blink/muzzle/effects
  if game_state=="fanfare_depart" then draw_hull() return end
  if ship.dying then
-  -- death explosion: 7 frames of 16x16 sprites (top-left tiles 160,162,...,172), 4 frames each
+  -- death: frame 0 is the ship's red hit flash (in lieu of tile 160); frames 1-5 are the
+  -- 16x16 explosion (tiles 162..170), 4 game-frames each
   local f=ship.death_t\4
-  if f<7 then spr(160+f*2,ship.x-4,ship.y-4,2,2) end
+  if f<1 then hitflash()
+  elseif f<6 then spr(160+f*2,ship.x-4,ship.y-4,2,2) end
  elseif ship.heal_t>t() then
   -- heal shimmer: alternate two 3-colour slices of the green ramp (1,3,11,10) up the hull greys (5,13,6)
   if flr(t()*8)%2<1 then pal(5,1) pal(13,3) pal(6,11)
@@ -202,13 +207,8 @@ function draw_ship()
   draw_hull()
   pal()
  elseif ship.hull_invuln>45 then
-  -- red hit flash: blink the hull red<->transparent for the first ~half-second before the normal invuln blink
-  if (ship.hull_invuln%4)>=2 then
-   -- swap the hull greys (6 light, 13 mid, 5 dark) for a red ramp
-   pal(6,8) pal(13,2) pal(5,2) pal(9,8) pal(4,8)
-   draw_hull()
-   pal()
-  end
+  -- red hit flash: blink the red-ramped hull for the first ~half-second before the normal invuln blink
+  if (ship.hull_invuln%4)>=2 then hitflash() end
  elseif not(ship.hull_invuln>0 and(ship.hull_invuln%4)<2)then
   draw_hull()
  end
