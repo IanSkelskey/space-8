@@ -9,10 +9,11 @@ local function hit_by_player_bullet(x,y,w,h)
 	end
 end
 
-local function spawn_chunk_dust(x,y)
+local function spawn_chunk_dust(x,y,alt)
 	for i=1,3+rndi(3) do
 		local a=rnd()
-		p_add(x,y,cos(a)*(0.6+rnd(0.6)),sin(a)*(0.6+rnd(0.6)),8+rndi(6),1)
+		-- alt flag rides in the d field; the type-1 ramp reads it to pick 13,5,1 vs 4,2,1
+		p_add(x,y,cos(a)*(0.6+rnd(0.6)),sin(a)*(0.6+rnd(0.6)),8+rndi(6),1,nil,alt)
 	end
 end
 
@@ -20,7 +21,7 @@ local function cash(x,y,n)for i=1,n do p_add(x,y,rnd()-0.5,rnd()-0.5,999,7,nil,7
 
 local function kill_debris(p)
 	local x,y=p.x+2,p.y+2
-	hud_add_score(3) spawn_chunk_dust(x,y) p.l=0
+	hud_add_score(3) spawn_chunk_dust(x,y,p.c) p.l=0
 	if rnd()<0.2 then cash(x,y,1) end
 end
 
