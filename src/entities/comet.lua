@@ -24,6 +24,13 @@ function comet_init()
 	comets,spawn_t={},0
 end
 
+-- explode every comet overlapping a rect (full death). used by the round-clear sweep.
+function comet_absorb(hx,hy,hw,hh)
+	for c in all(comets) do
+		if aabb(c.x,c.y,8,8,hx,hy,hw,hh) then comet_die(c) end
+	end
+end
+
 -- bend live comets' trajectories toward a gravity well (called by the black hole)
 function comet_pull(cx,cy,r,str)
 	local r2=r*r

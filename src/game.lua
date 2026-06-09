@@ -31,7 +31,13 @@ function complete_mission()
  -- flag distance for regen in UI (station ensure_mission will set new name+distance next visit)
  mission_distance,dr=0,0
  snd_music(8)
- p_clear() -- start the fly-off with a clean field so only the boost trail shows
+ -- round clear: blow up everything left on the field. bhabsorb=true so these kills
+ -- drop loot + booms but award NO score. collectibles are NOT cleared, so the coins
+ -- (existing + freshly dropped) stay on screen to be scooped during the fly-off.
+ bhabsorb=true
+ asteroid_absorb(0,0,128,128) comet_absorb(0,0,128,128) popcorn_absorb(0,0,128,128)
+ bhabsorb=false
+ p_absorb(0,0,128,128,{[9]=true}) -- clear enemy bullets so the fly-off can't hurt the player
  level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
 end
 
