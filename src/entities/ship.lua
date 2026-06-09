@@ -195,11 +195,10 @@ function draw_ship()
  -- flying off after a round clear: roll through the lean frames back to level, but no blink/muzzle/effects
  if game_state=="fanfare_depart" then draw_hull() return end
  if ship.dying then
-  -- death: frame 0 is the ship's red hit flash (in lieu of tile 160); frames 1-5 are the
-  -- 16x16 explosion (tiles 162..170), 4 game-frames each
+  -- death: a hit flash first, then the full 6-frame 16x16 explosion (tiles 160..170), 4 game-frames each
   local f=ship.death_t\4
   if f<1 then hitflash()
-  elseif f<6 then spr(160+f*2,ship.x-4,ship.y-4,2,2) end
+  elseif f<7 then spr(160+(f-1)*2,ship.x-4,ship.y-4,2,2) end
  elseif ship.heal_t>t() then
   -- heal shimmer: alternate two 3-colour slices of the green ramp (1,3,11,10) up the hull greys (5,13,6)
   if flr(t()*8)%2<1 then pal(5,1) pal(13,3) pal(6,11)
