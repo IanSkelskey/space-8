@@ -27,10 +27,10 @@ end
 local function spawn_asteroid_debris(x,y,alt)
 	local l=alt and 27 or 5
 	local sx,sy=l%16*8,flr(l/16)*8
-	for i=0,3 do
-		local ox,oy=i%2*4,i\2*4
-		local a=rnd()
-		p_add(x+ox,y+oy,cos(a)*(0.5+rnd(1.2)),sin(a)*(0.5+rnd(1.2)),999,4,nil,{sx+ox,sy+oy})
+	for i=1,2+rndi(2) do
+		local ox,oy=rndi(2)*4,rndi(2)*4
+		local a,s=atan2(x+ox-ship.x,y+oy-ship.y)+rnd(.6)-.3,1+rnd(.5)
+		p_add(x+ox,y+oy,cos(a)*s,sin(a)*s,999,4,nil,{sx+ox,sy+oy})
 	end
 	for i=1,8 do
 		local a=rnd()
@@ -92,14 +92,14 @@ function update_asteroid()
 						-- alt (tougher) variants award more score + money for the extra hits
 						hud_add_score(m.alt and 85 or 60)
 						-- money shards (large): 0-5 (avg ~2.5), +4 flat for alt; 4 credits each
-						cash(m.x+4,m.y+4,rndi(6)+(m.alt and 4 or 0))
+						cash(m.x+4,m.y+4,max(1,rndi(6)+(m.alt and 4 or 0)))
 					-- inlined spawn_child_asteroids
 					for i=0,1 do local ag=i*0.25+rnd(0.1) add(asteroids,{x=i%2*m.w-i%2*8+m.x+2,y=m.y+2,w=8,h=8,dx=cos(ag)*(0.4+rnd(0.3)),dy=sin(ag)*(0.4+rnd(0.3))*0.5+0.9,spd=mspd,hp=m.alt and 4 or 2,large=false,alt=m.alt,flash_t=0}) end
 					spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
 				else
 						hud_add_score(m.alt and 50 or 35)
 						-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt; 4 credits each
-						cash(m.x+4,m.y+4,rndi(4)+(m.alt and 2 or 0))
+						cash(m.x+4,m.y+4,max(1,rndi(4)+(m.alt and 2 or 0)))
 					spawn_asteroid_debris(m.x,m.y,m.alt)
 				end
 				snd_sfx(1)

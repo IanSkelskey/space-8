@@ -19,7 +19,7 @@ function p_upd()
  for i in all(p) do
   i.x+=i.dx i.y+=i.dy+((i.t==7 and cs*0.7) or 0) i.l-=1
   -- inline damp
-  if i.t==4 then i.dx*=0.99 i.dy*=0.99 elseif i.t==2 then i.dx*=0.9 i.dy*=0.9 elseif i.t==3 then i.dx*=0.98 i.dy*=0.98 end
+  if i.t==2 then i.dx*=0.9 i.dy*=0.9 elseif i.t==3 then i.dx*=0.98 i.dy*=0.98 end
   if i.t==9 and scoll(i.x,i.y,2,2) then ship_kill() del(p,i) goto continue end
    -- money shard settle: apply stronger friction once speed low
     if i.t==7 and i.d==7 and not ship.dying then
