@@ -17,6 +17,9 @@ function update_popcorn()
  for e in all(pops) do
   -- bomb shockwave: trigger the normal death (score + money roll)
   if bhit(e.x+4,e.y+4) then pkill(e) goto continue end
+  -- shield pulse (retaliation + shock aura) damages/vaporises popcorn
+  local nh=shdmg(e.x+4,e.y+4,e.h)
+  if nh<e.h then e.f=4 e.h=nh if e.h<=0 then pkill(e) goto continue end end
   e.y+=e.dy*cs e.x+=sin(e.y/32+e.a)*.4*cs
   if e.f>0 then e.f-=1 end
   e.s-=1

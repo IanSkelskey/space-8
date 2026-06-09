@@ -52,6 +52,18 @@ local function sh_off()
  sfx(-1,3) snd_sfx(43)
 end
 
+-- shield-pulse kill-level + shock-aura radius, refreshed each frame in update_asteroid
+shkl,shsr=0,0
+-- shield-pulse damage at an enemy centre (cx,cy): the retaliation pulse (fired when a
+-- hit lands on the active shield) plus the shock aura's threshold-kill. returns hp
+-- after damage; the caller flashes the enemy and runs its own full death at hp<=0.
+function shdmg(cx,cy,hp)
+ local dx,dy=cx-ship.x-4,cy-ship.y-4 local d2=dx*dx+dy*dy
+ if ship.shield_retaliate_t>0 and d2<=ship.shield_retaliate_r*ship.shield_retaliate_r then hp-=1 end
+ if shsr>0 and d2<=shsr*shsr and hp<=shkl then hp=0 end
+ return hp
+end
+
 function ship_kill()
  if ship.dying or ship.shield_invuln>0 or ship.hull_invuln>0 then return end
  sfx(-1,3)

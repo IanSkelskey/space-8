@@ -86,24 +86,17 @@ function update_asteroid()
 		spawn_t=msmin+rnd(msrng)
 	end
 
-	-- shield shock threshold kill:
-	-- level1: destroy if asteroid hp<=1 inside shield radius
-	-- level2: destroy if hp<=2 inside shield radius
-	local kill_lvl=ship.shield_pulse_level
-	local sr=(ship.shield_active and kill_lvl>0) and (10+kill_lvl) or 0
+	-- refresh shield-pulse globals once per frame (asteroid runs first among enemies)
+	shkl=ship.shield_pulse_level
+	shsr=(ship.shield_active and shkl>0) and (10+shkl) or 0
 	for m in all(asteroids) do
 		m.y+=m.spd
 		m.x+=m.dx
 		m.flash_t=max(0,m.flash_t-1)
 
-		-- shield shock kill check (no continuous damage tick)
-		if sr>0 and m.flash_t==0 then
-			local dx=(m.x+m.w/2)-(ship.x+4) local dy=(m.y+m.h/2)-(ship.y+4)
-			if dx*dx+dy*dy <= sr*sr and m.hp<=kill_lvl then
-				-- simulate bullet kill path: award score and spawn debris like normal hp<=0 branch
-				m.hp=0 m.flash_t=4
-			end
-		end
+		-- shield pulse (retaliation + shock aura) damages/vaporises this asteroid
+		local nh=shdmg(m.x+m.w/2,m.y+m.h/2,m.hp)
+		if nh<m.hp then m.flash_t=4 m.hp=nh if m.hp<=0 then akill(m) goto continue end end
 
 		-- bomb shockwave: trigger the normal death (split, cash, debris)
 		if bhit(m.x+m.w/2,m.y+m.h/2) then akill(m) goto continue end
@@ -126,12 +119,9 @@ function update_asteroid()
 			if hit_by_player_bullet(p.x,p.y,4,4) then
 					kill_debris(p)
 			-- shield shock (active shield aura destroys debris)
-			elseif ship.shield_pulse_level>0 and ship.shield_active then
+			elseif shsr>0 then
 				local dx=(p.x+2)-(ship.x+4) local dy=(p.y+2)-(ship.y+4)
-				local r=10+ship.shield_pulse_level
-				if dx*dx+dy*dy <= r*r then
-					 kill_debris(p)
-				end
+				if dx*dx+dy*dy <= shsr*shsr then kill_debris(p) end
 			elseif scoll(p.x,p.y,4,4) then if game_state=="game" then ship_kill() end end
 		end
 	end

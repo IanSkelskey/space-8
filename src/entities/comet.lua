@@ -63,19 +63,14 @@ function update_comet()
 		spawn_t=(mi+rnd(rg))*(round_number<5 and 1.5 or 1)
 	end
 
-	local kill_lvl=ship.shield_pulse_level
-	local sr=(ship.shield_active and kill_lvl>0) and (10+kill_lvl) or 0
 	for c in all(comets) do
 		-- pre-warning skip
 		if c.warning_t>0 then c.warning_t-=1 goto continue end
 		-- bomb shockwave: vaporise (drop + score + boom, shared with bullet kills)
 		if bhit(c.x+4,c.y+4) then comet_die(c) goto continue end
-		-- distance to ship, shared by both shield-kill checks below
-		local dx,dy=c.x+4-(ship.x+4),c.y+4-(ship.y+4) local d2=dx*dx+dy*dy
-		-- retaliation splash
-		if ship.shield_retaliate_t>0 and d2<=ship.shield_retaliate_r*ship.shield_retaliate_r then c.hp-=1 c.flash_t=4 end
-		-- shield shock threshold kill (no continuous damage accumulation)
-		if sr>0 and c.flash_t==0 and d2<=sr*sr and c.hp<=kill_lvl then c.hp=0 c.flash_t=4 end
+		-- shield pulse (retaliation + shock aura) damages/vaporises this comet
+		local nh=shdmg(c.x+4,c.y+4,c.hp)
+		if nh<c.hp then c.flash_t=4 c.hp=nh if c.hp<=0 then comet_die(c) goto continue end end
 		-- movement
 		c.x+=c.dx*cs c.y+=c.dy*cs
 		if c.flash_t>0 then c.flash_t-=1 end
