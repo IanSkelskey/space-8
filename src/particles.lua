@@ -27,7 +27,7 @@ function p_upd()
   i.x+=i.dx i.y+=i.dy+((i.t==7 and cs*0.7) or 0) i.l-=1
   -- inline damp
   if i.t==2 then i.dx*=0.9 i.dy*=0.9 elseif i.t==3 then i.dx*=0.98 i.dy*=0.98 end
-  if i.t==9 and scoll(i.x,i.y,2,2) then ship_kill() del(p,i) goto continue end
+  if i.t==9 and scoll(i.x+1,i.y+1,3,3) then ship_kill() del(p,i) goto continue end
    -- money shard settle: apply stronger friction once speed low
     if i.t==7 and i.d==7 and not ship.dying then
          local dx,dy=ship.x+3-i.x,ship.y+3-i.y local d2=dx*dx+dy*dy
@@ -93,9 +93,7 @@ function p_draw()
      sspr(i.d[1],i.d[2],4,4,i.x,i.y)
      if i.c then pal() end
     elseif i.t==9 then
-     pal(10,8)pal(9,2)pal(8,1)
-     sspr(64+(ppf%2)*8,56,5,6,flr(i.x),flr(i.y)-1)
-     pal()
+     sspr(112+((ppf\4)%2)*8,56,5,5,flr(i.x),flr(i.y))
     elseif i.t==10 then
      -- explosion: frame from remaining life; flip by spawn-pos parity for variety
      setramp(i.d) spr(202+(18-i.l)\3,i.x,i.y,1,1,i.x%2<1,i.y%2<1) pal()
