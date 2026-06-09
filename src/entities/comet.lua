@@ -106,21 +106,11 @@ function draw_comet()
 			local cx,cy=c.x,c.y
 			if flash then wt() cx+=rndi(3)-1 cy+=rndi(3)-1
 			else setramp(c.ramp) end
-			-- angled or mostly-horizontal: plain spr (flip_y only meaningful for angled); else rotate 90
-			if angled or ax>ay then
-				spr(sid,cx,cy,1,1,c.dx<0,angled and c.dy>0)
-			else
-				-- rotated branch draws pixel-by-pixel; tint to white inline when flashing
-				local sx,sy=sid%16*8,flr(sid/16)*8
-				for px=0,7 do
-					for py=0,7 do
-						local col=sget(sx+px,sy+py)
-						if col!=0 then
-							if c.dy<0 then pset(cx+py,cy+7-px,flash and 7 or col) else pset(cx+7-py,cy+px,flash and 7 or col) end
-						end
-					end
-				end
-			end
+			-- all orientations use plain spr now. vertical comets draw with the
+			-- horizontal sprite, which only happens to comets bent near-vertical by a
+			-- black hole's gravity (rounds 5+) -- rare and brief. flash whiteout is
+			-- handled by the wt() above, same as every other spr-drawn entity.
+			spr(sid,cx,cy,1,1,c.dx<0,angled and c.dy>0)
 			pal()
 		end
 	end

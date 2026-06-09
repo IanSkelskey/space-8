@@ -1,16 +1,20 @@
 local START_X,START_Y=60,77
-ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,vx=0,vy=0,dying=false,death_t=0,shield_active=false,shield_power=0,shield_anim=0,shield_invuln=0,shield_cool=0,shield_level=0,laser_cd=0,fire_rate_level=0,spread_level=0,shield_unlocked=false,hull=2,hull_invuln=0,hull_level=0,thruster_level=0,shield_free=0,rfb=0,magnet_t=0,shield_pulse_level=0,shield_retaliate_t=0,shield_retaliate_r=0,vlean=0,muzzle_t=0,heal_t=0}
+-- ship state. fields that genuinely need a default HERE:
+--   * w/h/spd : constants, never reassigned
+--   * heal_t  : compared in draw_ship before it's ever set
+--   * the 8 upgrade fields (fire_rate_level..hull): persist_save_from_game() READS
+--     these, and a direct boot (the not-resumed path) calls it via tu(0) to write a
+--     clean default save before ship_init()/persist_load_game_start() ever run.
+-- every OTHER runtime field -- vx vy dying death_t shield_active shield_power
+-- shield_anim shield_invuln shield_cool laser_cd hull_invuln shield_free rfb
+-- magnet_t shield_retaliate_t shield_retaliate_r vlean muzzle_t -- is set by
+-- ship_init() on each mission launch, so defaulting it here was pure duplication.
+ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,heal_t=0,fire_rate_level=0,shield_level=0,shield_pulse_level=0,spread_level=0,hull_level=0,thruster_level=0,shield_unlocked=false,hull=2}
 
 bullets={}
 
 -- precomputed color triplets: base, level1, level2, level3+
-local thr_cols={
- {10,9,8},
- {12,13,1},
- {11,3,1},
- {7,6,5},
- {8,9,2}
-}
+local thr_cols={split"10,9,8",split"12,13,1",split"11,3,1",split"7,6,5",split"8,9,2"}
 
 -- rapid-fire recolor: shift warm bullet/flash colors one step hotter (yellow->white, orange->yellow, red->orange)
 local function rfpal() pal(10,7)pal(9,10)pal(8,9) end
@@ -237,31 +241,19 @@ function draw_ship()
     circ(cx,cy,base_r-i+sin(t+i*0.2)*2,flash or cols[i])
   end
  end
- -- magnet aura: twin counter-rotating dotted rings in the gravity-well palette
+ -- magnet aura: a rotating dotted ring in the gravity-well palette
  -- (pink 14 / purple 2, shared with pink comets + black holes). the radius
  -- breathes gently around the 44px pull range and the ring flickers out as the
  -- effect expires, so it reads as a field without becoming a distraction.
  if ship.magnet_t>0 and not ship.dying and not(ship.magnet_t<20 and ship.magnet_t%4<2) then
+  -- single rotating pink/purple dotted ring at the ~44px pull range; breathes
+  -- gently and flickers out as the effect expires. (the inner counter-rotating
+  -- ring and the in-falling spark streams were dropped to reclaim tokens.)
   local cx,cy,t=ship.x+4,ship.y+4,time()
   local r=43+sin(t*0.5)*1.5
-  -- outer ring: alternating pink/purple, slow clockwise sweep
   local ao=t*0.6
   for i=0,23 do
    pp(cx,cy,ao+i/24,r,i%2==0 and 14 or 2)
-  end
-  -- inner ring: dim purple, counter-rotating, with travelling pink sparkles
-  local ri,ai=r-4,t*-0.9
-  for i=0,15 do
-   pp(cx,cy,ai+i/16,ri,flr(t*8+i)%5==0 and 14 or 2)
-  end
-  -- in-falling sparks: pink heads stream from the ring toward the ship,
-  -- accelerating inward (radius=r*(1-u^2)) with a short purple trail behind so
-  -- the pull direction is unmistakable.
-  for i=0,5 do
-   local u=(t*0.7+i/6)%1
-   local a,rr=i/6+t*0.1,r*(1-u*u)
-   pp(cx,cy,a,rr,14)
-   pp(cx,cy,a,rr+2,2)
   end
  end
 end
