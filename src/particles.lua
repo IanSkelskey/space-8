@@ -88,7 +88,10 @@ function p_draw()
        spr(PS[d],i.x,i.y)
      end
     elseif i.t==4 and i.d then
+     -- debris chunk sampled from sprite 5; alt asteroids recolour it (4,2,1 -> 13,5,1)
+     if i.c then pal(4,13) pal(2,5) end
      sspr(i.d[1],i.d[2],4,4,i.x,i.y)
+     if i.c then pal() end
     elseif i.t==9 then
      pal(10,8)pal(9,2)pal(8,1)
      sspr(64+(ppf%2)*8,56,5,6,flr(i.x),flr(i.y)-1)
@@ -100,7 +103,7 @@ function p_draw()
      local c=i.c
      if not c then
         local t,l=i.t,i.l
-        c=(t==1 and (l>12 and 6 or l>6 and 5 or 7))
+        c=(t==1 and (l>9 and 4 or l>4 and 2 or 1)) -- asteroid rock dust: 4->2->1 as it fades
          or (t==2 and (l>3 and (i.d and i.d[1] or 10) or l>1 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
          or (t==3 and (l>16 and 10 or l>8 and 9 or 8))
          or (t==6 and (l>16 and 14 or l>8 and 2 or 1))

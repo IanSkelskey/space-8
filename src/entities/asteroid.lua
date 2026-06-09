@@ -24,18 +24,18 @@ local function kill_debris(p)
 	if rnd()<0.2 then cash(x,y,1) end
 end
 
-local function spawn_asteroid_debris(x,y,alt)
-	local l=alt and 27 or 5
-	local sx,sy=l%16*8,flr(l/16)*8
+local function spawn_asteroid_debris(x,y,alt,boomed)
 	for i=1,2+rndi(2) do
 		local ox,oy=rndi(2)*4,rndi(2)*4
 		local a,s=atan2(x+ox-ship.x,y+oy-ship.y)+rnd(.6)-.3,1+rnd(.5)
-		p_add(x+ox,y+oy,cos(a)*s,sin(a)*s,999,4,nil,{sx+ox,sy+oy})
+		-- chunks always sampled from sprite 5 (src x=40); alt recoloured by pal swap at draw (c=alt)
+		p_add(x+ox,y+oy,cos(a)*s,sin(a)*s,999,4,alt,{40+ox,oy})
 	end
-	for i=1,8 do
+	-- dust puff: skipped for small asteroids, whose sprite explosion (boom) covers it
+	if not boomed then for i=1,8 do
 		local a=rnd()
 		p_add(x+4,y+4,cos(a)*rnd(1.2),sin(a)*rnd(1.2),18,1)
-	end
+	end end
 end
 
 -- spawn_child_asteroids inlined at call site
@@ -100,7 +100,7 @@ function update_asteroid()
 						hud_add_score(m.alt and 50 or 35)
 						-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt; 4 credits each
 						cash(m.x+4,m.y+4,max(1,rndi(4)+(m.alt and 2 or 0)))
-					spawn_asteroid_debris(m.x,m.y,m.alt)
+					spawn_asteroid_debris(m.x,m.y,m.alt,true) boom(m.x,m.y,split"1,2,4,13")
 				end
 				snd_sfx(1)
 				del(asteroids,m)
@@ -135,19 +135,18 @@ end
 
 function draw_asteroid()
 	for m in all(asteroids) do
-		-- hit flash via palette whiteout (no dedicated flash sprites)
-		if m.flash_t>0 and m.flash_t%2==0 then
-			wt()
-		end
+		-- hit flash whiteout (strobed); otherwise the stronger (alt) rock is just a
+		-- palette swap of the base sprite colours (4,2,1 -> 13,5,1)
+		if m.flash_t>0 and m.flash_t%2==0 then wt()
+		elseif m.alt then pal(4,13) pal(2,5) end
 		-- per-object hit shake: jitter the draw position +-1px while flashing
 		local dx,dy=m.x,m.y
 		if m.flash_t>0 then dx+=rndi(3)-1 dy+=rndi(3)-1 end
 		if m.large then
-			local base=7+(m.alt and 5 or 0)
-			-- draw 2x2 block
-			spr(base,dx,dy) spr(base+1,dx+8,dy) spr(base+16,dx,dy+8) spr(base+17,dx+8,dy+8)
+			-- 2x2 block; alt uses the same sprites, recoloured by the swap above
+			spr(7,dx,dy) spr(8,dx+8,dy) spr(23,dx,dy+8) spr(24,dx+8,dy+8)
 		else
-			spr(m.alt and 26 or 2,dx,dy)
+			spr(2,dx,dy)
 		end
 		pal()
 	end
