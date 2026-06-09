@@ -103,7 +103,7 @@ function p_draw()
      local c=i.c
      if not c then
         local t,l=i.t,i.l
-        c=(t==1 and (l>9 and 4 or l>4 and 2 or 1)) -- asteroid rock dust: 4->2->1 as it fades
+        c=(t==1 and (l>9 and (i.d and 13 or 4) or l>4 and (i.d and 5 or 2) or 1)) -- rock dust; alt debris (i.d set) fades 13->5->1
          or (t==2 and (l>3 and (i.d and i.d[1] or 10) or l>1 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
          or (t==3 and (l>16 and 10 or l>8 and 9 or 8))
          or (t==6 and (l>16 and 14 or l>8 and 2 or 1))
