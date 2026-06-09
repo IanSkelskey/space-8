@@ -25,6 +25,8 @@ function update_blackhole()
 		spawn_t=(3+rnd(3))*(round_number<7 and 1.5 or 1)
 	end
 
+	-- black-hole kills run the full death (boom + loot) but award NO score (not a skill kill)
+	bhabsorb=true
 	for h in all(holes) do
 		h.y+=h.spd
 		h.spin_t=(h.spin_t+1)%32
@@ -76,6 +78,8 @@ function update_blackhole()
 			end
 		end
 	end
+
+	bhabsorb=false
 
 	-- Update hole particles with special physics
 	p_hole_pull(holes)

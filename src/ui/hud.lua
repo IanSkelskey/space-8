@@ -3,6 +3,7 @@ score,scoreh,ts,tsh,db=0,0,0,0,0
 function hud_init()score,scoreh=0,0 end
 
 function hud_add_score(n)
+ if bhabsorb then return end -- black-hole kills don't score (set in update_blackhole)
  local m=flr(n*dsc[df]+0.5)
  score+=m ts+=m
  while score>=1000 do score-=1000 scoreh+=1 end
