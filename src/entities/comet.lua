@@ -7,19 +7,17 @@ local C8,C9=split"2,10,3,1,8",split"14,9,11,12,2"
 -- order matches C8/C9: pink, yellow, green, blue, red. yellow tops out at white (7).
 -- blue draws with colour 15, which the screen palette remaps to hidden colour 140
 -- (see pal(15,140,1) at the end of _draw); colour 15 is otherwise unused.
-local SRC=split"1,3,11,10"
-local RAMPS={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6",split"2,8,9,10"}
+-- comet body ramps per variant; SRC + setramp moved to particles. red reuses the shared EXR blast.
+local RAMPS={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6",EXR}
 -- one colour-keyed powerup drop per variant (pink,yellow,green,blue,red): shard d / odds / life
 -- red odds 0 => never drops, so its DROP_D/DROP_LIFE entries are never indexed (left at 4)
 local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2",split".2,.17,0.1,.14,0",split"150,150,170,140"
--- apply a variant's ramp to the draw palette (call pal() to reset afterwards)
-local function setramp(rp) for k=1,4 do pal(SRC[k],rp[k]) end end
 -- kill a comet: drop + score + start the death animation (shared by bullet hits and black holes)
 local function comet_die(c)
 	local k=c.ci+1
 	if rnd()<DROP_ODDS[k] then p_add(c.x,c.y,0,0,DROP_LIFE[k],7,nil,DROP_D[k]) end
 	hud_add_score(55) snd_sfx(1)
-	c.dying,c.death_t,c.fx,c.fy=true,0,rnd()<.5,rnd()<.5
+	boom(c.x,c.y,c.ramp) del(comets,c)
 end
 
 function comet_init()
@@ -30,13 +28,11 @@ end
 function comet_pull(cx,cy,r,str)
 	local r2=r*r
 	for c in all(comets) do
-		if not c.dying then
-			local dx,dy=cx-c.x-4,cy-c.y-4 local d2=dx*dx+dy*dy
-			if d2<36 then comet_die(c) -- swallowed: play the normal death animation
-			elseif d2<r2 then
-				local invd,acc=1/sqrt(d2),str*(1-d2/r2) c.dx+=dx*invd*acc c.dy+=dy*invd*acc
-				capv(c,3)
-			end
+		local dx,dy=cx-c.x-4,cy-c.y-4 local d2=dx*dx+dy*dy
+		if d2<36 then comet_die(c) -- swallowed: spawn explosion + remove
+		elseif d2<r2 then
+			local invd,acc=1/sqrt(d2),str*(1-d2/r2) c.dx+=dx*invd*acc c.dy+=dy*invd*acc
+			capv(c,3)
 		end
 	end
 end
@@ -70,15 +66,6 @@ function update_comet()
 	local kill_lvl=ship.shield_pulse_level
 	local sr=(ship.shield_active and kill_lvl>0) and (10+kill_lvl) or 0
 	for c in all(comets) do
-		-- death animation: flash the hit sprite (death_t<3), then a 6-frame explosion (3 frames each), then remove
-		if c.dying then
-			c.death_t+=1
-			-- coast along the comet's trajectory, decelerating, so the blast drifts then settles
-			c.x+=c.dx*cs c.y+=c.dy*cs
-			c.dx*=0.85 c.dy*=0.85
-			if c.death_t>=21 then del(comets,c) end
-			goto continue
-		end
 		-- pre-warning skip
 		if c.warning_t>0 then c.warning_t-=1 goto continue end
 		-- distance to ship, shared by both shield-kill checks below
@@ -106,11 +93,7 @@ end
 
 function draw_comet()
 	for c in all(comets) do
-		if c.dying and c.death_t>=3 then
-			-- 6-frame explosion (8x8) starting at tile 202, held 3 game-frames each
-			local f=(c.death_t-3)\3
-			if f<6 then setramp(c.ramp) spr(202+f,c.x,c.y,1,1,c.fx,c.fy) pal() end
-		elseif c.warning_t>0 then
+		if c.warning_t>0 then
 			local cx,cy=c.left and 4 or 123,max(c.y+4,14)
 			h(cx,cy,(20-c.warning_t)*0.15,c.c8,c.c9)
 		else
@@ -118,7 +101,7 @@ function draw_comet()
 			local ax,ay=abs(c.dx),abs(c.dy)
 			local angled=ax*2.414>ay and ay*2.414>ax
 			-- 2-frame flight anim from the angled (198) or straight (200) base, desynced via c.x
-			local sid,flash=(angled and 198 or 200)+flr(t()*6+c.x)%2,c.flash_t>0 or c.dying
+			local sid,flash=(angled and 198 or 200)+flr(t()*6+c.x)%2,c.flash_t>0
 			-- per-object hit shake: jitter the draw position +-1px while flashing
 			local cx,cy=c.x,c.y
 			if flash then wt() cx+=rndi(3)-1 cy+=rndi(3)-1

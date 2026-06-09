@@ -3,6 +3,13 @@ local p={}
 local ppf=0 -- frame counter for shimmer
 Gp=p
 local PC1,PC2,PS=split"11,12,0,0,9,10",split"7,1,0,0,10,8",split"38,10,0,0,11,56"
+-- shared explosion: the 6-frame blast (spr 202..207) recoloured per-source by a ramp.
+-- SRC = green-comet body colours setramp() swaps; EXR = red blast (popcorn + red comets).
+-- moved here so comets AND popcorn spawn the explosion as a one-shot particle (type 10).
+local SRC,EXR=split"1,3,11,10",split"2,8,9,10"
+local function setramp(rp) for k=1,4 do pal(SRC[k],rp[k]) end end
+-- spawn a one-shot explosion particle (type 10): 6 frames over 18 ticks, recoloured by ramp r
+function boom(x,y,r) p_add(x,y,0,0,18,10,nil,r) end
 
 -- shared token-saving helpers (used across gameplay files)
 function rndi(n) return rnd(n)\1 end                         -- integer rnd
@@ -86,6 +93,9 @@ function p_draw()
      pal(10,8)pal(9,2)pal(8,1)
      sspr(64+(ppf%2)*8,56,5,6,flr(i.x),flr(i.y)-1)
      pal()
+    elseif i.t==10 then
+     -- explosion: frame from remaining life; flip by spawn-pos parity for variety
+     setramp(i.d) spr(202+(18-i.l)\3,i.x,i.y,1,1,i.x%2<1,i.y%2<1) pal()
     else
      local c=i.c
      if not c then
