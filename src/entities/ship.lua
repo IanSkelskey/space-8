@@ -194,6 +194,8 @@ end
 
 -- the ship's red hit-flash: swap the hull greys (6,13,5) for a red ramp, draw the hull, reset
 local function hitflash() pal(6,8) pal(13,2) pal(5,2) pal(9,8) pal(4,8) draw_hull() pal() end
+-- green heal-flash: same as hitflash() but with the green ramp (light 11 / dark 3)
+local function healflash() pal(6,11) pal(13,3) pal(5,3) pal(9,11) pal(4,11) draw_hull() pal() end
 
 function draw_ship()
  -- flying off after a round clear: roll through the lean frames back to level, but no blink/muzzle/effects
@@ -204,11 +206,8 @@ function draw_ship()
   if f<1 then hitflash()
   elseif f<7 then spr(160+(f-1)*2,ship.x-4,ship.y-4,2,2) end
  elseif ship.heal_t>t() then
-  -- heal shimmer: alternate two 3-colour slices of the green ramp (1,3,11,10) up the hull greys (5,13,6)
-  if flr(t()*8)%2<1 then pal(5,1) pal(13,3) pal(6,11)
-  else pal(5,3) pal(13,3) pal(6,11) end
-  draw_hull()
-  pal()
+  -- heal flash: blink the green-ramped hull on/off, same cadence as the red hit flash
+  if (flr(t()*15))%2<1 then healflash() end
  elseif ship.hull_invuln>45 then
   -- red hit flash: blink the red-ramped hull for the first ~half-second before the normal invuln blink
   if (ship.hull_invuln%4)>=2 then hitflash() end
