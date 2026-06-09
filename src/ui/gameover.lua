@@ -2,10 +2,9 @@
 local function check_highscore_qualified()
  local lo,hi=persist_fetch_last_run()
  if (lo or 0)==0 and (hi or 0)==0 then return false end
- local val=hi*1000+lo
  local di=df or 1
  local t=hs_sets[di]
- return #t<4 or val>((t[#t].hi or 0)*1000+(t[#t].lo or 0))
+ return #t<4 or hs_gt(hi,lo,t[#t].hi,t[#t].lo)
 end
 
 function draw_gameover()

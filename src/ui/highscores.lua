@@ -7,7 +7,6 @@ hs_sets={{},{},{}} -- per-difficulty tables: 1 easy,2 normal,3 veteran
 local hs_tab=1
 local hs_marq=0            -- marquee scroll offset (pixels)
 
-local function enc_name(a,b,c) return a*676+b*26+c end
 local function dec_name(code)
  local a=code\676 code-=a*676
  local b=code\26
@@ -35,36 +34,11 @@ end
 
 local diff_icons={19,34,6} -- difficulty icons easy/normal/veteran
 
-local function hs_save(di)
- di=di or hs_tab
- local t=hs_sets[di]
- local I_CNT,I_BASE=persist_hs_indices_for_df(di)
- dset(I_CNT,#t)
- for i=1,#t do local e=t[i] local o=I_BASE+(i-1)*3 dset(o,e.hi) dset(o+1,e.lo) dset(o+2,e.nc) end
-end
-
-local function score_value(hi,lo) return hi*1000+lo end
-
-local function insert_entry(hi,lo,nc,di)
- di=di or hs_tab
- local t=hs_sets[di]
- local val=score_value(hi,lo)
- local inserted=false
- for i=1,#t do if val>score_value(t[i].hi,t[i].lo) then add(t,{hi=hi,lo=lo,nc=nc},i) inserted=true break end end
- if not inserted then add(t,{hi=hi,lo=lo,nc=nc}) end
- while #t>MAX_HS do del(t,t[#t]) end
- hs_save(di)
-end
-
-function hs_process_new_run()
- -- This is now handled by the gameover screen and highscore_entry screen
- -- Keep empty for compatibility
-end
-
-local function commit_name()
- local hi=pending_score\1000 local lo=pending_score%1000
- insert_entry(hi,lo,enc_name(name_idx[1],name_idx[2],name_idx[3]),hs_tab)
- hs_entering=false
+-- compare two split scores WITHOUT recombining (hi*1000+lo overflows pico-8's 32767 cap).
+-- returns true if (ha,la) > (hb,lb).
+function hs_gt(ha,la,hb,lb)
+ ha=ha or 0 la=la or 0 hb=hb or 0 lb=lb or 0
+ return ha>hb or (ha==hb and la>lb)
 end
 
 -- replace old fmt_score (returned number when hi==0 causing # on number)

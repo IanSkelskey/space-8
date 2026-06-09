@@ -1,23 +1,24 @@
 -- Dedicated highscore name entry screen
 local entry_name = {0,0,0}
 local entry_pos = 1
-local entry_score = 0
+-- score kept split (hi=thousands, lo=0-999); recombining overflows pico-8's 32767 cap
+local entry_hi = 0
+local entry_lo = 0
 local entry_rank = 0
 local blink_timer = 0
 
 function highscore_entry_init()
- local lo,hi = persist_fetch_last_run()
- entry_score = hi*1000 + lo
+ entry_lo,entry_hi = persist_fetch_last_run()
  entry_name = {0,0,0}
  entry_pos = 1
  blink_timer = 0
- 
+
  -- Determine rank this score will achieve
  local di = df or 1
  local t = hs_sets[di]
  entry_rank = #t + 1
  for i=1,#t do
-  if entry_score > (t[i].hi*1000 + t[i].lo) then
+  if hs_gt(entry_hi,entry_lo,t[i].hi,t[i].lo) then
    entry_rank = i
    break
   end
@@ -52,16 +53,16 @@ function update_highscore_entry()
    snd_sfx(63)
   else
    -- Save the highscore
-   local hi = entry_score \ 1000
-   local lo = entry_score % 1000
+   local hi = entry_hi
+   local lo = entry_lo
    local nc = entry_name[1]*676 + entry_name[2]*26 + entry_name[3]
-   
+
    -- Insert into appropriate difficulty table
    local di = df or 1
    local t = hs_sets[di]
    local inserted = false
    for i=1,#t do
-    if entry_score > (t[i].hi*1000 + t[i].lo) then
+    if hs_gt(entry_hi,entry_lo,t[i].hi,t[i].lo) then
      add(t,{hi=hi,lo=lo,nc=nc},i)
      inserted = true
      break
@@ -102,8 +103,9 @@ function draw_highscore_entry()
  local fl=time()%0.8<0.4
  draw_logo("high score!",14,fl and 9 or 10,fl and 4 or 9,fl and 9 or 10,fl and 4 or 9,1.5)
  
- -- Score display
- local score_str = ""..entry_score
+ -- Score display (format split score without recombining)
+ local els="00"..entry_lo
+ local score_str = entry_hi>0 and (entry_hi..sub(els,#els-2)) or (""..entry_lo)
  print(score_str, 64-#score_str*2, 32, 11)
  
  -- Rank with trophy on same line

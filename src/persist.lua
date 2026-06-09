@@ -161,14 +161,6 @@ function persist_store_last_run(score_lo,score_hi)
  dset(I_LAST_RUN_LO,score_lo or 0) dset(I_LAST_RUN_HI,score_hi or 0)
 end
 
--- new: authoritative total score writer (avoids caller order mistakes)
-function persist_store_last_run_total(total)
- total=total or 0
- local hi=total\1000
- local lo=total%1000
- dset(I_LAST_RUN_LO,lo) dset(I_LAST_RUN_HI,hi)
-end
-
 function persist_fetch_last_run()
  local hi=dget(I_LAST_RUN_HI) local lo=dget(I_LAST_RUN_LO)
  return lo,hi

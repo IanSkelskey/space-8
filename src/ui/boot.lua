@@ -54,10 +54,9 @@ function _update()
   local lo,hi=persist_fetch_last_run()
   local qualified = false
   if (lo or 0)>0 or (hi or 0)>0 then
-   local val=hi*1000+lo
    local di=df or 1
    local t=hs_sets[di]
-   qualified = #t<4 or val>((t[#t].hi or 0)*1000+(t[#t].lo or 0))
+   qualified = #t<4 or hs_gt(hi,lo,t[#t].hi,t[#t].lo)
   end
   
   if btnp(4) or btnp(5) then

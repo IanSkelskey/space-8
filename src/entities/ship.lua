@@ -80,8 +80,8 @@ function ship_kill()
   ship.dying,ship.death_t,ship.vx,ship.vy,game_state=true,0,0,0,"dying"
   -- store run score here: game.lua's death-entry block is unreachable because
   -- game_state is already "dying" by the time it re-checks for it
-  local t=tsh*1000+ts
-  dset(19,t\1000) dset(18,t%1000)
+  -- store split directly; recombining (tsh*1000+ts) overflows pico-8's 32767 int cap
+  dset(19,tsh) dset(18,ts)
  end
 end
 
