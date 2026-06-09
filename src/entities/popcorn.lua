@@ -2,8 +2,6 @@ local pops,pt={},0
 
 function popcorn_init()pops,pt={},0 end
 
-local function rflash() for i=1,15 do pal(i,8) end end
-
 -- popcorn death: score + a money roll (a touch richer than asteroids) + boom + del.
 -- shared by bullet kills and the bomb shockwave (uses cash() from asteroid.lua).
 local function pkill(e)
@@ -42,9 +40,9 @@ end
 
 function draw_popcorn()
  for e in all(pops) do
-  if e.f>0 then rflash() end
+  if e.f>0 then fl(8) end
   local x,y=e.x,e.y
-  if e.f>0 then x+=rndi(3)-1 y+=rndi(3)-1 end
+  if e.f>0 then x+=jit() y+=jit() end
   spr(e.c>0 and(e.s>6 and 17 or 33)or 1,x,y)
   if e.f>0 then pal() end
  end

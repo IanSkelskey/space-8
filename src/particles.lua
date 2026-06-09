@@ -14,7 +14,8 @@ function boom(x,y,r) p_add(x,y,0,0,18,10,nil,r) end
 
 -- shared token-saving helpers (used across gameplay files)
 function rndi(n) return rnd(n)\1 end                         -- integer rnd
-function wt() for i=1,15 do pal(i,7) end end                 -- whiteout palette (hit flash)
+function jit() return rndi(3)-1 end                          -- -1/0/+1 hit-shake jitter
+function fl(c) for i=1,15 do pal(i,c) end end                -- solid palette fill (white hit flash fl(7), red popcorn fl(8), etc.)
 function capv(o,m) local s=sqrt(o.dx*o.dx+o.dy*o.dy) if s>m then o.dx*=m/s o.dy*=m/s end end -- cap a {dx,dy} speed
 
 -- tiny shared halo (rotating 4-dot ring) reused by comets + powerups

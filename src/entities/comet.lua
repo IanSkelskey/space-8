@@ -107,11 +107,11 @@ function draw_comet()
 			local sid,flash=(angled and 198 or(vert and 196 or 200))+flr(t()*6+c.x)%2,c.flash_t>0
 			-- per-object hit shake: jitter the draw position +-1px while flashing
 			local cx,cy=c.x,c.y
-			if flash then wt() cx+=rndi(3)-1 cy+=rndi(3)-1
+			if flash then fl(7) cx+=jit() cy+=jit()
 			else setramp(c.ramp) end
 			-- one spr for every orientation: flip_x by horizontal heading; flip_y points
 			-- the up-drawn angled/vertical art downward when c.dy>0 (horizontal art never
-			-- v-flips). flash whiteout handled by wt() above.
+			-- v-flips). flash whiteout handled by fl(7) above.
 			spr(sid,cx,cy,1,1,c.dx<0,(angled or vert)and c.dy>0)
 			pal()
 		end

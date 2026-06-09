@@ -5,7 +5,7 @@ local LS,LC,LN=split".08,.25,.5,1",split"1,5,6,7",split"16,13,10,7"
 
 -- distant planets/moons: slowest far layer, drawn as the original sprite tiles
 -- each entry: {sprite id, tile width}
-local PSP,PW=split"92,93,94,95,109,110,111,76,78",split"1,1,1,1,1,1,1,2,2"
+local PSP,PW=split"92,93,94,95,76,78",split"1,1,1,1,2,2"
 local PLANET_SPD=0.08
 local PLANET_N=3
 

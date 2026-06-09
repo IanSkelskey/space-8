@@ -141,11 +141,11 @@ function draw_asteroid()
 	for m in all(asteroids) do
 		-- hit flash whiteout (strobed); otherwise the stronger (alt) rock is just a
 		-- palette swap of the base sprite colours (4,2,1 -> 13,5,1)
-		if m.flash_t>0 and m.flash_t%2==0 then wt()
+		if m.flash_t>0 and m.flash_t%2==0 then fl(7)
 		elseif m.alt then pal(4,13) pal(2,5) end
 		-- per-object hit shake: jitter the draw position +-1px while flashing
 		local dx,dy=m.x,m.y
-		if m.flash_t>0 then dx+=rndi(3)-1 dy+=rndi(3)-1 end
+		if m.flash_t>0 then dx+=jit() dy+=jit() end
 		if m.large then
 			-- 2x2 block; alt uses the same sprites, recoloured by the swap above
 			spr(7,dx,dy) spr(8,dx+8,dy) spr(23,dx,dy+8) spr(24,dx+8,dy+8)
