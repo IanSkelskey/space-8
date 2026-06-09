@@ -100,17 +100,17 @@ function draw_comet()
 			-- orientation from CURRENT velocity (gravity bends the path): angled if neither axis dominates by >2.4x
 			local ax,ay=abs(c.dx),abs(c.dy)
 			local angled=ax*2.414>ay and ay*2.414>ax
-			-- 2-frame flight anim from the angled (198) or straight (200) base, desynced via c.x
-			local sid,flash=(angled and 198 or 200)+flr(t()*6+c.x)%2,c.flash_t>0
+			local vert=ay>ax  -- vertical-dominant heading (only reached when not angled)
+			-- 2-frame flight anim; base sprite by orientation: angled 198 / vertical 196 / horizontal 200
+			local sid,flash=(angled and 198 or(vert and 196 or 200))+flr(t()*6+c.x)%2,c.flash_t>0
 			-- per-object hit shake: jitter the draw position +-1px while flashing
 			local cx,cy=c.x,c.y
 			if flash then wt() cx+=rndi(3)-1 cy+=rndi(3)-1
 			else setramp(c.ramp) end
-			-- all orientations use plain spr now. vertical comets draw with the
-			-- horizontal sprite, which only happens to comets bent near-vertical by a
-			-- black hole's gravity (rounds 5+) -- rare and brief. flash whiteout is
-			-- handled by the wt() above, same as every other spr-drawn entity.
-			spr(sid,cx,cy,1,1,c.dx<0,angled and c.dy>0)
+			-- one spr for every orientation: flip_x by horizontal heading; flip_y points
+			-- the up-drawn angled/vertical art downward when c.dy>0 (horizontal art never
+			-- v-flips). flash whiteout handled by wt() above.
+			spr(sid,cx,cy,1,1,c.dx<0,(angled or vert)and c.dy>0)
 			pal()
 		end
 	end
