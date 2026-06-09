@@ -7,6 +7,9 @@ local sci_adj=sci_adj or split"quantum,plasma,ionic,fusion,nano,void"
 local sci_noun=sci_noun or split"core,drive,matrix,relay,reactor,array"
 local diff_labels=diff_labels or split"easy,normal,veteran"
 
+-- borderless slanted 3px bar, matching the gameplay HUD's hull meter
+function sbar(x,y,w,c) for r=0,2 do rectfill(x+2-r,y+r,x+1-r+w,y+r,c) end end
+
 local function ensure_mission()
  -- if gameplay cart didn't persist name, synthesize deterministic one
  if not current_mission then
@@ -87,14 +90,10 @@ function draw_station()
         if current_mission then
             print(current_mission,6,30,11)
             print("dist:"..mission_distance,6,38,6)
-            -- draw hull meter like in HUD
+            -- hull meter, matching the gameplay HUD: fixed 24px, mh EQUAL segments, borderless slant
             spr(38,6,46)
-            local m=2+ship.hull_level local bw=min(20,m*10) local sw=bw/m 
-            for i=1,ship.hull do 
-                local sx=13+(i-1)*sw 
-                rectfill(sx,47,sx+sw-2,49,11) 
-            end 
-            rect(13,47,12+bw,49,5)
+            local mh=2+ship.hull_level local sw=24\mh
+            for i=0,mh-1 do sbar(13+i*sw,47,sw-1,i<ship.hull and 11 or 5) end
         else
             print("pending",6,30,5)
         end

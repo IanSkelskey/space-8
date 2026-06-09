@@ -24,12 +24,7 @@ function starfield_init()
  for li=1,#LS do
   local sp,col,n=LS[li],LC[li],LN[li]
   for i=1,n do
-   add(stars,{
-    x=rnd(128),y=rnd(128),
-    s=sp,c=col,
-    tw=li==#LS, -- only the nearest layer twinkles
-    ph=rnd(1)       -- twinkle phase so they're not synced
-   })
+   add(stars,{x=rnd(128),y=rnd(128),s=sp,c=col})
   end
  end
  planets={}
@@ -50,10 +45,5 @@ end
 function draw_starfield()
  -- planets sit farthest back, behind all star layers
  for p in all(planets) do spr(p.sp,p.x,p.y,p.w,1) end
- local t=time()
- for st in all(stars) do
-  local c=st.c
-  if st.tw and (t+st.ph)%1<0.12 then c=13 end -- brief dim flicker
-  pset(st.x,st.y,c)
- end
+ for st in all(stars) do pset(st.x,st.y,st.c) end
 end

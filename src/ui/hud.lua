@@ -10,19 +10,35 @@ function hud_add_score(n)
  while ts>=1000 do ts-=1000 tsh+=1 end
 end
 
+-- one borderless slanted 3px bar: width w at (x,y) in colour c
+-- (each row up shifts 1px right, giving a 2px italic lean over the 3px height)
+function sbar(x,y,w,c) for r=0,2 do rectfill(x+2-r,y+r,x+1-r+w,y+r,c) end end
+
 function draw_hud()
+ -- score (left) + money (right), on the top band's text row
  local ls="00"..score
- local ds=scoreh>0 and (scoreh..sub(ls,#ls-2)) or score
- print(ds,2,2,7)
- local gsx=game_state
- local run=(gsx=="game" or gsx=="dying")
+ print(scoreh>0 and (scoreh..sub(ls,#ls-2)) or score,2,2,7)
+ local run=(game_state=="game" or game_state=="dying")
  local sa=(run and last_payout_ready) and (money_total-last_pay-last_bonus) or money_total
- local t="$"..sa print(t,127-#t*4-2,2,10)
- spr(38,30,2) local m=2+ship.hull_level local bw=min(20,m*10) local sw=bw/m for i=1,ship.hull do local sx=37+(i-1)*sw rectfill(sx,3,sx+sw-2,5,11) end rect(37,3,36+bw,5,5)
- spr(10,58,2)
- local sp=ship.shield_power local fw=sp*0.2\1 if fw>0 then local r=sp/100 rectfill(65,3,64+fw,5,r>0.5 and 12 or(r>0.25 and 13 or 8)) end rect(65,3,84,5,5)
- if run and mission_distance>0 then local t=level_fanfare_timer>0 and 1 or min(1,(mission_distance-(dr or mission_distance))/mission_distance) db=db<t and min(t,db+0.02) or(db>t and max(t,db-0.02) or db) local bx,by,bw=20,122,88 local w=db*bw rectfill(bx,by,bx+bw-1,123,1) if w>0 then rectfill(bx,by,bx+w-1,123,13) if db>0.95 then rectfill(bx+w-2,by,bx+w-1,123,flr(time()*4)%2==0 and 6 or 13) end end spr(39,111,119) end
- if ship.magnet_t>0 then
-  spr(56,88,2)
+ local mt="$"..sa print(mt,127-#mt*4-2,2,10)
+ -- hull meter: FIXED 24px total (divisible by 2/3/4) split into mh EQUAL segments, so the
+ -- bar is the same size for 2/3/4 hulls; filled=green, lost=grey. icon (spr 38) at left.
+ spr(38,26,2)
+ local mh=2+ship.hull_level local sw=24\mh
+ for i=0,mh-1 do sbar(33+i*sw,3,sw-1,i<ship.hull and 11 or 5) end
+ -- shield meter: same fixed 24px length, continuous fill by power%. icon (spr 10) at left.
+ spr(10,63,2)
+ local sp=ship.shield_power
+ sbar(70,3,24,1)
+ local fw=flr(sp/100*24)
+ if fw>0 then sbar(70,3,fw,sp>50 and 12 or(sp>25 and 13 or 8)) end
+ if ship.magnet_t>0 then spr(56,96,2) end
+ -- mission progress: full-width thin bar inside the band (was the old bottom-screen bar)
+ if run and mission_distance>0 then
+  local pt=level_fanfare_timer>0 and 1 or min(1,(mission_distance-(dr or mission_distance))/mission_distance)
+  db=db<pt and min(pt,db+0.02) or(db>pt and max(pt,db-0.02) or db)
+  local w=db*124
+  rectfill(2,10,125,11,1)
+  if w>0 then rectfill(2,10,1+w,11,db>0.95 and(flr(time()*4)%2==0 and 6 or 13)or 13) end
  end
 end

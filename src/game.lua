@@ -11,7 +11,7 @@ function scoll(x,y,w,h)
 end
 -- gameplay-only state (mission name now owned by UI cart via station ensure_mission)
 round_number,mission_distance,dr,level_fanfare_timer,ship_departing=1,0,0,0,false
-death_jingle_t,death_skip_pending,death_skip_lock=0,false,0
+death_jingle_t,death_skip_pending=0,false
 local DEATH_ANIM_MIN=45      -- minimum death animation duration (frames)
 local DEATH_JINGLE_LEN=210   -- full gameover jingle length; cart loads only after this ends
 vr=1 -- visible round counter (always starts at 1)
@@ -88,37 +88,16 @@ function _update()
 				if dr<=0 then complete_mission() end
 			end
 		else
-			-- in dying state: count down jingle; only transition after both thresholds
+			-- dying: play the gameover jingle, then hand off to the ui cart's gameover
 			if ship.dying then
-				-- safety: if somehow music was interrupted, restart it without resetting timer
-				if death_jingle_t>0 and current_music!=9 then snd_music(9) end
-				-- edge case: death flag set but jingle never started (death_jingle_t==0 & current_music!=9)
-				if death_jingle_t==0 and ship.death_t<DEATH_JINGLE_LEN and current_music!=9 then
-					death_jingle_t=DEATH_JINGLE_LEN-ship.death_t
-					snd_music(9)
-				end
+				-- (re)start the jingle if it isn't playing; seed its countdown once
+				if current_music!=9 then snd_music(9) if death_jingle_t<=0 then death_jingle_t=DEATH_JINGLE_LEN-ship.death_t end end
 				if death_jingle_t>0 then death_jingle_t-=1 end
-				-- skip lock: >0 counting down; ==0 waiting for release; <0 ready
-				if death_skip_lock>0 then
-					death_skip_lock-=1
-				elseif death_skip_lock==0 then
-					-- require both buttons released once after lock period before arming
-					if not (btn(4) or btn(5)) then death_skip_lock=-1 end
-				end
-				-- allow player to skip to gameover only when armed (lock<0)
-				if death_skip_lock<0 and btnp and (btnp(4) or btnp(5)) then
-					if not death_skip_pending then
-						death_skip_pending=true
-					else
-						-- second press: force finish timers
-						death_jingle_t=0
-						ship.death_t=DEATH_ANIM_MIN
-					end
-				end
-				if ship.death_t>=DEATH_ANIM_MIN and death_jingle_t<=0 then
-					death_skip_pending=false death_skip_lock=0
-					tu(2)
-					return
+				-- after the min animation: arm once buttons release, then a single press skips the rest
+				if ship.death_t>=DEATH_ANIM_MIN then
+					if not(btn(4)or btn(5)) then death_skip_pending=true end
+					if death_skip_pending and(btnp(4)or btnp(5)) then death_jingle_t=0 end
+					if death_jingle_t<=0 then tu(2) return end
 				end
 			end
 		end
@@ -128,11 +107,12 @@ function _draw()
 	cls()
 	-- screen shake: jitter the world camera; reset before HUD so it stays fixed
 	if shake>0 then camera(rnd(shake)-shake/2,rnd(shake)-shake/2) end
+	clip(0,12,128,128) -- confine all gameplay below the 12px HUD band so nothing overlaps it
 	draw_starfield()
 	if game_state=="fanfare_depart"then
 		draw_ship()
 		p_draw()
-		camera()
+		camera() clip()
 		draw_hud()
 	elseif game_state=="game"or game_state=="dying"then
 		draw_blackhole()
@@ -142,9 +122,9 @@ function _draw()
 		draw_popcorn()
 		draw_comet() -- after p_draw so comet sprites sit above their trail particles
 		draw_bomb()
-		camera()
+		camera() clip()
 		draw_hud()
-		if game_state=="dying" and death_skip_pending and death_skip_lock<0 then
+		if game_state=="dying" and death_skip_pending then
 			-- simple centered prompt (multi-line minimal tokens)
 			local t="🅾️/❎ skip"
 			local x=64-#t*2
