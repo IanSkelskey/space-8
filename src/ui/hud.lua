@@ -14,6 +14,13 @@ end
 -- (each row up shifts 1px right, giving a 2px italic lean over the 3px height)
 function sbar(x,y,w,c) for r=0,2 do rectfill(x+2-r,y+r,x+1-r+w,y+r,c) end end
 
+-- temp-effect icon at x (status row): when active, the colour sprite `id` plus a
+-- remaining-time bar (t of tm) the width of the 5px icon; otherwise the dimmed grayscale `gid`.
+function fxi(x,id,gid,t,tm,c)
+ if t>0 then spr(id,x,8) rectfill(x,13,x+t/tm*4,13,c)
+ else spr(gid,x,8) end
+end
+
 function draw_hud()
  -- score (left) + money (right), on the top band's text row
  local ls="00"..score
@@ -32,13 +39,17 @@ function draw_hud()
  sbar(70,3,24,1)
  local fw=flr(sp/100*24)
  if fw>0 then sbar(70,3,fw,sp>50 and 12 or(sp>25 and 13 or 8)) end
- if ship.magnet_t>0 then spr(56,96,2) end
- -- mission progress: full-width thin bar inside the band (was the old bottom-screen bar)
+ -- temp-effect status row (y8), left-aligned under the hull meter: rapid fire, free shield,
+ -- magnet. always shown (grayscale 35/36/37 when idle); active = colour icon + colour time bar.
+ fxi(26,11,35,ship.rfb,120,10)
+ fxi(33,10,36,ship.shield_free,110,12)
+ fxi(40,56,37,ship.magnet_t,420,14)
+ -- mission progress: full-width thin bar at the bottom of the band
  if run and mission_distance>0 then
   local pt=level_fanfare_timer>0 and 1 or min(1,(mission_distance-(dr or mission_distance))/mission_distance)
   db=db<pt and min(pt,db+0.02) or(db>pt and max(pt,db-0.02) or db)
   local w=db*124
-  rectfill(2,10,125,11,1)
-  if w>0 then rectfill(2,10,1+w,11,db>0.95 and(flr(time()*4)%2==0 and 6 or 13)or 13) end
+  rectfill(2,15,125,16,1)
+  if w>0 then rectfill(2,15,1+w,16,db>0.95 and(flr(time()*4)%2==0 and 6 or 13)or 13) end
  end
 end
