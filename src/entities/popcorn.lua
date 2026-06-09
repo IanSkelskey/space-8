@@ -4,13 +4,21 @@ function popcorn_init()pops,pt={},0 end
 
 local function rflash() for i=1,15 do pal(i,8) end end
 
+-- popcorn death: score + a money roll (a touch richer than asteroids) + boom + del.
+-- shared by bullet kills and the bomb shockwave (uses cash() from asteroid.lua).
+local function pkill(e)
+	hud_add_score(20)
+	if rnd()<0.65 then cash(e.x+4,e.y+4,2+rndi(3)) end
+	boom(e.x,e.y,EXR) del(pops,e)
+end
+
 function update_popcorn()
  if round_number<2 then return end
  pt-=FT
  if pt<=0 and #pops<(round_number<5 and 1 or 2) then add(pops,{x=rnd(120),y=-8,dy=0.55+rnd(0.4),s=30+rndi(20),c=0,h=2,f=0,a=rnd()}) pt=1.2+rnd(1.5) end
  for e in all(pops) do
-  -- bomb shockwave: vaporise the enemy with a red blast
-  if bhit(e.x+4,e.y+4) then hud_add_score(20) boom(e.x,e.y,EXR) del(pops,e) goto continue end
+  -- bomb shockwave: trigger the normal death (score + money roll)
+  if bhit(e.x+4,e.y+4) then pkill(e) goto continue end
   e.y+=e.dy*cs e.x+=sin(e.y/32+e.a)*.4*cs
   if e.f>0 then e.f-=1 end
   e.s-=1
@@ -22,7 +30,7 @@ function update_popcorn()
   end
   if hit_by_player_bullet(e.x+1,e.y+1,6,6) then
    e.h-=1 e.f=4 snd_sfx(1)
-   if e.h<=0 then hud_add_score(20) boom(e.x,e.y,EXR) del(pops,e) end
+   if e.h<=0 then pkill(e) end
   elseif scoll(e.x+1,e.y+1,6,6) then
    ship_kill()
   elseif e.y>136 then
