@@ -9,6 +9,8 @@ function update_popcorn()
  pt-=FT
  if pt<=0 and #pops<(round_number<5 and 1 or 2) then add(pops,{x=rnd(120),y=-8,dy=0.55+rnd(0.4),s=30+rndi(20),c=0,h=2,f=0,a=rnd()}) pt=1.2+rnd(1.5) end
  for e in all(pops) do
+  -- bomb shockwave: vaporise the enemy with a red blast
+  if bhit(e.x+4,e.y+4) then hud_add_score(20) boom(e.x,e.y,EXR) del(pops,e) goto continue end
   e.y+=e.dy*cs e.x+=sin(e.y/32+e.a)*.4*cs
   if e.f>0 then e.f-=1 end
   e.s-=1
@@ -26,6 +28,7 @@ function update_popcorn()
   elseif e.y>136 then
    del(pops,e)
   end
+  ::continue::
  end
 end
 

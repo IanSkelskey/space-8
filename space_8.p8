@@ -12,6 +12,7 @@ __lua__
 #include src/entities/blackhole.lua
 #include src/entities/comet.lua
 #include src/entities/popcorn.lua
+#include src/entities/bomb.lua
 #include src/game.lua
 
 __gfx__

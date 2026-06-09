@@ -2,7 +2,8 @@
 local p={}
 local ppf=0 -- frame counter for shimmer
 Gp=p
-local PC1,PC2,PS=split"11,12,0,0,9,10",split"7,1,0,0,10,8",split"38,10,0,0,11,56"
+-- powerup halo/icon by drop kind: 1 hull,2 shield,3 bomb (red halo, tile 40),5 rapid,6 magnet
+local PC1,PC2,PS=split"11,12,8,0,9,10",split"7,1,2,0,10,8",split"38,10,40,0,11,56"
 -- shared explosion: the 6-frame blast (spr 202..207) recoloured per-source by a ramp.
 -- SRC = green-comet body colours setramp() swaps; EXR = red blast (popcorn + red comets).
 -- moved here so comets AND popcorn spawn the explosion as a one-shot particle (type 10).
@@ -27,7 +28,7 @@ function p_upd()
   i.x+=i.dx i.y+=i.dy+((i.t==7 and cs*0.7) or 0) i.l-=1
   -- inline damp
   if i.t==2 then i.dx*=0.9 i.dy*=0.9 elseif i.t==3 then i.dx*=0.98 i.dy*=0.98 end
-  if i.t==9 and scoll(i.x+1,i.y+1,3,3) then ship_kill() del(p,i) goto continue end
+  if i.t==9 then if bhit(i.x+2,i.y+2) then del(p,i) goto continue elseif scoll(i.x+1,i.y+1,3,3) then ship_kill() del(p,i) goto continue end end
    -- money shard settle: apply stronger friction once speed low
     if i.t==7 and i.d==7 and not ship.dying then
          local dx,dy=ship.x+3-i.x,ship.y+3-i.y local d2=dx*dx+dy*dy
@@ -42,6 +43,7 @@ function p_upd()
    if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(30)
        elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end ship.heal_t=t()+0.4 hud_add_score(20) snd_sfx(63)
        elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
+       elseif d==3 then bomb_fire(ship.x+4,ship.y+4)
        elseif d==5 then ship.rfb=120 snd_sfx(63)
        elseif d==6 then ship.magnet_t=420 snd_sfx(63)
        end del(p,i) goto continue end

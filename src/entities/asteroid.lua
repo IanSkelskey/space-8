@@ -37,6 +37,29 @@ end
 
 -- spawn_child_asteroids inlined at call site
 
+-- full asteroid death: score + cash + (split children / debris) + boom + del.
+-- shared by bullet kills and the bomb shockwave so both spawn the same payload.
+local function akill(m)
+	if m.large then
+		-- alt (tougher) variants award more score + money for the extra hits
+		hud_add_score(m.alt and 85 or 60)
+		-- money shards (large): 0-5 (avg ~2.5), +4 flat for alt; 4 credits each
+		cash(m.x+4,m.y+4,max(1,rndi(6)+(m.alt and 4 or 0)))
+		-- two halves of the 16px parent: i%2*(m.w-8) == i%2*8 since large m.w is always 16
+		for i=0,1 do local ag=i*0.25+rnd(0.1) add(asteroids,{x=i%2*8+m.x+2,y=m.y+2,w=8,h=8,dx=cos(ag)*(0.4+rnd(0.3)),dy=sin(ag)*(0.4+rnd(0.3))*0.5+0.9,spd=mspd,hp=m.alt and 4 or 2,large=false,alt=m.alt,flash_t=0}) end
+		spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
+		-- fast rock-dust burst (alt-aware via the type-1 ramp); cheaper than a sprite explosion
+		for i=1,12 do local a=rnd() p_add(m.x+8,m.y+8,cos(a)*(.5+rnd(1.6)),sin(a)*(.5+rnd(1.6)),9+rndi(7),1,nil,m.alt) end
+	else
+		hud_add_score(m.alt and 50 or 35)
+		-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt; 4 credits each
+		cash(m.x+4,m.y+4,max(1,rndi(4)+(m.alt and 2 or 0)))
+		spawn_asteroid_debris(m.x,m.y,m.alt) boom(m.x,m.y,split"1,2,4,13")
+	end
+	snd_sfx(1)
+	del(asteroids,m)
+end
+
 function asteroid_init()
 	asteroids,spawn_t={},0
 end
@@ -82,32 +105,13 @@ function update_asteroid()
 			end
 		end
 
+		-- bomb shockwave: trigger the normal death (split, cash, debris)
+		if bhit(m.x+m.w/2,m.y+m.h/2) then akill(m) goto continue end
+
 		if hit_by_player_bullet(m.x,m.y,m.w,m.h) then
 			m.hp-=1
-				if m.hp<=0 then
-				if m.large then
-						-- alt (tougher) variants award more score + money for the extra hits
-						hud_add_score(m.alt and 85 or 60)
-						-- money shards (large): 0-5 (avg ~2.5), +4 flat for alt; 4 credits each
-						cash(m.x+4,m.y+4,max(1,rndi(6)+(m.alt and 4 or 0)))
-					-- inlined spawn_child_asteroids
-					-- two halves of the 16px parent: i%2*(m.w-8) == i%2*8 since large m.w is always 16
-					for i=0,1 do local ag=i*0.25+rnd(0.1) add(asteroids,{x=i%2*8+m.x+2,y=m.y+2,w=8,h=8,dx=cos(ag)*(0.4+rnd(0.3)),dy=sin(ag)*(0.4+rnd(0.3))*0.5+0.9,spd=mspd,hp=m.alt and 4 or 2,large=false,alt=m.alt,flash_t=0}) end
-					spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
-					-- fast rock-dust burst (alt-aware via the type-1 ramp); cheaper than a sprite explosion
-					for i=1,12 do local a=rnd() p_add(m.x+8,m.y+8,cos(a)*(.5+rnd(1.6)),sin(a)*(.5+rnd(1.6)),9+rndi(7),1,nil,m.alt) end
-				else
-						hud_add_score(m.alt and 50 or 35)
-						-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt; 4 credits each
-						cash(m.x+4,m.y+4,max(1,rndi(4)+(m.alt and 2 or 0)))
-					spawn_asteroid_debris(m.x,m.y,m.alt) boom(m.x,m.y,split"1,2,4,13")
-				end
-				snd_sfx(1)
-				del(asteroids,m)
-				goto continue
-			else
-				m.flash_t=6
-			end
+			if m.hp<=0 then akill(m) goto continue
+			else m.flash_t=6 end
 		end
 
 		if scoll(m.x,m.y,m.w,m.h) then ship_kill() end

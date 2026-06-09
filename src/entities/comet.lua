@@ -1,6 +1,6 @@
 local comets,spawn_t={},0
 -- use split strings for ids (cheaper than table literals)
--- arrays align to: pink, yellow, green, blue, red. red has no drop (DROP_ODDS 0)
+-- arrays align to: pink, yellow, green, blue, red. red drops the bomb powerup (kind 3)
 local C8,C9=split"2,10,3,1,8",split"14,9,11,12,2"
 -- all comets use the green comet art (angled 198 / straight 200) recoloured by palette swap.
 -- the green body ramp is colours 1,2,3,11 (dark->light); RAMPS replaces those per variant.
@@ -10,8 +10,8 @@ local C8,C9=split"2,10,3,1,8",split"14,9,11,12,2"
 -- comet body ramps per variant; SRC + setramp moved to particles. red reuses the shared EXR blast.
 local RAMPS={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6",EXR}
 -- one colour-keyed powerup drop per variant (pink,yellow,green,blue,red): shard d / odds / life
--- red odds 0 => never drops, so its DROP_D/DROP_LIFE entries are never indexed (left at 4)
-local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2",split".2,.17,0.1,.14,0",split"150,150,170,140"
+-- red drops the bomb (kind 3) at low odds; all five entries are now indexed
+local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2,3",split".2,.17,0.1,.14,1",split"150,150,170,140,150"
 -- kill a comet: drop + score + start the death animation (shared by bullet hits and black holes)
 local function comet_die(c)
 	local k=c.ci+1
@@ -68,6 +68,8 @@ function update_comet()
 	for c in all(comets) do
 		-- pre-warning skip
 		if c.warning_t>0 then c.warning_t-=1 goto continue end
+		-- bomb shockwave: vaporise (drop + score + boom, shared with bullet kills)
+		if bhit(c.x+4,c.y+4) then comet_die(c) goto continue end
 		-- distance to ship, shared by both shield-kill checks below
 		local dx,dy=c.x+4-(ship.x+4),c.y+4-(ship.y+4) local d2=dx*dx+dy*dy
 		-- retaliation splash
