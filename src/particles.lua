@@ -30,12 +30,17 @@ function p_upd()
   -- inline damp
   if i.t==2 then i.dx*=0.9 i.dy*=0.9 elseif i.t==3 then i.dx*=0.98 i.dy*=0.98 end
   if i.t==9 then if bhit(i.x+2,i.y+2) then del(p,i) goto continue elseif scoll(i.x+1,i.y+1,3,3) then ship_kill() del(p,i) goto continue end end
-   -- money shard settle: apply stronger friction once speed low
-    if i.t==7 and i.d==7 and not ship.dying then
-         local dx,dy=ship.x+3-i.x,ship.y+3-i.y local d2=dx*dx+dy*dy
-         if d2<196 and d2>0 then local inv=1/sqrt(d2)
-            if d2<49 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
-         else i.dx*=0.94 i.dy*=0.94 end
+   -- coin/pickup attraction (magnet pass folded in here):
+   --  * magnet powerup pulls ALL pickups in from 44px (1936=44^2)
+   --  * money shards also auto-settle toward the ship within 14px, snapping in close
+    if i.t==7 and not ship.dying then
+         local dx,dy=ship.x+4-i.x,ship.y+4-i.y local d2=dx*dx+dy*dy
+         if ship.magnet_t>0 and d2<1936 and d2>0.5 then local inv,f=1/sqrt(d2),0.55*(1-d2/1936) i.dx+=dx*inv*f i.dy+=dy*inv*f end
+         if i.d==7 then
+          if d2<196 and d2>0 then local inv=1/sqrt(d2)
+             if d2<49 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
+          else i.dx*=0.94 i.dy*=0.94 end
+         end
     end
    -- pickup handling with tighter coin capture (center 4x4)
    if i.t==7 then
@@ -56,24 +61,6 @@ function p_upd()
    end
   if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end
   ::continue::
- end
- -- global magnet pull (after per-particle updates for smoother feel)
- if ship.magnet_t>0 and not ship.dying then
-  local cx,cy=ship.x+4,ship.y+4
-  local r=44
-  local r2=r*r
-  for i in all(p) do
-   if i.t==7 then
-    local dx,dy=cx-i.x,cy-i.y
-    local d2=dx*dx+dy*dy
-    if d2<r2 and d2>0.5 then
-     local inv=1/sqrt(d2)
-     local pull=0.55*(1-d2/r2)
-     i.dx+=dx*inv*pull
-     i.dy+=dy*inv*pull
-    end
-   end
-  end
  end
 end
 

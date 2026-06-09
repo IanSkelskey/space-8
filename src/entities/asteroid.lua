@@ -148,10 +148,9 @@ function draw_asteroid()
 end
 
 function asteroid_absorb(hx,hy,hw,hh)
+	-- black hole shreds asteroids: run the full death (akill) so they boom + score + drop loot
 	for m in all(asteroids) do
-		if aabb(m.x,m.y,m.w,m.h,hx,hy,hw,hh) then
-			del(asteroids,m)
-		end
+		if aabb(m.x,m.y,m.w,m.h,hx,hy,hw,hh) then akill(m) end
 	end
 	-- Also absorb debris particles
 	p_absorb(hx,hy,hw,hh,{[4]=true})

@@ -10,6 +10,13 @@ local function pkill(e)
 	boom(e.x,e.y,EXR) del(pops,e)
 end
 
+-- black hole swallows popcorn: full death (pkill) so it pops + scores + drops loot
+function popcorn_absorb(hx,hy,hw,hh)
+ for e in all(pops) do
+  if aabb(e.x,e.y,8,8,hx,hy,hw,hh) then pkill(e) end
+ end
+end
+
 function update_popcorn()
  if round_number<2 then return end
  pt-=FT

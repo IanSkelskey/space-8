@@ -30,8 +30,9 @@ function update_blackhole()
 		h.spin_t=(h.spin_t+1)%32
 		
 		local cx,cy=h.x+4,h.y+4
-		-- inline asteroid_debris_pull / ship_trails_pull
-		p_pull(cx,cy,h.r,0.35,{[4]=true})
+		-- inline asteroid_debris_pull / ship_trails_pull; type 7 = coins/pickups, so a
+		-- collectible drifting into the well is sucked in instead of sitting uncollectable
+		p_pull(cx,cy,h.r,0.35,{[4]=true,[7]=true})
 		p_pull(cx,cy,h.r,0.22,{[2]=true,[3]=true})
 		comet_pull(cx,cy,h.r,0.3)
 
@@ -52,9 +53,11 @@ function update_blackhole()
 
 		if h.y>136 then del(holes,h) end
 
-		asteroid_absorb(h.x,h.y,8,8)
-		-- inline ship_trails_absorb
-		p_absorb(h.x,h.y,8,8,{[2]=true,[3]=true})
+		-- absorb trails + any coins/pickups that reached the core FIRST, so the loot the
+		-- kills below spawn survives this frame (and can still be grabbed as it's pulled in)
+		p_absorb(h.x,h.y,8,8,{[2]=true,[3]=true,[7]=true})
+		asteroid_absorb(h.x,h.y,8,8) -- full death: boom + score + loot
+		popcorn_absorb(h.x,h.y,8,8)  -- full death: pop + score + loot
 
 		-- inlined spawn_particles(h)
 		for i=1,(rnd()<0.5 and 2 or 1) do
