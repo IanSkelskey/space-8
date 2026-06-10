@@ -12,7 +12,7 @@ function summary_init()
 end
 
 function update_summary()
- st_+=1
+ if st_<41 then st_+=1 end -- cap so st_ never overflows 16.16 fixed-point (~32767) and flips negative
  if st_>40 and(btnp(4)or btnp(5)) then
   snd_sfx(63) game_state="station" station_init() snd_music(10)
  end
@@ -26,5 +26,5 @@ function draw_summary()
  srow(70,"payout","+"..flr(last_pay*a),10)
  srow(78,"bonus","+"..flr(last_bonus*a),10)
  srow(88,"earned","$"..flr((last_pay+last_bonus)*a),10)
- if a>=1 and st_%30<20 then local l="🅾️ continue" print(l,64-#l*2,100,6) end
+ if a>=1 and time()%1<0.66 then local l="🅾️ continue" print(l,64-#l*2,100,6) end
 end
