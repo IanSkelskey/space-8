@@ -3,7 +3,7 @@ local p={}
 local ppf=0 -- frame counter for shimmer
 Gp=p
 -- powerup halo/icon by drop kind: 1 hull,2 shield,3 bomb (red halo, tile 40),5 rapid,6 magnet
-local PC1,PC2,PS=split"11,12,8,0,9,10",split"7,1,2,0,10,8",split"38,10,40,0,11,56"
+local PC1,PS=split"11,12,8,0,9,10",split"38,10,40,0,11,56"
 -- shared explosion: the 6-frame blast (spr 202..207) recoloured per-source by a ramp.
 -- SRC = green-comet body colours setramp() swaps; EXR = red blast (popcorn + red comets).
 -- moved here so comets AND popcorn spawn the explosion as a one-shot particle (type 10).
@@ -20,6 +20,18 @@ function capv(o,m) local s=sqrt(o.dx*o.dx+o.dy*o.dy) if s>m then o.dx*=m/s o.dy*
 
 -- tiny shared halo (rotating 4-dot ring) reused by comets + powerups
 function h(x,y,a,c1,c2)for i=0,3 do local g=a+i*0.25 pset(flr(x+cos(g)*3),flr(y+sin(g)*3),i%2==0 and c1 or c2)end end
+
+-- dashed 9x9 square frame at top-left (x,y) in colour c, with the dash marching around the
+-- perimeter (clockwise) for a rotating-border look. used to ring powerup drops.
+function dborder(x,y,c)
+ local t=flr(time()*12)
+ for k=0,31 do
+  if (k+t)%4<2 then
+   local s,p=k\8,k%8
+   pset(x+(s==0 and p or s==1 and 8 or s==2 and 8-p or 0),y+(s==0 and 0 or s==1 and p or s==2 and 8 or 8-p),c)
+  end
+ end
+end
 
 function p_add(x,y,dx,dy,life,typ,col,dat) add(p,{x=x,y=y,dx=dx,dy=dy,l=life,t=typ,c=col,d=dat}) end
 
@@ -74,8 +86,11 @@ function p_draw()
           pset(i.x,i.y,c)pset(i.x+1,i.y,c)pset(i.x,i.y+1,c)pset(i.x+1,i.y+1,c)
           if ppf%15==0 then pset(i.x+1,i.y-1,7) end
      else
-       h(i.x+2.5,i.y+2.5,time(),PC1[d],PC2[d])
-       spr(PS[d],i.x,i.y)
+       -- 7x7 dark-blue backing, the 5x5 icon centred on it, and a colour-coded marching dashed
+       -- frame just OUTSIDE the backing (9x9 total). colour = PC1[d] with a brief white blink.
+       rectfill(i.x,i.y,i.x+6,i.y+6,1)
+       spr(PS[d],i.x+1,i.y+1)
+       dborder(i.x-1,i.y-1,time()%0.5<0.1 and 7 or PC1[d])
      end
     elseif i.t==4 and i.d then
      -- debris chunk sampled from sprite 5; alt asteroids recolour it (4,2,1 -> 13,5,1)
