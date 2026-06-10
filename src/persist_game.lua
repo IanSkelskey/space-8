@@ -38,4 +38,6 @@ function persist_save_from_game(ui_state)
  dset(12,ship.shield_unlocked and 1 or 0) dset(13,ship.hull)
  dset(14,ts) dset(15,tsh)
  dset(16,last_payout_ready and 1 or 0)
+ -- round-summary tallies for the ui cart's round-clear screen (spare cartdata slots)
+ dset(33,last_kills) dset(47,last_score)
 end

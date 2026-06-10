@@ -21,11 +21,9 @@ function _init()
   end
  end
  if st==1 then
-  game_state="station" station_init()
+  game_state="summary" summary_init() -- round-clear summary (round jingle already finished in gameplay)
  elseif st==2 then
-  game_state="gameover" -- jingle expected to have finished in gameplay cart
-  -- if silent (e.g., jingle failed) fall back to menu loop for gameover ambience
-  if current_music<0 then snd_music(0) end
+  game_state="gameover" -- gameover jingle already finished in the gameplay cart
  else
   game_state="menu" menu_init()
  end
@@ -34,12 +32,9 @@ function _init()
  hs_init()        -- load table
  -- Remove automatic hs_process_new_run() call
  dset(0,0)
- -- start appropriate looping music for initial ui state
- if game_state=="menu" then
-  snd_music(0)
- elseif game_state=="station" then
-  snd_music(10)
- end
+ -- menu / round-clear summary / gameover all boot into the menu loop; the round-end jingle
+ -- already finished in the gameplay cart. station music starts when the summary advances.
+ snd_music(0)
 end
 
 function _update()
@@ -47,6 +42,7 @@ function _update()
  if update_starfield then update_starfield() end
  if game_state=="menu" then update_menu()
  elseif game_state=="station" then update_station()
+ elseif game_state=="summary" then update_summary()
  elseif game_state=="help" then update_help()
  elseif game_state=="highscore_entry" then update_highscore_entry()
  elseif game_state=="gameover" then
@@ -85,6 +81,7 @@ function _draw()
  if draw_starfield then draw_starfield() end
  if game_state=="menu" then draw_menu()
  elseif game_state=="station" then draw_station()
+ elseif game_state=="summary" then draw_summary()
  elseif game_state=="help" then draw_help()
  elseif game_state=="highscore_entry" then draw_highscore_entry()
  elseif game_state=="gameover" then draw_gameover() end

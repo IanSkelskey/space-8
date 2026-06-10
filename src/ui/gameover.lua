@@ -11,7 +11,8 @@ function draw_gameover()
 	-- animated game-over logo: block-letter tiles flashing red/purple, with a darker drop layer for depth
 	local fl=time()%0.8<0.4
 	draw_logo("game over",30,fl and 2 or 8,fl and 1 or 2,fl and 2 or 8,fl and 1 or 2)
-	
+	-- (taunt flavor now shown in the gameplay cart over the death jingle, right after death)
+
 	-- Stats display
 	local tls="00"..(ts or 0)
 	local sdisp=tsh and tsh>0 and (tsh..sub(tls,#tls-2)) or ts or 0
