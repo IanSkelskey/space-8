@@ -14,7 +14,7 @@ round_number,mission_distance,dr,ship_departing=1,0,0,false
 local DEATH_ANIM_MIN=45      -- min death-animation frames before the gameover jingle can be skipped
 local GO_JINGLE,RC_JINGLE=210,90 -- gameover / round-clear jingle lengths (frames); tune to your music
 jingle_t=0 -- countdown for the current round-end jingle; cart hands off once it finishes (or is skipped)
-taunts=split"game is hard,get good,go touch grass,skill issue,try again,not like this,one more try,do or do not"
+taunts=split"game is hard,get good,go touch grass,skill issue,try again,not like this,one more try,do or do not,he's dead jim, your intelligence is stupid, your other left"
 vr=1 -- visible round counter (always starts at 1)
 shake=0 -- screen-shake intensity (px), decays each frame, set on hits in ship_kill
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
@@ -125,10 +125,10 @@ function _draw()
 		if game_state=="dying" then
 			-- taunt the player over the death jingle; offer a skip once the explosion has played
 			local tt=taunts[ts%#taunts+1]
-			print(tt,64-#tt*2,90,14)
+			print(tt,64-print(tt,0,200)/2,90,14)
 			if ship.death_t>=DEATH_ANIM_MIN and time()%0.6<0.4 then
 				local p="🅾️/❎ skip"
-				print(p,64-#p*2,100,6)
+				print(p,64-print(p,0,200)/2,100,6)
 			end
 		end
 	end -- gameover + round summary now handled in the ui cart

@@ -56,7 +56,7 @@ local function draw_list(labels,icons,start_y)
  local y=start_y
  for i=1,#labels do
   local c=i==sel and 7 or 6
-  if i==sel then print(">",36+time()%1\0.5,y,c) end
+  if i==sel then spr(20,36+time()%1\0.5,y) end
   spr(icons[i],44,y)
   print(labels[i],54,y,c)
   y+=12
