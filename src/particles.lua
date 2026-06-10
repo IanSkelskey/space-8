@@ -44,15 +44,16 @@ function p_upd()
   if i.t==9 then if bhit(i.x+2,i.y+2) then del(p,i) goto continue elseif scoll(i.x+1,i.y+1,3,3) then ship_kill() del(p,i) goto continue end end
    -- coin/pickup attraction (magnet pass folded in here):
    --  * magnet powerup pulls ALL pickups in from 44px (1936=44^2)
-   --  * money shards also auto-settle toward the ship within 14px, snapping in close
+   --  * EVERY pickup then homes in within 14px and snaps straight in within 7px -- the
+   --    player's own collection radius, so pickups settle INTO the hull instead of being
+   --    slingshotted past. the speed cap keeps the magnet from flinging anything away.
     if i.t==7 and not ship.dying then
          local dx,dy=ship.x+4-i.x,ship.y+4-i.y local d2=dx*dx+dy*dy
          if ship.magnet_t>0 and d2<1936 and d2>0.5 then local inv,f=1/sqrt(d2),0.55*(1-d2/1936) i.dx+=dx*inv*f i.dy+=dy*inv*f end
-         if i.d==7 then
-          if d2<196 and d2>0 then local inv=1/sqrt(d2)
-             if d2<49 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
-          else i.dx*=0.94 i.dy*=0.94 end
-         end
+         if d2<196 and d2>0 then local inv=1/sqrt(d2)
+            if d2<49 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
+         elseif i.d==7 then i.dx*=0.94 i.dy*=0.94 end
+         if ship.magnet_t>0 or d2<196 then capv(i,2) end
     end
    -- pickup handling with tighter coin capture (center 4x4)
    if i.t==7 then

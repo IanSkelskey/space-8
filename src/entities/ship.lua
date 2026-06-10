@@ -217,9 +217,26 @@ end
 -- red hit-flash = hf(8,2); green heal-flash = hf(11,3). swaps the hull greys (6,13,5,9,4).
 local function hf(a,b) pal(6,a) pal(13,b) pal(5,b) pal(9,a) pal(4,a) draw_hull() pal() end
 
+-- magnet aura: a rotating dotted ring in the gravity-well palette (pink 14 / purple 2,
+-- shared with pink comets + black holes). the radius breathes gently around the 44px pull
+-- range and the ring flickers out as the effect expires, so it reads as a field without
+-- becoming a distraction. drawn in both the normal and fly-off states (the pull still works
+-- during the round-clear fly-off, so the aura should stay visible).
+local function draw_magnet()
+ if ship.magnet_t>0 and not ship.dying and not(ship.magnet_t<20 and ship.magnet_t%4<2) then
+  local cx,cy,t=ship.x+4,ship.y+4,time()
+  local r=43+sin(t*0.5)*1.5
+  local ao=t*0.6
+  for i=0,23 do
+   pp(cx,cy,ao+i/24,r,i%2==0 and 14 or 2)
+  end
+ end
+end
+
 function draw_ship()
  -- flying off after a round clear: roll through the lean frames back to level, but no blink/muzzle/effects
- if game_state=="fanfare_depart" then draw_hull() return end
+ -- (the magnet still pulls loot during the fly-off, so keep its aura visible)
+ if game_state=="fanfare_depart" then draw_hull() draw_magnet() return end
  if ship.dying then
   -- death: a hit flash first, then the full 6-frame 16x16 explosion (tiles 160..170), 4 game-frames each
   local f=ship.death_t\4
@@ -260,19 +277,5 @@ function draw_ship()
     circ(cx,cy,base_r-i+sin(t+i*0.2)*2,flash or cols[i])
   end
  end
- -- magnet aura: a rotating dotted ring in the gravity-well palette
- -- (pink 14 / purple 2, shared with pink comets + black holes). the radius
- -- breathes gently around the 44px pull range and the ring flickers out as the
- -- effect expires, so it reads as a field without becoming a distraction.
- if ship.magnet_t>0 and not ship.dying and not(ship.magnet_t<20 and ship.magnet_t%4<2) then
-  -- single rotating pink/purple dotted ring at the ~44px pull range; breathes
-  -- gently and flickers out as the effect expires. (the inner counter-rotating
-  -- ring and the in-falling spark streams were dropped to reclaim tokens.)
-  local cx,cy,t=ship.x+4,ship.y+4,time()
-  local r=43+sin(t*0.5)*1.5
-  local ao=t*0.6
-  for i=0,23 do
-   pp(cx,cy,ao+i/24,r,i%2==0 and 14 or 2)
-  end
- end
+ draw_magnet()
 end
