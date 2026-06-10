@@ -62,7 +62,7 @@ function p_upd()
        elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end ship.heal_t=t()+0.4 hud_add_score(20) snd_sfx(63)
        elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
        elseif d==3 then bomb_fire(ship.x+4,ship.y+4)
-       elseif d==5 then ship.rfb=120 snd_sfx(63)
+       elseif d==5 then ship.rfb=210 snd_sfx(63)
        elseif d==6 then ship.magnet_t=420 snd_sfx(63)
        end del(p,i) goto continue end
       ::skip_pick::
