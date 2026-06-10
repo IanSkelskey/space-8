@@ -10,13 +10,15 @@ function scoll(x,y,w,h)
  return aabb(x,y,w,h,ship.x+1.5,ship.y+1.5,5,5)
 end
 -- gameplay-only state (mission name now owned by UI cart via station ensure_mission)
-round_number,mission_distance,dr,level_fanfare_timer,ship_departing=1,0,0,0,false
+round_number,mission_distance,dr,ship_departing=1,0,0,false
 death_jingle_t,death_skip_pending=0,false
 local DEATH_ANIM_MIN=45      -- minimum death animation duration (frames)
 local DEATH_JINGLE_LEN=210   -- full gameover jingle length; cart loads only after this ends
 vr=1 -- visible round counter (always starts at 1)
 shake=0 -- screen-shake intensity (px), decays each frame, set on hits in ship_kill
 money_total,last_pay,last_bonus,last_payout_ready=0,0,0,false
+-- round-summary state: captured round score + obstacle kills, count-up timer, live kill tally
+last_score,last_kills,sum_t,obk=0,0,0,0
 -- short init bundle (entities + hud + ship)
 function ie() ship_init() asteroid_init() hud_init() blackhole_init() comet_init() popcorn_init() bomb_init() end
 function tu(s) persist_save_from_game(s) load("ui.p8") load("ui.p8.png") load("#space_8_ui") end
@@ -26,6 +28,8 @@ function complete_mission()
  money_total+=last_pay
  -- lifetime money now folded in by the ui cart on arrival (saves gameplay tokens)
  last_payout_ready=true
+ -- freeze the round summary now (before the explode-all sweep can inflate the kill count)
+ last_score,last_kills,sum_t=scoreh*1000+score,obk,0
  score,scoreh,db=0,0,0
  round_number+=1 vr+=1
  -- flag distance for regen in UI (station ensure_mission will set new name+distance next visit)
@@ -38,7 +42,29 @@ function complete_mission()
  asteroid_absorb(0,0,128,128) comet_absorb(0,0,128,128) popcorn_absorb(0,0,128,128)
  bhabsorb=false
  p_absorb(0,0,128,128,{[9]=true}) -- clear enemy bullets so the fly-off can't hurt the player
- level_fanfare_timer,ship_departing,game_state=120,true,"fanfare_depart"
+ ship_departing,game_state=true,"fanfare_depart"
+end
+
+-- round-clear summary panel: tallies count up over sum_t, then a continue prompt blinks
+-- one summary row: label left at x34, value right-aligned to x94, both colour c
+function srow(y,l,v,c) print(l,34,y,c) v=""..v print(v,94-#v*4,y,c) end
+
+function draw_summary()
+ local a=min(1,sum_t/40)
+ -- "round clear": secondary font, centred, per-letter sine wave + drop shadow
+ local s="round clear"
+ local x=64-print("\014"..s,0,200)/2
+ for i=1,#s do
+  local c,yy="\014"..sub(s,i,i),34+sin(t()/2+i/9)*2
+  print(c,x+1,yy+1,3)
+  x=print(c,x,yy,11)
+ end
+ srow(48,"destroyed",flr(last_kills*a),7)
+ srow(56,"score",flr(last_score*a),7)
+ srow(70,"payout","+"..flr(last_pay*a),10)
+ srow(78,"bonus","+"..flr(last_bonus*a),10)
+ srow(88,"earned","$"..flr((last_pay+last_bonus)*a),10)
+ if a>=1 and sum_t%30<20 then print("🅾️ continue",40,100,6) end
 end
 
 -- gameplay cart init
@@ -59,7 +85,6 @@ end
 function _update()
 	if shake>0 then shake-=1 end
 	update_starfield()
-	if level_fanfare_timer>0 then level_fanfare_timer-=1 end
 
 	-- pause menu removed (handled in UI cart to save tokens)
 
@@ -69,12 +94,12 @@ function _update()
 	  ship_thrust(0.8,0,-1.5) -- boost trail while flying off
 	  ship.vlean+=mid(-0.2,-ship.vlean,0.2) -- roll lean back to level
 	  if ship.y+ship.h<0 then ship_departing=false end
+	 else
+	  -- ship gone: round summary counts up (sum_t/40), then continue on a press
+	  sum_t+=1
+	  if sum_t>40 and(btnp(4)or btnp(5)) then tu(1) end
 	 end
 	 p_upd()
-	 if not ship_departing and level_fanfare_timer<=0 then
-	  -- mission finished: return to station in ui cart
-	  tu(1)
-	 end
 	 return
 	end
 	local gs=game_state
@@ -114,6 +139,7 @@ function _draw()
 		p_draw()
 		camera() clip()
 		draw_hud()
+		if not ship_departing then draw_summary() end
 	elseif game_state=="game"or game_state=="dying"then
 		draw_blackhole()
 		draw_asteroid()

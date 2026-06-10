@@ -64,6 +64,15 @@ function shdmg(cx,cy,hp)
  return hp
 end
 
+-- shared obstacle damage: bomb shockwave OR shield pulse at centre (cx,cy). `die` is the
+-- obstacle's death fn. returns true if e died (caller does goto continue); a non-fatal
+-- shield hit sets e.flash. lets asteroid/comet/popcorn share one bomb+pulse check.
+function eaoe(e,die,cx,cy)
+ if bhit(cx,cy) then die(e) return true end
+ local nh=shdmg(cx,cy,e.hp)
+ if nh<e.hp then e.flash=4 e.hp=nh if e.hp<=0 then die(e) return true end end
+end
+
 function ship_kill()
  if ship.dying or ship.shield_invuln>0 or ship.hull_invuln>0 then return end
  sfx(-1,3)

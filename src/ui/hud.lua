@@ -46,7 +46,7 @@ function draw_hud()
  fxi(40,56,37,ship.magnet_t,420,14)
  -- mission progress: full-width thin bar at the bottom of the band
  if run and mission_distance>0 then
-  local pt=level_fanfare_timer>0 and 1 or min(1,(mission_distance-(dr or mission_distance))/mission_distance)
+  local pt=min(1,(mission_distance-(dr or mission_distance))/mission_distance)
   db=db<pt and min(pt,db+0.02) or(db>pt and max(pt,db-0.02) or db)
   local w=db*124
   rectfill(2,15,125,16,1)
