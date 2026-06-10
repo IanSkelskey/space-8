@@ -33,8 +33,10 @@ function update_blackhole()
 		
 		local cx,cy=h.x+4,h.y+4
 		-- inline asteroid_debris_pull / ship_trails_pull; type 7 = coins/pickups, so a
-		-- collectible drifting into the well is sucked in instead of sitting uncollectable
-		p_pull(cx,cy,h.r,0.35,{[4]=true,[7]=true})
+		-- collectible drifting into the well is sucked in instead of sitting uncollectable.
+		-- collectibles use a smaller, gentler well than obstacles/player so they're not yanked
+		-- away from across the screen; obstacles, comets, the player and bullets keep h.r.
+		p_pull(cx,cy,h.r*0.5,0.2,{[4]=true,[7]=true})
 		p_pull(cx,cy,h.r,0.22,{[2]=true,[3]=true})
 		comet_pull(cx,cy,h.r,0.3)
 
