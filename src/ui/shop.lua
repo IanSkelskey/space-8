@@ -3,7 +3,7 @@ local s,sm,st,sc=1,"",0,11 -- s=selected item index (single grid now, no pages)
 -- compressed items: icon,max,base$,inc$,field,unlock,name,desc
 -- rebalance: cheaper early items, expensive later upgrades for 1-2 round affordability but >12 round completion
 -- NOTE: fields are comma-split, so name/desc must NOT contain commas (use / or + instead).
-local id="11,3,100,120,fire_rate_level,,fire rate,-20% shot cooldown / lvl;10,3,140,150,shield_level,shield_unlocked,shield,holds longer + recharges;25,2,180,200,spread_level,,spread shot,more lasers / wider spread;38,2,200,220,hull_level,,hull,+1 max hull segment;54,99,180,0,,,repair,restore 1 hull segment;55,3,90,140,thruster_level,,thrusters,+12% top speed / lvl;105,2,220,180,shield_pulse_level,shield_unlocked,shield shock,shielded hits blast foes"
+local id="83,3,100,120,fire_rate_level,,fire rate,-20% shot cooldown / lvl;84,3,140,150,shield_level,shield_unlocked,shield,holds longer + recharges;87,2,180,200,spread_level,,spread shot,more lasers / wider spread;82,2,200,220,hull_level,,hull,+1 max hull segment;81,99,180,0,,,repair,restore 1 hull segment;86,3,90,140,thruster_level,,thrusters,+12% top speed / lvl;85,2,220,180,shield_pulse_level,shield_unlocked,shield shock,shielded hits blast foes"
 -- pre-split once to save tokens (was repeatedly split each access)
 local items={}
 for e in all(split(id,";")) do add(items,split(e,",")) end
@@ -72,7 +72,7 @@ function shop_draw()
  local cash="$"..money_total
  rprint(cash,123-#cash*4,4,10,9)
 
- -- icon grid: 4 columns. each 5x5 source icon scaled 2x to 10x10, with level pips below.
+ -- icon grid: 4 columns, native 8x8 upgrade tiles with level pips below.
  for i=1,#items do
   local it=items[i]
   local cx=22+((i-1)%4)*28      -- cell centre x
@@ -80,17 +80,17 @@ function shop_draw()
   local sel=i==s
   local locked=it[6]~="" and not ship[it[6]] and i~=2 -- shield-gated, pre-unlock
   if sel then
-   -- selection highlight, centred on the 10px icon (cx-5..cx+4) both axes
-   rectfill(cx-8,ty-2,cx+7,ty+14,1)
-   rect(cx-8,ty-2,cx+7,ty+14,12)
+   -- selection highlight, centred on the 8px icon (cx-4..cx+3) + pips
+   rectfill(cx-6,ty-2,cx+5,ty+12,1)
+   rect(cx-6,ty-2,cx+5,ty+12,12)
   end
-  -- icon: shield shock shows its pre-grayed variant (tile 36) while shield-locked
+  -- icon: shield shock shows its pre-grayed variant (tile 102) while shield-locked
   local icon=it[1]
-  if i==7 and locked then icon="36" end
-  sspr((icon%16)*8,(icon\16)*8,5,5,cx-5,ty,10,10)
+  if i==7 and locked then icon="102" end
+  sspr((icon%16)*8,(icon\16)*8,8,8,cx-4,ty,8,8) -- native 8x8 (sspr coerces the string id)
   -- pips below the icon: hull for repair, level for upgrades
-  if i==5 then pips(cx,ty+11,ship.hull,2+ship.hull_level)
-  elseif it[5]~="" then pips(cx,ty+11,ship[it[5]] or 0,it[2]) end
+  if i==5 then pips(cx,ty+9,ship.hull,2+ship.hull_level)
+  elseif it[5]~="" then pips(cx,ty+9,ship[it[5]] or 0,it[2]) end
  end
 
  -- divider, then the selected item's details across the lower half

@@ -35,16 +35,16 @@ function draw_help()
   -- permanent upgrades (descriptions match the shop)
   shead("upgrades",30)
   local e={
-   {11,"fire rate","faster shots"},
-   {10,"shield","lasts longer"},
-   {25,"spread","more lasers"},
-   {38,"hull","+1 max hull"},
-   {55,"thrusters","+ top speed"},
-   {105,"shock","blast on hit"}
+   {83,"fire rate","faster shots"},
+   {84,"shield","lasts longer"},
+   {87,"spread","more lasers"},
+   {82,"hull","+1 max hull"},
+   {86,"thrusters","+ top speed"},
+   {85,"shock","blast on hit"}
   }
   local y=42
   for i=1,#e do
-   sspr((e[i][1]%16)*8,(e[i][1]\16)*8,5,5,9,y,8,8) -- 5x5 source -> 8x8; icon at y, text at y+2
+   spr(e[i][1],9,y) -- icon at y, text at y+2
    rprint(e[i][2],22,y+2,10,4)
    print(e[i][3],66,y+2,6)
    y+=11
