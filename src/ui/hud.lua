@@ -38,23 +38,31 @@ function draw_hud()
  spr(38,26,2)
  local mh=2+ship.hull_level local sw=24\mh
  for i=0,mh-1 do sbar(33+i*sw,3,sw-1,i<ship.hull and 11 or 5) end
- -- shield meter: same fixed 24px length, continuous fill by power%. icon (spr 10) at left.
- spr(10,63,2)
- local sp=ship.shield_power
+ -- shield meter: icon + fill colour reflect the shock upgrade (spr 105 / warm ramp vs spr 10 / cool ramp).
+ -- during a free (powerup) shield it shows the countdown, flashing, so a pinned-full bar can't read as charge.
+ local shk=ship.shield_pulse_level>0
+ spr(ship.shield_unlocked and(shk and 105 or 10)or 36,63,2)
+ local fr=ship.shield_free
+ local sp=fr>0 and fr/110 or ship.shield_power/100
  sbar(70,3,24,1)
- local fw=flr(sp/100*24)
- if fw>0 then sbar(70,3,fw,sp>50 and 12 or(sp>25 and 13 or 8)) end
- -- temp-effect status row (y8), left-aligned under the hull meter: rapid fire, free shield,
- -- magnet. always shown (grayscale 35/36/37 when idle); active = colour icon + colour time bar.
+ local fw=flr(sp*24)
+ if fw>0 then
+  local c=fr>0 and(flr(time()*8)%2<1 and 7 or(shk and 8 or 12))
+   or(shk and(sp>.5 and 8 or sp>.25 and 9 or 2)or(sp>.5 and 12 or sp>.25 and 13 or 1))
+  sbar(70,3,fw,c)
+ end
+ -- temp-effect status row (y8): rapid fire, free shield (shock-aware icon/colour), magnet.
+ -- always shown (grayscale 35/36/37 when idle); active = colour icon + colour time bar.
  fxi(26,11,35,ship.rfb,120,10)
- fxi(33,10,36,ship.shield_free,110,12)
+ fxi(33,shk and 105 or 10,36,ship.shield_free,110,shk and 8 or 12)
  fxi(40,56,37,ship.magnet_t,420,14)
- -- mission progress: full-width thin bar at the bottom of the band
+ -- mission progress: full-width 1px bar at the very bottom of the band (slimmed from 2px to give
+ -- the status row a clear margin above it)
  if run and mission_distance>0 then
   local pt=min(1,(mission_distance-(dr or mission_distance))/mission_distance)
   db=mid(pt,db-0.02,db+0.02) -- ease toward pt, 0.02/frame
   local w=db*124
-  rectfill(2,15,125,16,1)
-  if w>0 then rectfill(2,15,1+w,16,db>0.95 and(flr(time()*4)%2==0 and 6 or 13)or 13) end
+  rectfill(2,16,125,16,1)
+  if w>0 then rectfill(2,16,1+w,16,db>0.95 and(flr(time()*4)%2==0 and 6 or 13)or 13) end
  end
 end

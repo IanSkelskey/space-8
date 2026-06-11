@@ -63,13 +63,8 @@ function update_blackhole()
 		asteroid_absorb(h.x,h.y,8,8) -- full death: boom + score + loot
 		popcorn_absorb(h.x,h.y,8,8)  -- full death: pop + score + loot
 
-		-- inlined spawn_particles(h)
-		for i=1,(rnd()<0.5 and 2 or 1) do
-			local ang,rad=rnd(),2+rnd(2)
-			local px,py=h.x+4+cos(ang)*rad,h.y+4+sin(ang)*rad
-			local tx,ty,spd=-sin(ang),cos(ang),0.45+rnd(0.45)
-			p_add(px,py,tx*spd+rnd(0.2)-0.1+cos(ang)*0.08,ty*spd+rnd(0.2)-0.1+sin(ang)*0.08,20+rndi(10),6)
-		end
+		-- accretion swirl (shared with the shield-break burst)
+		swirl(h.x+4,h.y+4,rnd()<0.5 and 2 or 1)
 		-- inline bullet pull (reuse cx,cy and r2)
 		for b in all(bullets) do
 			if aabb(b.x,b.y,5,5,h.x,h.y,8,8) then

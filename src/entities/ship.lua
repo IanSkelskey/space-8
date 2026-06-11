@@ -46,9 +46,17 @@ local function sh_stats()
  return sd[l],sr[l],sh[l]
 end
 
--- unified shield shutdown (set vars + sfx)
+-- shield break/fizzle: a swirl of shards at the ship centre, fading through the shield's own
+-- colour ramp (shock = warm). the same emitter the black holes use, so it reads like their burst.
+local function shield_burst(n)
+ swirl(ship.x+4,ship.y+4,n,thr_cols[ship.shield_pulse_level>0 and 5 or 2])
+end
+
+-- unified shield shutdown. clears shield_free too so a shatter stays down (no one-frame
+-- free-shield reactivation).
 local function sh_off()
- ship.shield_active,ship.shield_cool,ship.shield_invuln,ship.shield_anim=false,60,30,0
+ ship.shield_active,ship.shield_cool,ship.shield_invuln,ship.shield_anim,ship.shield_free=false,60,30,0,0
+ shield_burst(16)
  sfx(-1,3) snd_sfx(43)
 end
 
@@ -166,6 +174,8 @@ function update_ship()
     if shield_active then
       if shield_free>0 then
         shield_free-=1
+        -- powerup ran out and the player isn't holding shield: fizzle (softer than a hard break)
+        if shield_free<=0 and not btn(5) then shield_burst(8) end
       else
         shield_power=max(0,shield_power-drain)
       end
@@ -267,12 +277,16 @@ function draw_ship()
  if ship.rfb>0 then rfpal() end
  for b in all(bullets)do sspr(64+(flr(time()*16+b.x+b.y)%2)*8,56,5,6,flr(b.x),flr(b.y)-1) end
  pal()
- if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and (ship.shield_invuln%4)<2) then
+ -- shield bubble depletes for BOTH shields: rings shed (3->2->1) and the ring blinks as the charge
+ -- runs low (manual: power; powerup: time), so each reads as "about to break".
+ local lvl=ship.shield_free>0 and ship.shield_free/110 or ship.shield_power/100
+ if ship.shield_active and not ship.dying and not(ship.shield_invuln>0 and (ship.shield_invuln%4)<2) and not(lvl<0.15 and ship.shield_anim%4<2) then
   local cx,cy,t=ship.x+3,ship.y+4,ship.shield_anim/30
   local base_r=12+ship.shield_pulse_level -- slight growth per level
+  local rings=lvl>0.6 and 3 or lvl>0.3 and 2 or 1
   local cols=thr_cols[ship.shield_pulse_level>0 and 5 or 2]
   local flash=ship.shield_invuln>25 and (ship.shield_pulse_level>0 and 8 or 7)
-  for i=1,3 do
+  for i=1,rings do
     circ(cx,cy,base_r-i+sin(t+i*0.2)*2,flash or cols[i])
   end
  end

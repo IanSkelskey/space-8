@@ -35,6 +35,18 @@ end
 
 function p_add(x,y,dx,dy,life,typ,col,dat) add(p,{x=x,y=y,dx=dx,dy=dy,l=life,t=typ,c=col,d=dat}) end
 
+-- swirl of n particles around (cx,cy): tangential velocity gives the black-hole accretion look.
+-- type 6 fades through ramp rmp (default = the black-hole pink->dark); shared with the shield break.
+local BHR=split"14,2,1"
+function swirl(cx,cy,n,rmp)
+ rmp=rmp or BHR
+ for i=1,n do
+  local ang,rad=rnd(),2+rnd(2)
+  local s=0.45+rnd(0.45)
+  p_add(cx+cos(ang)*rad,cy+sin(ang)*rad,-sin(ang)*s+rnd(0.2)-0.1+cos(ang)*0.08,cos(ang)*s+rnd(0.2)-0.1+sin(ang)*0.08,20+rndi(10),6,nil,rmp)
+ end
+end
+
 function p_upd()
  ppf=(ppf+1)%60
  for i in all(p) do
@@ -105,7 +117,7 @@ function p_draw()
         c=(t==1 and (l>9 and (i.d and 13 or 4) or l>4 and (i.d and 5 or 2) or 1)) -- rock dust; alt debris (i.d set) fades 13->5->1
          or (t==2 and (l>3 and (i.d and i.d[1] or 10) or l>1 and (i.d and i.d[2] or 9) or (i.d and i.d[3] or 8)))
          or (t==3 and (l>16 and 10 or l>8 and 9 or 8))
-         or (t==6 and (l>16 and 14 or l>8 and 2 or 1))
+         or (t==6 and (l>16 and i.d[1] or l>8 and i.d[2] or i.d[3]))
          or (t==8 and (ship.rfb>0 and (l>6 and 7 or l>4 and 10 or l>2 and 9 or 5) or (l>6 and 10 or l>4 and 9 or l>2 and 8 or 5))) -- muzzle spark; rapid fire shifts hotter (white->yellow->orange->gray)
          or 7
      end
