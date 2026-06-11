@@ -4,8 +4,8 @@ local picking_diff=false -- whether we are on difficulty submenu
 local menu_t0=0        -- time() when the menu was entered; drives the one-shot logo shine
 
 -- difficulty & root label/icon sets
-local diff_labels,diff_icons=split"easy,normal,veteran",{19,34,6}
-local root_labels,root_icons=split"start,highscores,help",{6,50,41} -- added help option
+local diff_labels,diff_icons=split"easy,normal,veteran",{12,13,14} -- new 8x8 difficulty icons
+local root_labels,root_icons=split"play,highscores,guide",{45,28,44} -- new 8x8 icons: start/trophy/help
 
 -- start a new run but remain in station before launching first mission
 local function start_game(set_df)
@@ -52,14 +52,23 @@ function update_menu()
  end
 end
 
+-- menu rows (default font). icons share one column and labels another (both derived from the
+-- widest label), and the whole block is centred on screen as a unit -- so icons line up and
+-- nothing resizes, while the list still reads as centred. selection = the bobbing cursor plus
+-- a brighter, raised label; no box.
 local function draw_list(labels,icons,start_y)
+ local wl=0
+ for l in all(labels) do wl=max(wl,#l*4) end -- widest label -> shared block width
+ local gx=64-(12+wl)\2 -- centred block left edge = icon column
+ local lx=gx+12        -- label column
  local y=start_y
  for i=1,#labels do
-  local c=i==sel and 7 or 6
-  if i==sel then spr(20,36+time()%1\0.5,y) end
-  spr(icons[i],44,y)
-  print(labels[i],54,y,c)
-  y+=12
+  local s=i==sel
+  if s then spr(20,gx-10+time()%1\0.5,y) end -- cursor bobs left of the icon column
+  spr(icons[i],gx,y)
+  if s then rprint(labels[i],lx,y+1,7,1)  -- selected: white, raised on dark blue
+  else rprint(labels[i],lx,y+1,6,5) end  -- idle: muted, subtle raise
+  y+=14
  end
 end
 

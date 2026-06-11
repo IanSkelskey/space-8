@@ -32,7 +32,9 @@ function hs_init()
  hs_entries=hs_sets[hs_tab]
 end
 
-local diff_icons={19,34,6} -- difficulty icons easy/normal/veteran
+local diff_icons={12,13,14} -- new 8x8 difficulty icons easy/normal/veteran
+-- per-rank {main,shadow} colours for the raised name/score text: gold, silver, bronze, blue
+local rank_cols={{10,9},{6,5},{9,4},{12,1}}
 
 -- compare two split scores WITHOUT recombining (hi*1000+lo overflows pico-8's 32767 cap).
 -- returns true if (ha,la) > (hb,lb).
@@ -86,111 +88,91 @@ function hs_draw_full()
  local fl=time()%0.8<0.4
  draw_logo("high scores",y_title,fl and 9 or 10,fl and 4 or 9,fl and 9 or 10,fl and 4 or 9)
 
- -- unified tab bar (outer border removed) WITH padding + no separators
- local bar_x0,bar_x1=8,120
- rectfill(bar_x0,y_tabs,bar_x1,y_tabs+bar_h-1,0)
+ -- difficulty selector: only the ACTIVE difficulty is shown (icon + name), flanked by fixed
+ -- arrows that map to the left/right switch control. the icon+name re-centre as you switch
+ -- while the arrows stay put, so nothing overflows or jumps.
  local tabs={"easy","normal","veteran"}
- -- content widths: icon 8 + gap 4 + label chars*4
- local cw={}
- for i=1,3 do cw[i]=8+4+#tabs[i]*4 end
- local w={}
- for i=1,3 do w[i]=cw[i]+4 end -- +4 (=2px horiz padding total) so we can keep 1px padding each side after centering
- local gap=2
- local inner_w=w[1]+w[2]+w[3]+gap*2
- local bar_w=bar_x1-bar_x0+1
- local sx=bar_x0+(bar_w-inner_w)\2
- local pad=1
- for i=1,3 do
-  local active=i==hs_tab
-  local seg_w=w[i]
-  local ex=sx+seg_w-1
-  if active then
-   -- full segment fill; content will respect padding
-   rectfill(sx,y_tabs,ex,y_tabs+bar_h-1,1)
-  end
-  -- center content then clamp to ensure 1px padding inside segment
-  local content_w=cw[i]
-  local cx=sx+(seg_w-content_w)\2
-  if cx<sx+pad then cx=sx+pad end
-  if cx+content_w>ex-pad+1 then cx=ex-pad+1-content_w end
-  local cy=y_tabs+pad+1 -- 1px top padding; leaves ≥1px bottom
-  spr(diff_icons[i],cx,cy)
-  print(tabs[i],cx+12,cy,(active and 7 or 6))
-  sx=ex+gap+1
- end
+ local dn=tabs[hs_tab]
+ local gw=10+#dn*4               -- icon(8) + 2px gap + name
+ local gx=64-gw\2
+ spr(diff_icons[hs_tab],gx,y_tabs)
+ rprint(dn,gx+10,y_tabs+1,7,1)   -- active name: white, raised
+ local ac=time()%0.8<0.4 and 12 or 6 -- gentle pulse so the arrows read as interactive
+ print("◀",18,y_tabs+1,ac)
+ print("▶",102,y_tabs+1,ac)
 
- -- panel (height fixed to avoid overlapping bottom instructions)
- rect(8,panel_top,120,panel_bottom,1)
+ -- no panel border -- rows float on the starfield like the menu. panel_top/panel_bottom still
+ -- bound the row layout below.
 
- print("#",16,y_header-2,5)
- print("name",36,y_header-2,5)
- print("score",94,y_header-2,5)
+ -- column headers (quiet, raised). rank is carried by the trophy, so there's no number column
+ rprint("name",30,y_header-2,6,5)
+ rprint("score",94,y_header-2,6,5)
 
  if #t==0 then
   cprint("(no scores yet)",y_header+10,5)
  else
-  local trophy_sprs={50,103,104,108}
+  local trophy_sprs={28,29,30,31} -- gold/silver/bronze/4th
   -- calculate even spacing for up to 4 entries
   local content_start=y_header+8
   local content_end=panel_bottom-6
   local available_h=content_end-content_start-6  -- reduce total span by 6px (2px*3 gaps)
   local num_entries=min(#t,MAX_HS)
   local spacing=num_entries>1 and available_h/(num_entries-1) or 0
-  
+
   for i=1,num_entries do
    local e=t[i]
    local a,b,c=dec_name(e.nc)
    local nm=name_to_string(a,b,c)
    local sc=fmt_score(e.hi,e.lo)
    local y=content_start+(i-1)*spacing
+   local rc=rank_cols[min(i,4)]
+   local m=rc[1]
+   if i==1 and time()%0.6<0.3 then m=7 end -- #1 gets a gentle gold->white shimmer
    spr(trophy_sprs[min(i,4)],14,y)
-   print(i..".",24,y,(i==1 and 10) or (i==2 and 6) or (i==3 and 4) or 6)
-   print(nm,36,y,(i==1 and 7 or 6))
-   local sc_col=(i==1 and ((time()%0.5<0.25) and 11 or 10))
-     or (i==2 and 6) or (i==3 and 4) or 13
-   print(sc,116-#sc*4,y,sc_col)
+   rprint(nm,30,y+1,m,rc[2])          -- name (raised, rank-coloured)
+   rprint(sc,114-#sc*4,y+1,m,rc[2])   -- score, right-aligned to x114
   end
  end
 
- -- footer instruction (no separator line)
- cprint("❎ back",bottom_instr_y,5)
+ -- footer: how to switch difficulty (arrows) + how to leave
+ cprint("⬅️➡️ difficulty   ❎ back",bottom_instr_y,5)
 end
 
 -- compact (single-line) display
 -- marquee showing all 3 difficulties (trophy + diff icon + name + score)
 function hs_draw_compact()
  if hs_entering then return end
- -- build segments (skip difficulties with no score)
- local segs={} local tw=0
+ -- one segment per difficulty with a score: difficulty icon + name + score, dot-separated.
+ -- the gold trophy was dropped -- it was identical on every entry, crowded the diff icon, and
+ -- ate space. name and score now share equal weight (white name, gold score).
+ local segs={} local total=0
  for di=1,3 do
-  local t=hs_sets[di] local e=t[1]
+  local e=hs_sets[di][1]
   if e then
    local a,b,c=dec_name(e.nc)
    local nm=name_to_string(a,b,c)
    local sc=fmt_score(e.hi,e.lo)
-   local txt=" "..nm.." "..sc.."   " -- padding spaces
-   local w=16+#txt*4  -- 2 icons (trophy+diff) + text
-   add(segs,{di=di,txt=txt,w=w})
-   tw+=w
+   -- width: icon(8) +3 +name +4 +score +16 (gap + separator dot)
+   add(segs,{di=di,nm=nm,sc=sc,w=31+#nm*4+#sc*4})
+   total+=segs[#segs].w
   end
  end
  if #segs==0 then return end
  -- advance scroll
  hs_marq-=0.5
- if hs_marq<=-tw then hs_marq+=tw end
+ if hs_marq<=-total then hs_marq+=total end
  -- draw (wrap)
  local x=2+hs_marq
- local y=4
- if tw<1 then return end
+ local y=3
  while x<128 do
   for s in all(segs) do
    if x+s.w>0 then
-    -- gold trophy
-    spr(50,x,y)
-    -- difficulty icon
-    spr(diff_icons[s.di] or 50,x+8,y)
-    -- text
-    print(s.txt,x+16,y,7)
+    spr(diff_icons[s.di] or 28,x,y)        -- difficulty icon (no trophy)
+    local tx=x+11
+    rprint(s.nm,tx,y+1,7,5)                 -- name: white, raised
+    local scx=tx+#s.nm*4+4
+    rprint(s.sc,scx,y+1,10,9)               -- score: gold, raised
+    circfill(scx+#s.sc*4+7,y+3,1,13)        -- dot separator in the trailing gap
    end
    x+=s.w
    if x>=128 then break end

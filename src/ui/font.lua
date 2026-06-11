@@ -30,3 +30,10 @@ function draw_logo(txt,y,lm,ls,dm,ds,wv)
  end
  pal()
 end
+
+-- print TXT with the logo's raised look: a darker copy 1px below, then the main colour on top.
+-- shared by the menu and the high-score screens so embossed text reads the same everywhere.
+function rprint(txt,x,y,m,s)
+ print(txt,x,y+1,s)
+ print(txt,x,y,m)
+end
