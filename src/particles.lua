@@ -68,25 +68,21 @@ function p_upd()
        elseif d==5 then ship.rfb=210 snd_sfx(63)
        elseif d==6 then ship.magnet_t=420 snd_sfx(63)
        end del(p,i) goto continue end
-      -- sparkle emission for money shards
-      if i.d==7 and rnd()<0.1 then
-        p_add(i.x+rnd(),i.y+0.5,(rnd()-0.5)*0.2,(rnd()-0.5)*0.2,5,1,(ppf%4<2 and 10 or 9))
-      end
    end
   if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end
   ::continue::
  end
 end
 
+local CF={67,68,69,68} -- spinning-coin animation frames (credit shards)
 function p_draw()
  for i in all(p) do
       if i.t==7 then
      local d=i.d
      if d==7 then
-          -- shimmering 2x2 credit shard
-          local c=(ppf%8<4) and 10 or 9
-          pset(i.x,i.y,c)pset(i.x+1,i.y,c)pset(i.x,i.y+1,c)pset(i.x+1,i.y+1,c)
-          if ppf%15==0 then pset(i.x+1,i.y-1,7) end
+          -- spinning coin: 4-frame animation (67,68,69,68). art is the tile's top-left 5x5,
+          -- so offset by -2 to centre that on the particle point.
+          spr(CF[(ppf\4)%4+1],i.x-2,i.y-2)
      else
        -- 7x7 dark-blue backing, the 5x5 icon centred on it, and a colour-coded marching dashed
        -- frame just OUTSIDE the backing (9x9 total). colour = PC1[d] with a brief white blink.

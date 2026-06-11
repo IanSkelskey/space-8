@@ -102,14 +102,8 @@ function draw_help()
   for i=1,#items do
    local icon=items[i][1]
    if icon==-1 then
-    -- money shards: shimmering bobbing cluster of 3
-    local t=time()
-    for j=1,3 do
-     local cx,cy=9+(j-2)*3,y+3+sin(t*0.8+j*0.3)*0.7+((j==2) and 0 or -2)
-     local c=(t*8+j*2)%8<4 and 10 or 9
-     pset(cx,cy,c) pset(cx+1,cy,c) pset(cx,cy+1,c) pset(cx+1,cy+1,c)
-     if (t*12+j)%15<1 then pset(cx+1,cy-1,7) end
-    end
+    -- spinning coin, matching the in-game credit animation (frames 67,68,69,68)
+    spr(69-abs(2-flr(time()*8)%4),7,y+1)
    else
     spr(icon,7,y)
    end
