@@ -37,3 +37,14 @@ function rprint(txt,x,y,m,s)
  print(txt,x,y+1,s)
  print(txt,x,y,m)
 end
+
+-- flashing nav arrow built from the two arrow tiles: 18 (lit) + 19 (plain) alternate for the
+-- flash. right=true points right; false flips to point left. inactive shows a dimmed plain frame.
+function farrow(x,y,right,active)
+ local f=not right
+ if active then
+  spr(time()%0.8<0.4 and 18 or 19,x,y,1,1,f)
+ else
+  pal(7,5) pal(6,13) pal(13,1) spr(19,x,y,1,1,f) pal()
+ end
+end

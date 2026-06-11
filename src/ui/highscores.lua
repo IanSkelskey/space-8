@@ -97,9 +97,9 @@ function hs_draw_full()
  local gx=64-gw\2
  spr(diff_icons[hs_tab],gx,y_tabs)
  rprint(dn,gx+10,y_tabs+1,7,1)   -- active name: white, raised
- local ac=time()%0.8<0.4 and 12 or 6 -- gentle pulse so the arrows read as interactive
- print("◀",18,y_tabs+1,ac)
- print("▶",102,y_tabs+1,ac)
+ -- flashing sprite arrows (always active -- the difficulty tabs wrap around)
+ farrow(18,y_tabs+1,false,true)
+ farrow(102,y_tabs+1,true,true)
 
  -- no panel border -- rows float on the starfield like the menu. panel_top/panel_bottom still
  -- bound the row layout below.
