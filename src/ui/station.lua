@@ -6,6 +6,7 @@ local sel = sel or 1
 local sci_adj=sci_adj or split"quantum,plasma,ionic,fusion,nano,void"
 local sci_noun=sci_noun or split"core,drive,matrix,relay,reactor,array"
 local diff_labels=diff_labels or split"easy,normal,veteran"
+local diff_icons={12,13,14} -- new 8x8 difficulty icons (easy/normal/veteran)
 
 -- borderless slanted 3px bar, matching the gameplay HUD's hull meter
 function sbar(x,y,w,c) for r=0,2 do rectfill(x+2-r,y+r,x+1-r+w,y+r,c) end end
@@ -74,71 +75,58 @@ end
 function draw_station()
     if station_mode == "main" then
         ensure_mission()
-        -- header bar
-        rectfill(0,0,127,15,1)
-        print("station",4,4,7)
-        print("round"..vr,72,4,6)
+        -- header: block-letter title (centred at y4, leaving a top margin) + readouts.
+        local fl=time()%0.8<0.4
+        draw_logo("station",4,fl and 12 or 7,fl and 1 or 12,fl and 12 or 7,fl and 1 or 12)
         local cf="$"..money_total
-    local tls="00"..ts
-    local tdisp=tsh>0 and (tsh..sub(tls,#tls-2)) or ts
-    print(tdisp,40,4,11)
-        print(cf,124-#cf*4,4,10)
+        rprint(cf,124-#cf*4,5,10,9)
+        rprint("round "..vr,4,15,6,5)
+        local tls="00"..ts
+        local tdisp=tsh>0 and (tsh..sub(tls,#tls-2)) or ts
+        local ss="score "..tdisp
+        rprint(ss,124-#ss*4,15,6,5)
+        line(2,23,125,23,1)
 
-        -- mission panel
-        rect(2,18,78,54,1)
-        print("mission",6,20,12)
+        -- mission status. the payout breakdown was removed -- the round-summary screen now
+        -- shows earnings, which freed this whole area.
         if current_mission then
-            print(current_mission,6,30,11)
-            print("dist:"..mission_distance,6,38,6)
-            -- hull meter, matching the gameplay HUD: fixed 24px, mh EQUAL segments, borderless slant
-            spr(38,6,46)
+            rprint(current_mission,4,27,12,1)
+            print("dist "..mission_distance,4,37,6)
+            spr(38,66,35) -- hull meter (matches the gameplay HUD): icon + mh equal segments
             local mh=2+ship.hull_level local sw=24\mh
-            for i=0,mh-1 do sbar(13+i*sw,47,sw-1,i<ship.hull and 11 or 5) end
+            for i=0,mh-1 do sbar(73+i*sw,36,sw-1,i<ship.hull and 11 or 5) end
         else
-            print("pending",6,30,5)
+            print("mission pending...",4,31,5)
         end
+        line(2,45,125,45,1)
 
-        -- payout (round earnings) panel - current funds moved to header
-        rect(80,18,125,54,1)
-        print("payout",84,20,6)
-        if last_payout_ready then
-            print("base",84,26,5) local v=""..last_pay print(v,124-#v*4,26,11)
-            print("bonus",84,32,5) v=""..last_bonus print(v,124-#v*4,32,12)
-            print("total",84,38,5) v=""..(last_pay+last_bonus) print(v,124-#v*4,38,7)
-        else
-            print("none",84,30,5)
-        end
-
-        -- full-width actions panel
-        rect(2,56,125,121,1)
         if station_confirm then
-            print("launch mission?",10,64,7)
-            print("🅾️ yes  ❎ no",12,76,6)
+            local q="launch mission?"
+            rprint(q,64-#q*2,63,7,1)
+            print("🅾️ yes   ❎ no",38,79,6)
         else
+            -- action list: bobbing cursor + raised labels, matching the main menu
             local first_station = (vr==1 and not last_payout_ready)
-            local y = 64
             local rows = first_station and 3 or 2
+            local y=57
             for i=1,rows do
-                local c = (i==sel) and 7 or 5
-                if i==sel then rectfill(6,y-2,121,y+6,1) end
-                if i<3 or not first_station then
-                    local icon = (i==1) and 6 or 22
-                    local sx,sy=(icon%16)*8,flr(icon/16)*8
-                    sspr(sx,sy,5,5,10,y,5,5)
-                    print(i==1 and "launch mission" or "shop",18,y,c)
+                local on=i==sel
+                if on then spr(20,6+time()%1\0.5,y-1) end
+                local m,s=on and 7 or 6,on and 1 or 5
+                if i==1 then
+                    spr(45,16,y-1) rprint("launch mission",27,y,m,s)
+                elseif i==2 then
+                    spr(22,16,y-1) rprint("shop",27,y,m,s)
                 else
-                    -- difficulty selector row
-                    print("difficulty",18,y,c)
-                    local dname=diff_labels[df]
-                    local dx=96-#dname*2
-                    print("<",70,y,c)
-                    print(dname,dx,y, (i==sel) and 11 or 6)
-                    print(">",116,y,c)
+                    spr(diff_icons[df],16,y-1) rprint("difficulty",27,y,m,s)
+                    local dn=diff_labels[df]
+                    local ac=on and (time()%0.8<0.4 and 12 or 6) or 6
+                    print("◀",74,y,ac) print(dn,96-#dn*2,y,on and 11 or 6) print("▶",114,y,ac)
                 end
-                y += 12
+                y+=14
             end
-            local prompt = first_station and "🅾️ sel  ❎ back" or "🅾️ select"
-            print(prompt,8,108,6)
+            local prompt,px=first_station and "🅾️ select  ❎ back" or "🅾️ select",first_station and 22 or 42
+            print(prompt,px,115,6)
         end
     else
         if shop_draw then shop_draw() else print("shop",58,76,7) end

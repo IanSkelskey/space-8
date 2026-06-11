@@ -66,8 +66,9 @@ end
 
 function shop_draw()
  -- header (new standard): block-letter SHOP title on the starfield + raised-gold cash. no bar.
+ -- title at y4 to leave a small top margin.
  local fl=time()%0.8<0.4
- draw_logo("shop",2,fl and 12 or 7,fl and 1 or 12,fl and 12 or 7,fl and 1 or 12)
+ draw_logo("shop",4,fl and 12 or 7,fl and 1 or 12,fl and 12 or 7,fl and 1 or 12)
  local cash="$"..money_total
  rprint(cash,123-#cash*4,4,10,9)
 
@@ -112,10 +113,10 @@ function shop_draw()
   stat="level "..lv.."/"..sit[2]
  end
 
- rprint(sit[7],8,64,7,1)               -- item name (raised)
- if stat then print(stat,8,74,6) end   -- accurate, computed level / hull / status
- print(desc,8,84,11)                   -- effect description
- print("cost",8,94,6) print(cstr,30,94,12)
+ rprint(sit[7],8,64,7,1)                            -- item name (raised)
+ if stat then rprint(stat,120-#stat*4,64,6,5) end   -- level/hull/status, right-aligned on the name line
+ print(desc,8,74,11)                                -- effect description
+ print("cost",8,84,6) print(cstr,30,84,12)
  print("⬅️➡️ select  🅾️ buy  ❎ back",6,104,6) -- navigation + actions
  if sm~="" then print(sm,8,114,sc) end
 end
