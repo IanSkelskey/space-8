@@ -1,13 +1,14 @@
-local s,p,sm,st,sc=1,1,"",0,11
+local s,sm,st,sc=1,"",0,11 -- s=selected item index (single grid now, no pages)
 
 -- compressed items: icon,max,base$,inc$,field,unlock,name,desc
 -- rebalance: cheaper early items, expensive later upgrades for 1-2 round affordability but >12 round completion
-local id="11,3,100,120,fire_rate_level,,fire rate +20%,+ faster shots;10,3,140,150,shield_level,shield_unlocked,shield upgrade,+ more shield;25,2,180,200,spread_level,,phaser spread +1,+ wider spread;38,2,200,220,hull_level,,hull +1 segment,+ more hull;54,99,180,0,,,repair hull,+ restore 1 hull;55,3,90,140,thruster_level,,thruster boost,+ top speed;105,2,220,180,shield_pulse_level,shield_unlocked,shield shock,+ shield dmg 1/2"
+-- NOTE: fields are comma-split, so name/desc must NOT contain commas (use / or + instead).
+local id="11,3,100,120,fire_rate_level,,fire rate,-20% shot cooldown / lvl;10,3,140,150,shield_level,shield_unlocked,shield,holds longer + recharges;25,2,180,200,spread_level,,spread shot,more lasers / wider spread;38,2,200,220,hull_level,,hull,+1 max hull segment;54,99,180,0,,,repair,restore 1 hull segment;55,3,90,140,thruster_level,,thrusters,+12% top speed / lvl;105,2,220,180,shield_pulse_level,shield_unlocked,shield shock,shielded hits blast foes"
 -- pre-split once to save tokens (was repeatedly split each access)
 local items={}
 for e in all(split(id,";")) do add(items,split(e,",")) end
 
-function shop_init() s,p,sm,st=1,1,"",0 end
+function shop_init() s,sm,st=1,"",0 end
 
 local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and 45 or 63) end
 
@@ -46,84 +47,75 @@ end
 
 function shop_update()
  if st>0 then st-=1 if st<=0 then sm="" end end
- local page_items = (p==1) and 5 or (#items-5)
- local mx=page_items
- if btnp(2) then s=s>1 and s-1 or mx snd_sfx(44) end
- if btnp(3) then s=s<mx and s+1 or 1 snd_sfx(44) end
- if btnp(0) and p>1 then p,s=1,1 snd_sfx(44) end
- if btnp(1) and p<2 then p,s=2,1 snd_sfx(44) end
+ local n=#items
+ -- grid nav: left/right wrap through all items in reading order; up/down jump a row (4 cols)
+ if btnp(0) then s=s>1 and s-1 or n snd_sfx(44) end
+ if btnp(1) then s=s<n and s+1 or 1 snd_sfx(44) end
+ if btnp(2) and s>4 then s-=4 snd_sfx(44) end
+ if btnp(3) and s+4<=n then s+=4 snd_sfx(44) end
  if btnp(5) then snd_sfx(63) station_mode="main" end
- if btnp(4) then
-  -- page2 offset FIX (was 5+s-1 causing wrong item)
-  local gi=(p==1) and s or (5+s)
-  buy(gi)
- end
+ if btnp(4) then buy(s) end
+end
+
+-- level pips under an icon: filled up to `cur` (green), hollow (dark gray) for the rest.
+-- hollow is gray not blue so it stays visible on top of the blue selection fill.
+local function pips(cx,y,cur,mx)
+ local x0=cx-(mx*3-1)\2
+ for j=0,mx-1 do rectfill(x0+j*3,y,x0+j*3+1,y+1,j<cur and 11 or 5) end
 end
 
 function shop_draw()
- rectfill(0,0,127,15,1)
- print("◀",4,4,p>1 and 7 or 1)
- spr(22,14,4)
- print("shop - page "..p.."/2",24,4,7)
- print("▶",96,4,p<2 and 7 or 1)
- print("$"..money_total,100,4,10)
- rect(2,18,125,121,1)
- 
- -- draw items
- local start_i,end_i=(p==1 and 1 or 6),(p==1 and 5 or #items)
- local idx=1
- for i=start_i,end_i do
+ -- header (new standard): block-letter SHOP title on the starfield + raised-gold cash. no bar.
+ local fl=time()%0.8<0.4
+ draw_logo("shop",2,fl and 12 or 7,fl and 1 or 12,fl and 12 or 7,fl and 1 or 12)
+ local cash="$"..money_total
+ rprint(cash,123-#cash*4,4,10,9)
+
+ -- icon grid: 4 columns. each 5x5 source icon scaled 2x to 10x10, with level pips below.
+ for i=1,#items do
   local it=items[i]
-  local y=26+(idx-1)*11
-  local selc=idx==s
-  local c=selc and 7 or 5
-  if selc then rectfill(8,y-2,119,y+6,1) end
-  -- dynamic icon: shield shock locked → tile 106
-  local icon=it[1]
-  if i==7 and not ship.shield_unlocked and ship.shield_pulse_level==0 then icon="106" end
-  sspr((icon%16)*8,flr(icon/16)*8,5,5,12,y,5,5)
-  print(it[7],22,y,c)
-  local stat=""
-  if i==5 then
-   local h,mh=ship.hull,2+ship.hull_level stat=h.."/"..mh
-  elseif it[5]~="" then
-   local lv=ship[it[5]] or 0
-   local ul=it[6]!="" and ship[it[6]]
-   if i==2 and ul then lv=max(1,lv) end
-   if (i~=2 or ul) then stat="lvl"..lv.."/"..it[2] end
-   if i==7 and not ul then stat="locked" end
+  local cx=22+((i-1)%4)*28      -- cell centre x
+  local ty=22+((i-1)\4)*22      -- icon top y
+  local sel=i==s
+  local locked=it[6]~="" and not ship[it[6]] and i~=2 -- shield-gated, pre-unlock
+  if sel then
+   -- selection highlight, centred on the 10px icon (cx-5..cx+4) both axes
+   rectfill(cx-8,ty-2,cx+7,ty+14,1)
+   rect(cx-8,ty-2,cx+7,ty+14,12)
   end
-  if stat~="" then print(stat,94,y,c) end
-  idx+=1
+  -- icon: shield shock shows its pre-grayed variant (tile 36) while shield-locked
+  local icon=it[1]
+  if i==7 and locked then icon="36" end
+  sspr((icon%16)*8,(icon\16)*8,5,5,cx-5,ty,10,10)
+  -- pips below the icon: hull for repair, level for upgrades
+  if i==5 then pips(cx,ty+11,ship.hull,2+ship.hull_level)
+  elseif it[5]~="" then pips(cx,ty+11,ship[it[5]] or 0,it[2]) end
  end
 
- -- cost / desc (page offset fix retained)
- local sit=items[(p==1 and s) or (5+s)]
- local cstr,desc="",sit[8]
+ -- divider, then the selected item's details across the lower half
+ line(6,60,121,60,1)
+ local sit=items[s]
  local dm=dmul()
- local locked = ( (p==1 and s)==false and ( (p==2 and s== (7-5) ) ) ) -- helper not used further; keep tokens low
- if ( (p==2 and (5+s)==7) and not ship.shield_unlocked and ship.shield_pulse_level==0 ) then
-  cstr="locked"
-  desc="+ requires shield"
+ local locked=sit[6]~="" and not ship[sit[6]] and s~=2
+ local cstr,desc,stat="",sit[8]
+ if locked then
+  cstr,desc,stat="locked","+ requires shield","locked"
+ elseif s==5 then
+  local h,mh=ship.hull,2+ship.hull_level
+  cstr=h>=mh and "hull full" or "$"..flr((150+max(0,round_number-8)*30)*dm+0.5)
+  stat="hull "..h.."/"..mh
+ elseif s==2 and not ship.shield_unlocked then
+  cstr,desc,stat="$"..flr(140*dm+0.5),"+ adds shield","not owned"
  else
-  if s==5 and p==1 then
-    local repair_cost=(150+max(0,round_number-8)*30)*dm
-    cstr="$"..flr(repair_cost+0.5)
-  else
-    local lv,ul=sit[5]~="" and (ship[sit[5]] or 0) or 0,sit[6]~="" and ship[sit[6]]
-    if p==1 and s==2 and not ul then
-      cstr,desc="$"..flr(140*dm+0.5),"+ adds shield"
-    elseif lv<sit[2] then
-      cstr="$"..flr((sit[3]+sit[4]*lv)*dm+0.5)
-    else
-      cstr="owned"
-    end
-  end
+  local lv=sit[5]~="" and (ship[sit[5]] or 0) or 0
+  cstr=lv<sit[2] and "$"..flr((sit[3]+sit[4]*lv)*dm+0.5) or "owned"
+  stat="level "..lv.."/"..sit[2]
  end
- 
- rect(8,84,119,116,1)
- print("cost "..cstr,12,87,12)
- print(desc,12,94,11)
- print("🅾️ buy  ❎ back",12,102,6)
- if sm~="" then print(sm,12,110,sc) end
+
+ rprint(sit[7],8,64,7,1)               -- item name (raised)
+ if stat then print(stat,8,74,6) end   -- accurate, computed level / hull / status
+ print(desc,8,84,11)                   -- effect description
+ print("cost",8,94,6) print(cstr,30,94,12)
+ print("⬅️➡️ select  🅾️ buy  ❎ back",6,104,6) -- navigation + actions
+ if sm~="" then print(sm,8,114,sc) end
 end
