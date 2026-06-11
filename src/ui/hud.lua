@@ -52,7 +52,7 @@ function draw_hud()
  -- mission progress: full-width thin bar at the bottom of the band
  if run and mission_distance>0 then
   local pt=min(1,(mission_distance-(dr or mission_distance))/mission_distance)
-  db=db<pt and min(pt,db+0.02) or(db>pt and max(pt,db-0.02) or db)
+  db=mid(pt,db-0.02,db+0.02) -- ease toward pt, 0.02/frame
   local w=db*124
   rectfill(2,15,125,16,1)
   if w>0 then rectfill(2,15,1+w,16,db>0.95 and(flr(time()*4)%2==0 and 6 or 13)or 13) end

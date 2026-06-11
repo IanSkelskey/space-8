@@ -109,12 +109,11 @@ end
 
 function ship_init()
  bullets={}
- ship.x,ship.y,ship.vx,ship.vy,ship.dying,ship.death_t,ship.shield_active,ship.shield_anim,ship.shield_invuln,ship.shield_cool,ship.laser_cd,ship.hull_invuln,ship.shield_free,ship.rfb=START_X,START_Y,0,0,false,0,false,0,0,0,0,0,0,0
+ -- zero every numeric runtime field in one split-loop; dying/shield_active must stay
+ -- actual false (0 is truthy in lua), so they're set separately
+ for f in all(split"vx,vy,death_t,shield_anim,shield_invuln,shield_cool,laser_cd,hull_invuln,shield_free,rfb,magnet_t,vlean,muzzle_t,shield_retaliate_t,shield_retaliate_r")do ship[f]=0 end
+ ship.x,ship.y,ship.dying,ship.shield_active=START_X,START_Y,false,false
  ship.shield_power=ship.shield_unlocked and 100 or 0
- ship.magnet_t=0
- ship.vlean=0
- ship.muzzle_t=0
- ship.shield_retaliate_t,ship.shield_retaliate_r=0,0
  sfx(-1,3)
 end
 

@@ -54,13 +54,11 @@ function p_upd()
             if d2<100 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
          elseif i.d==7 then i.dx*=0.94 i.dy*=0.94 end
          if ship.magnet_t>0 or d2<196 then capv(i,2) end
-    end
    -- pickup capture: collect anything whose centre is within an 8px disc of the ship centre
    -- (64=8^2, ~the visible hull). a round distance test instead of a tight offset box, so a
    -- coin sitting on the ship is never missed because its position fell just outside a corner.
-   if i.t==7 and not ship.dying then
-      local dx,dy=ship.x+4-i.x,ship.y+4-i.y
-      if dx*dx+dy*dy<64 then local d=i.d
+   -- (reuses d2 from the attraction pass above: position hasn't changed, only velocity)
+      if d2<64 then local d=i.d
    if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(30)
        elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end ship.heal_t=t()+0.4 hud_add_score(20) snd_sfx(63)
        elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
@@ -124,22 +122,21 @@ function p_clear() p={} Gp=p end
 function p_hole_pull(holes)
  for i in all(p) do
   if i.t==6 then
-   local cx,cy,bestd2,hh
+   local cx,cy,bestd2
    for h in all(holes) do
     local hx,hy=h.x+4,h.y+4
     local dx,dy=hx-i.x,hy-i.y
     local d2=dx*dx+dy*dy
     if not bestd2 or d2<bestd2 then
-     bestd2,cx,cy,hh=d2,hx,hy,h
+     bestd2,cx,cy=d2,hx,hy
     end
    end
    if cx then
     local dx,dy=cx-i.x,cy-i.y
-    local d2=dx*dx+dy*dy
-    if d2>0.1 then
-     local d=sqrt(d2)
+    if bestd2>0.1 then
+     local d=sqrt(bestd2)
      local invd=1/d
-     local fall=1-min(d/(hh and hh.r or 32),1)
+     local fall=1-min(d/50,1) -- 50 = hole pull radius (spawn_hole's r)
      local rg,sg=0.3*fall,0.8*max(fall,0.2)
      local vx,vy=i.dx,i.dy
      vx+=dx*invd*rg-dy*invd*sg
