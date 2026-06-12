@@ -20,7 +20,7 @@ function draw_gameover()
 	local ldisp=(money_life_hi and money_life_hi>0) and (money_life_hi..sub(ll,#ll-2)) or (money_life_lo or 0)
 	local r,m,s="round "..vr,"cash $"..ldisp,"score "..sdisp
 	print(r,64-#r*2,50,6)
-	print(m,64-#m*2,60,10)
+	mprint(m,64-#m*2-1,60,10)
 	print(s,64-#s*2,70,7)
 	
 	-- Check for highscore qualification

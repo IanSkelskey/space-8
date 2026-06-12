@@ -5,7 +5,7 @@
 local skills,sscore,st_=0,0,0
 
 -- one row: label left at x34, value right-aligned to x94, both colour c
-local function srow(y,l,v,c) print(l,34,y,c) v=""..v print(v,94-#v*4,y,c) end
+local function srow(y,l,v,c) print(l,34,y,c) v=""..v mprint(v,94-#v*4-(sub(v,1,1)=="$" and 2 or 0),y,c) end
 
 function summary_init()
  skills=dget(33) sscore=dget(47) st_=0

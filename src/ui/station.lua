@@ -79,7 +79,7 @@ function draw_station()
         local fl=time()%0.8<0.4
         draw_logo("station",4,fl and 12 or 7,fl and 1 or 12,fl and 12 or 7,fl and 1 or 12)
         local cf="$"..money_total
-        rprint(cf,124-#cf*4,5,10,9)
+        mprint(cf,122-#cf*4,5,10,9)
         rprint("round "..vr,4,15,6,5)
         local tls="00"..ts
         local tdisp=tsh>0 and (tsh..sub(tls,#tls-2)) or ts

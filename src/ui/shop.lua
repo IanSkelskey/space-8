@@ -70,7 +70,7 @@ function shop_draw()
  local fl=time()%0.8<0.4
  draw_logo("shop",4,fl and 12 or 7,fl and 1 or 12,fl and 12 or 7,fl and 1 or 12)
  local cash="$"..money_total
- rprint(cash,123-#cash*4,4,10,9)
+ mprint(cash,121-#cash*4,4,10,9)
 
  -- icon grid: 4 columns, native 8x8 upgrade tiles with level pips below.
  for i=1,#items do
@@ -116,7 +116,7 @@ function shop_draw()
  rprint(sit[7],8,64,7,1)                            -- item name (raised)
  if stat then rprint(stat,120-#stat*4,64,6,5) end   -- level/hull/status, right-aligned on the name line
  print(desc,8,74,11)                                -- effect description
- print("cost",8,84,6) print(cstr,30,84,12)
+ print("cost",8,84,6) mprint(cstr,30,84,12)
  print("⬅️➡️ select  🅾️ buy  ❎ back",6,104,6) -- navigation + actions
  if sm~="" then print(sm,8,114,sc) end
 end
