@@ -12,7 +12,7 @@ end
 -- gameplay-only state (mission name now owned by UI cart via station ensure_mission)
 round_number,mission_distance,dr,ship_departing=1,0,0,false
 local DEATH_ANIM_MIN=45      -- min death-animation frames before the gameover jingle can be skipped
-local GO_JINGLE,RC_JINGLE=210,90 -- gameover / round-clear jingle lengths (frames); tune to your music
+local GO_JINGLE,RC_JINGLE=180,90 -- gameover / round-clear jingle lengths (frames)
 jingle_t=0 -- countdown for the current round-end jingle; cart hands off once it finishes (or is skipped)
 taunts=split"game is hard,get good,go touch grass,skill issue,dude wheres my ship?,not like this,one more try,do or do not,he's dead jim, your intelligence is stupid, your other left"
 vr=1 -- visible round counter (always starts at 1)
@@ -35,7 +35,7 @@ function complete_mission()
  round_number+=1 vr+=1
  -- flag distance for regen in UI (station ensure_mission will set new name+distance next visit)
  mission_distance,dr=0,0
- snd_music(8) jingle_t=RC_JINGLE
+ snd_music(16) snd_sfx(23) jingle_t=RC_JINGLE
  -- round clear: blow up everything left on the field. bhabsorb=true so these kills
  -- drop loot + booms but award NO score. collectibles are NOT cleared, so the coins
  -- (existing + freshly dropped) stay on screen to be scooped during the fly-off.
@@ -57,8 +57,8 @@ function _init()
  ie() p_clear()
  -- mission distance & scaling (UI decides name; always recompute here)
  mission_distance=400+round_number*80 dr=mission_distance sl(round_number)
- -- start gameplay background music (pattern 4)
- snd_music(4)
+ -- start gameplay background music (afterburner)
+ snd_music(0)
 end
 function _update()
 	if shake>0 then shake-=1 end
@@ -95,7 +95,7 @@ function _update()
 			-- dying: death explosion + the full gameover jingle (taunt shown over it). once the
 			-- jingle finishes (or a press skips it past the min anim), hand off to the ui gameover.
 			if ship.dying then
-				if current_music!=9 then snd_music(9) jingle_t=GO_JINGLE end if jingle_t>0 then jingle_t-=1 end
+				if current_music!=17 then snd_music(17) jingle_t=GO_JINGLE end if jingle_t>0 then jingle_t-=1 end
 				if ship.death_t>=DEATH_ANIM_MIN then if btnp(4)or btnp(5) then jingle_t=0 end if jingle_t<=0 then tu(2) return end end
 			end
 		end

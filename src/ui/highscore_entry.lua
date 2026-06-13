@@ -31,26 +31,26 @@ function update_highscore_entry()
  -- Letter selection
  if btnp(2) then -- up
   entry_name[entry_pos] = (entry_name[entry_pos] + 1) % 26
-  snd_sfx(44)
+  snd_sfx(16)
  elseif btnp(3) then -- down  
   entry_name[entry_pos] = (entry_name[entry_pos] - 1 + 26) % 26
-  snd_sfx(44)
+  snd_sfx(16)
  end
  
  -- Position navigation
  if btnp(0) and entry_pos > 1 then -- left
   entry_pos -= 1
-  snd_sfx(44)
+  snd_sfx(16)
  elseif btnp(1) and entry_pos < 3 then -- right
   entry_pos += 1
-  snd_sfx(44)
+  snd_sfx(16)
  end
  
  -- Confirm name
  if btnp(4) then -- O button
   if entry_pos < 3 then
    entry_pos += 1
-   snd_sfx(63)
+   snd_sfx(17)
   else
    -- Save the highscore
    local hi = entry_hi
@@ -85,7 +85,7 @@ function update_highscore_entry()
    persist_clear_last_run()
    game_state = "menu"
    menu_init()
-   snd_sfx(63)
+   snd_sfx(17)
   end
  end
  
@@ -94,7 +94,7 @@ function update_highscore_entry()
   persist_clear_last_run()
   game_state = "menu"
   menu_init()
-  snd_sfx(44)
+  snd_sfx(16)
  end
 end
 

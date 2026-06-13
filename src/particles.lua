@@ -71,12 +71,12 @@ function p_upd()
    -- coin sitting on the ship is never missed because its position fell just outside a corner.
    -- (reuses d2 from the attraction pass above: position hasn't changed, only velocity)
       if d2<64 then local d=i.d
-   if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(30)
-       elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end ship.heal_t=t()+0.4 hud_add_score(20) snd_sfx(63)
-       elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(63)
+   if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(9)
+       elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end ship.heal_t=t()+0.4 hud_add_score(20) snd_sfx(15)
+       elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(13)
        elseif d==3 then bomb_fire(ship.x+4,ship.y+4)
-       elseif d==5 then ship.rfb=210 snd_sfx(63)
-       elseif d==6 then ship.magnet_t=420 snd_sfx(63)
+       elseif d==5 then ship.rfb=210 snd_sfx(14)
+       elseif d==6 then ship.magnet_t=420 snd_sfx(14)
        end del(p,i) goto continue end
    end
   if i.l<=0 or i.x<-4 or i.x>132 or i.y<-4 or i.y>132 then del(p,i) end

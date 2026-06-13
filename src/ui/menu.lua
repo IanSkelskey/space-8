@@ -21,33 +21,33 @@ end
 
 function update_menu()
  if show_hs then
-    if btnp(0) then hs_change_tab(-1) snd_sfx(44,3) end
-    if btnp(1) then hs_change_tab(1) snd_sfx(44,3) end
-    if btnp(5) or btnp(4) then show_hs=false snd_sfx(44,3) end
+    if btnp(0) then hs_change_tab(-1) snd_sfx(16,3) end
+    if btnp(1) then hs_change_tab(1) snd_sfx(16,3) end
+    if btnp(5) or btnp(4) then show_hs=false snd_sfx(16,3) end
   return
  end
  -- submenu: picking difficulty
  if picking_diff then
-  if btnp(2) then sel-=1 snd_sfx(44,3) end
-  if btnp(3) then sel+=1 snd_sfx(44,3) end
+  if btnp(2) then sel-=1 snd_sfx(16,3) end
+  if btnp(3) then sel+=1 snd_sfx(16,3) end
   if sel<1 then sel=#diff_labels end
   if sel>#diff_labels then sel=1 end
-  if btnp(5) then picking_diff=false sel=1 snd_sfx(44,3) return end
-  if btnp(4) then start_game(sel) end
+  if btnp(5) then picking_diff=false sel=1 snd_sfx(16,3) return end
+  if btnp(4) then snd_sfx(17,3) start_game(sel) end
   return
  end
  -- root menu (start / highscores)
- if btnp(2) then sel-=1 snd_sfx(44,3) end
- if btnp(3) then sel+=1 snd_sfx(44,3) end
+ if btnp(2) then sel-=1 snd_sfx(16,3) end
+ if btnp(3) then sel+=1 snd_sfx(16,3) end
  if sel<1 then sel=#root_labels end
  if sel>#root_labels then sel=1 end
  if btnp(4) then
   if sel==1 then
-   picking_diff=true sel=1 snd_sfx(63,3)
+   picking_diff=true sel=1 snd_sfx(17,3)
   elseif sel==2 then
-   show_hs=true snd_sfx(63,3)
+   show_hs=true snd_sfx(17,3)
   else
-   game_state="help" help_init() snd_sfx(63,3)
+   game_state="help" help_init() snd_sfx(17,3)
   end
  end
 end

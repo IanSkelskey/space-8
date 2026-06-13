@@ -59,7 +59,7 @@ local function akill(m)
 		cash(m.x+4,m.y+4,max(1,rndi(4)+(m.alt and 2 or 0)))
 		spawn_asteroid_debris(m.x,m.y,m.alt) boom(m.x,m.y,split"1,2,4,13")
 	end
-	snd_sfx(1)
+	snd_sfx(m.large and 6 or 5)
 	del(asteroids,m)
 end
 
@@ -103,7 +103,7 @@ function update_asteroid()
 		if hit_by_player_bullet(m.x,m.y,m.w,m.h) then
 			m.hp-=1
 			if m.hp<=0 then akill(m) goto continue
-			else m.flash=6 end
+			else m.flash=6 snd_sfx(3) end
 		end
 
 		if scoll(m.x,m.y,m.w,m.h) then ship_kill() end

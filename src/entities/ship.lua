@@ -54,10 +54,10 @@ end
 
 -- unified shield shutdown. clears shield_free too so a shatter stays down (no one-frame
 -- free-shield reactivation).
-local function sh_off()
+local function sh_off(brk)
  ship.shield_active,ship.shield_cool,ship.shield_invuln,ship.shield_anim,ship.shield_free=false,60,30,0,0
  shield_burst(16)
- sfx(-1,3) snd_sfx(43)
+ sfx(-1,3) snd_sfx(brk and 11 or 10)
 end
 
 -- shield-pulse kill-level + shock-aura radius, refreshed each frame in update_asteroid
@@ -91,19 +91,19 @@ function ship_kill()
   ship.shield_power=max(0,ship.shield_power-hit)
   ship.shield_invuln=30
   ship.shield_anim=0
-  snd_sfx(31)
+  snd_sfx(12)
   -- retaliation (debounced by shield_invuln frames)
   if ship.shield_pulse_level>0 then
    ship.shield_retaliate_t=2
    ship.shield_retaliate_r=18+4*(ship.shield_pulse_level-1)
   end
-  if ship.shield_power<=0 then sh_off() end
+  if ship.shield_power<=0 then sh_off(1) end
   return
  end
  ship.hull-=1
  ship.hull_invuln=60
  shake=max(shake,5) -- kick the screen on a hull hit
-  snd_sfx(1)
+  snd_sfx(4)
  if ship.hull<=0 then
   shake=12 -- bigger jolt on death
   ship.dying,ship.death_t,ship.vx,ship.vy,game_state=true,0,0,0,"dying"
@@ -159,7 +159,7 @@ function update_ship()
   muzzle_t=4 -- two-frame muzzle flash (72 then 73) at the nose
   -- 2-3 hot muzzle sparks: warm ramp that darkens with distance, then vanishes
   for i=1,2+rndi(2) do p_add(x+4+rnd()*2-1,y-4,iv+(rnd()-0.5)*1.2,-(0.6+rnd()*1.1),8+rndi(3),8) end
-  snd_sfx(62,2)
+  snd_sfx(0,2)
   laser_cd=max(3,flr(12*(1-0.2*fire_rate_level)-(rfb>0 and 5 or 0)+0.5))
   end
   ub()
@@ -190,9 +190,9 @@ function update_ship()
     -- manual toggle (only when not in free period)
     if shield_free<=0 then
       if btn(5) and shield_power>=10 and shield_cool<=0 and not dying and not shield_active then
-        shield_active=true snd_sfx(30)
+        shield_active=true snd_sfx(9)
       elseif (not btn(5)) and shield_active then
-        shield_active=false sfx(-1,3)
+        shield_active=false sfx(-1,3) snd_sfx(10)
       end
     end
 

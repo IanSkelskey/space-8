@@ -6,7 +6,7 @@ bomb_r=-1 -- current radius; <0 = inactive
 local bx,by
 function bomb_init() bomb_r=-1 end
 -- detonate at (x,y): start the wave + a hard initial jolt
-function bomb_fire(x,y) bx,by,bomb_r=x,y,0 shake=max(shake,6) snd_sfx(1) end
+function bomb_fire(x,y) bx,by,bomb_r=x,y,0 shake=max(shake,6) snd_sfx(6) end
 -- true if point (cx,cy) is inside the live shockwave disc
 function bhit(cx,cy)
 	if bomb_r<0 then return end

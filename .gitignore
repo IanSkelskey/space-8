@@ -5,3 +5,5 @@
 *.p8.png
 *.html
 *.js
+/extras/
+/__pycache__/

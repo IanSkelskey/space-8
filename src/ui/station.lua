@@ -27,8 +27,8 @@ function station_init()
  station_mode="main" station_confirm=false sel=1
  ensure_mission()
  if shop_init then shop_init() end
- -- ensure correct music (pattern 10) starts on first arrival from menu/start
- if snd_music and current_music~=10 then snd_music(10) end
+ -- ensure starport starts on first arrival from menu/start
+ if snd_music and current_music~=8 then snd_music(8) end
 end
 
 function update_station()
@@ -36,35 +36,35 @@ function update_station()
     if station_mode == "main" then
         if not station_confirm then
             local max_sel = first_station and 3 or 2
-            if btnp(2) then sel -= 1 snd_sfx(44) end -- up
-            if btnp(3) then sel += 1 snd_sfx(44) end -- down
+            if btnp(2) then sel -= 1 snd_sfx(16) end -- up
+            if btnp(3) then sel += 1 snd_sfx(16) end -- down
             if sel<1 then sel=max_sel elseif sel>max_sel then sel=1 end
             -- left/right to change difficulty when diff row selected
             if first_station and sel==3 then
-                if btnp(0) then df = (df-2+#diff_labels)%#diff_labels+1 snd_sfx(44) round_number=sr[df] vr=1 current_mission=nil mission_distance=400+round_number*80 end
-                if btnp(1) then df = (df%#diff_labels)+1 snd_sfx(44) round_number=sr[df] vr=1 current_mission=nil mission_distance=400+round_number*80 end
+                if btnp(0) then df = (df-2+#diff_labels)%#diff_labels+1 snd_sfx(16) round_number=sr[df] vr=1 current_mission=nil mission_distance=400+round_number*80 end
+                if btnp(1) then df = (df%#diff_labels)+1 snd_sfx(16) round_number=sr[df] vr=1 current_mission=nil mission_distance=400+round_number*80 end
             end
-            if first_station and btnp(5) then game_state="menu" menu_init() snd_sfx(44) return end
+            if first_station and btnp(5) then game_state="menu" menu_init() snd_music(19) snd_sfx(16) return end
             if btnp(4) then
                 if sel == 1 then
-                    if (level_fanfare_timer or 0)<=0 then station_confirm = true snd_sfx(63) end
+                    if (level_fanfare_timer or 0)<=0 then station_confirm = true snd_sfx(17) end
                 elseif sel == 2 then
-                    station_mode = "shop" snd_sfx(63)
+                    station_mode = "shop" snd_sfx(17)
                 elseif sel == 3 then
                     -- acts like no-op (selector handled via left/right); provide confirm sound
-                    snd_sfx(63)
+                    snd_sfx(17)
                 end
             end
         else
             if btnp(4) then
-                snd_sfx(63)
+                snd_sfx(17)
                 level_fanfare_timer = 0
                 last_payout_ready = false
                 last_bonus=0 -- reset collected bonus for new mission
                 launch_mission()
                 station_confirm = false
             elseif btnp(5) then
-                station_confirm = false snd_sfx(44)
+                station_confirm = false snd_sfx(16)
             end
         end
     else

@@ -8,7 +8,7 @@ local function pkill(e)
 	obk+=1 -- round-summary obstacle tally
 	hud_add_score(20)
 	if rnd()<0.65 then cash(e.x+4,e.y+4,2+rndi(3)) end
-	boom(e.x,e.y,EXR) del(pops,e)
+	boom(e.x,e.y,EXR) snd_sfx(7) del(pops,e)
 end
 
 -- black hole swallows popcorn: full death (pkill) so it pops + scores + drops loot
@@ -29,14 +29,14 @@ function update_popcorn()
   if e.flash>0 then e.flash-=1 end
   e.s-=1
   if e.c>0 then
-   if e.s==6 then p_add(e.x+4,e.y+4,mid(-1.2,(ship.x-e.x)/32,1.2),1.4,90,9) end
+   if e.s==6 then p_add(e.x+4,e.y+4,mid(-1.2,(ship.x-e.x)/32,1.2),1.4,90,9) snd_sfx(24) end
    if e.s<=0 then e.c-=1 e.s=e.c>0 and 12 or 45+rndi(30) end
   elseif e.s<=0 then
    e.c=3+rndi(3) e.s=12
   end
   if hit_by_player_bullet(e.x+1,e.y+1,6,6) then
-   e.hp-=1 e.flash=4 snd_sfx(1)
-   if e.hp<=0 then pkill(e) end
+   e.hp-=1 e.flash=4
+   if e.hp<=0 then pkill(e) else snd_sfx(2) end
   elseif scoll(e.x+1,e.y+1,6,6) then
    ship_kill()
   elseif e.y>136 then

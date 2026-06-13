@@ -1,6 +1,6 @@
 -- round-clear summary screen (ui cart). the round-clear jingle finished in the gameplay cart,
--- so this screen runs under the menu loop (started in boot); advancing to the station is what
--- starts the station music. kills/round-score come via cartdata (slots 33/47, written by the
+-- so this screen runs under the title loop (started in boot); advancing to the station is what
+-- starts starport. kills/round-score come via cartdata (slots 33/47, written by the
 -- gameplay cart); payout/bonus are loaded into globals by lg().
 local skills,sscore,st_=0,0,0
 
@@ -12,9 +12,12 @@ function summary_init()
 end
 
 function update_summary()
- if st_<41 then st_+=1 end -- cap so st_ never overflows 16.16 fixed-point (~32767) and flips negative
+ if st_<41 then
+  st_+=1 -- cap so st_ never overflows 16.16 fixed-point (~32767) and flips negative
+  if st_<40 and st_%4==0 then snd_sfx(19) elseif st_==40 then snd_sfx(20) end
+ end
  if st_>40 and(btnp(4)or btnp(5)) then
-  snd_sfx(63) game_state="station" station_init() snd_music(10)
+  snd_sfx(17) game_state="station" station_init()
  end
 end
 

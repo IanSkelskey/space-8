@@ -32,9 +32,9 @@ function _init()
  hs_init()        -- load table
  -- Remove automatic hs_process_new_run() call
  dset(0,0)
- -- menu / round-clear summary / gameover all boot into the menu loop; the round-end jingle
- -- already finished in the gameplay cart. station music starts when the summary advances.
- snd_music(0)
+ -- fresh menu boots through ignition into horizon; returning screens use horizon directly.
+ -- station/shop start starport when station_init() runs.
+ snd_music(st==0 and 18 or 19)
 end
 
 function _update()
@@ -60,15 +60,16 @@ function _update()
       -- enter highscore entry with either button
       game_state="highscore_entry"
       highscore_entry_init()
-      if current_music~=0 and current_music~=9 then snd_music(0) end
-      snd_sfx(63)
+      if current_music~=19 then snd_music(19) end
+      snd_sfx(17)
     else
       -- go back to menu
       persist_clear_last_run()
       persist_reset_progress()
       game_state="menu"
       menu_init()
-      if current_music~=0 then snd_music(0) end
+      if current_music~=19 then snd_music(19) end
+      snd_sfx(17)
       dset(0,0)
     end
   end

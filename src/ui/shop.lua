@@ -10,7 +10,7 @@ for e in all(split(id,";")) do add(items,split(e,",")) end
 
 function shop_init() s,sm,st=1,"",0 end
 
-local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and 45 or 63) end
+local function msg(t,e) sm,st,sc=t,60,e and 8 or 11 snd_sfx(e and 18 or 17) end
 
 local function buy(i)
   local it,m=items[i],money_total
@@ -49,11 +49,11 @@ function shop_update()
  if st>0 then st-=1 if st<=0 then sm="" end end
  local n=#items
  -- grid nav: left/right wrap through all items in reading order; up/down jump a row (4 cols)
- if btnp(0) then s=s>1 and s-1 or n snd_sfx(44) end
- if btnp(1) then s=s<n and s+1 or 1 snd_sfx(44) end
- if btnp(2) and s>4 then s-=4 snd_sfx(44) end
- if btnp(3) and s+4<=n then s+=4 snd_sfx(44) end
- if btnp(5) then snd_sfx(63) station_mode="main" end
+ if btnp(0) then s=s>1 and s-1 or n snd_sfx(16) end
+ if btnp(1) then s=s<n and s+1 or 1 snd_sfx(16) end
+ if btnp(2) and s>4 then s-=4 snd_sfx(16) end
+ if btnp(3) and s+4<=n then s+=4 snd_sfx(16) end
+ if btnp(5) then snd_sfx(17) station_mode="main" end
  if btnp(4) then buy(s) end
 end
 

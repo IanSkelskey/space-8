@@ -11,13 +11,13 @@ local C8,C9=split"2,10,3,1,8",split"14,9,11,12,2"
 local RAMPS={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6",EXR}
 -- one colour-keyed powerup drop per variant (pink,yellow,green,blue,red): shard d / odds / life
 -- red drops the bomb (kind 3) at low odds; all five entries are now indexed
-local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2,3",split".5,.5,.5,.5,.5",split"150,150,170,140,150"
+local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2,3",split".3,.3,.3,.3,.3",split"150,150,170,140,150"
 -- kill a comet: drop + score + start the death animation (shared by bullet hits and black holes)
 local function comet_die(c)
 	obk+=1 -- round-summary obstacle tally
 	local k=c.ci+1
 	if rnd()<DROP_ODDS[k] then p_add(c.x,c.y,0,0,DROP_LIFE[k],7,nil,DROP_D[k]) end
-	hud_add_score(55) snd_sfx(1)
+	hud_add_score(55) snd_sfx(8)
 	boom(c.x,c.y,c.ramp) del(comets,c)
 end
 
@@ -86,7 +86,7 @@ function update_comet()
 		if hit_by_player_bullet(c.x,c.y,8,8) then
 			c.hp-=1
 			if c.hp<=0 then comet_die(c) goto continue
-			else c.flash=4 end
+			else c.flash=4 snd_sfx(2) end
 		end
 		if c.hp>0 then if scoll(c.x,c.y,8,8) then ship_kill() end if c.x<-12 or c.x>140 or c.y<-12 or c.y>140 then del(comets,c) end end
 		::continue::

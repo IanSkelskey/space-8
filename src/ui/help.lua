@@ -3,9 +3,9 @@ local hp,MP=1,5
 function help_init() hp=1 end
 
 function update_help()
- if btnp(0) and hp>1 then hp-=1 snd_sfx(44,3) end
- if btnp(1) and hp<MP then hp+=1 snd_sfx(44,3) end
- if btnp(4) or btnp(5) then snd_sfx(63,3) game_state="menu" menu_init() end
+ if btnp(0) and hp>1 then hp-=1 snd_sfx(16,3) end
+ if btnp(1) and hp<MP then hp+=1 snd_sfx(16,3) end
+ if btnp(4) or btnp(5) then snd_sfx(17,3) game_state="menu" menu_init() end
 end
 
 -- section header: a raised page heading in logo-blue
