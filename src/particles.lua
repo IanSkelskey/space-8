@@ -2,8 +2,8 @@
 local p={}
 local ppf=0 -- frame counter for shimmer
 Gp=p
--- powerup halo/icon by drop kind: 1 hull,2 shield,3 bomb (red halo, tile 40),5 rapid,6 magnet
-local PC1,PS=split"11,12,8,0,9,10",split"38,10,40,0,11,56"
+-- powerup icon by drop kind: 82 hull,84 shield,41 bomb,83 rapid,57 magnet
+local PS=split"38,11,3,10,12,15,40,8,2,0,0,0,11,10,9,56,14,2"
 -- shared explosion: the 6-frame blast (spr 202..207) recoloured per-source by a ramp.
 -- SRC = green-comet body colours setramp() swaps; EXR = red blast (popcorn + red comets).
 -- moved here so comets AND popcorn spawn the explosion as a one-shot particle (type 10).
@@ -20,18 +20,6 @@ function capv(o,m) local s=sqrt(o.dx*o.dx+o.dy*o.dy) if s>m then o.dx*=m/s o.dy*
 
 -- tiny shared halo (rotating 4-dot ring) reused by comets + powerups
 function h(x,y,a,c1,c2)for i=0,3 do local g=a+i*0.25 pset(flr(x+cos(g)*3),flr(y+sin(g)*3),i%2==0 and c1 or c2)end end
-
--- dashed 9x9 square frame at top-left (x,y) in colour c, with the dash marching around the
--- perimeter (clockwise) for a rotating-border look. used to ring powerup drops.
-function dborder(x,y,c)
- local t=flr(time()*12)
- for k=0,31 do
-  if (k+t)%4<2 then
-   local s,p=k\8,k%8
-   pset(x+(s==0 and p or s==1 and 8 or s==2 and 8-p or 0),y+(s==0 and 0 or s==1 and p or s==2 and 8 or 8-p),c)
-  end
- end
-end
 
 function p_add(x,y,dx,dy,life,typ,col,dat) add(p,{x=x,y=y,dx=dx,dy=dy,l=life,t=typ,c=col,d=dat}) end
 
@@ -84,21 +72,21 @@ function p_upd()
  end
 end
 
-local CF={67,68,69,68} -- spinning-coin animation frames (credit shards)
+local CF={128,129,130,129} -- spinning-coin animation frames (credit shards)
 function p_draw()
  for i in all(p) do
       if i.t==7 then
      local d=i.d
      if d==7 then
-          -- spinning coin: 4-frame animation (67,68,69,68). art is the tile's top-left 5x5,
+          -- spinning coin: 4-frame animation (128,129,130,129). art is the tile's top-left 5x5,
           -- so offset by -2 to centre that on the particle point.
           spr(CF[(ppf\4)%4+1],i.x-2,i.y-2)
      else
-       -- 7x7 dark-blue backing, the 5x5 icon centred on it, and a colour-coded marching dashed
-       -- frame just OUTSIDE the backing (9x9 total). colour = PC1[d] with a brief white blink.
-       rectfill(i.x,i.y,i.x+6,i.y+6,1)
-       spr(PS[d],i.x+1,i.y+1)
-       dborder(i.x-1,i.y-1,time()%0.5<0.1 and 7 or PC1[d])
+       local o,f=d*3,ppf%12<6 and 1 or 0
+       pal(7,PS[o-f])pal(13,PS[o-1+f])
+       sspr(24,56,9,9,i.x-1,i.y-1)
+       pal()
+       spr(PS[o-2],i.x+1,i.y+1)
      end
     elseif i.t==4 and i.d then
      -- debris chunk sampled from sprite 5; alt asteroids recolour it (4,2,1 -> 13,5,1)
