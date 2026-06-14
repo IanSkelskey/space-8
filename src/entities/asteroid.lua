@@ -17,7 +17,7 @@ local function spawn_chunk_dust(x,y,alt)
 	end
 end
 
-local function cash(x,y,n)for i=1,n do p_add(x,y,rnd()-0.5,rnd()-0.5,999,7,nil,7)end end
+local function cash(x,y,n)for i=1,n do local r=rnd() p_add(x,y,rnd()-0.5,rnd()-0.5,999,7,nil,r<.65 and 8 or r<.9 and 9 or 10)end end
 
 local function kill_debris(p)
 	local x,y=p.x+2,p.y+2
@@ -44,7 +44,7 @@ local function akill(m)
 	if m.large then
 		-- alt (tougher) variants award more score + money for the extra hits
 		hud_add_score(m.alt and 85 or 60)
-		-- money shards (large): 0-5 (avg ~2.5), +4 flat for alt; 4 credits each
+		-- money shards (large): 0-5 (avg ~2.5), +4 flat for alt
 		cash(m.x+4,m.y+4,max(1,rndi(6)+(m.alt and 4 or 0)))
 		-- two halves of the 16px parent split straight outward (left half goes left, right
 		-- half goes right) at a guaranteed minimum horizontal speed, falling at mspd in a
@@ -55,7 +55,7 @@ local function akill(m)
 		for i=1,12 do local a=rnd() p_add(m.x+8,m.y+8,cos(a)*(.5+rnd(1.6)),sin(a)*(.5+rnd(1.6)),9+rndi(7),1,nil,m.alt) end
 	else
 		hud_add_score(m.alt and 50 or 35)
-		-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt; 4 credits each
+		-- money shards (small): 0-3 (avg ~1.5), +2 flat for alt
 		cash(m.x+4,m.y+4,max(1,rndi(4)+(m.alt and 2 or 0)))
 		spawn_asteroid_debris(m.x,m.y,m.alt) boom(m.x,m.y,split"1,2,4,13")
 	end

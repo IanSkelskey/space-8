@@ -52,7 +52,7 @@ function p_upd()
          if ship.magnet_t>0 and d2<1936 and d2>0.5 then local inv,f=1/sqrt(d2),0.55*(1-d2/1936) i.dx+=dx*inv*f i.dy+=dy*inv*f end
          if d2<196 and d2>0 then local inv=1/sqrt(d2)
             if d2<100 then i.dx=dx*inv*1.8 i.dy=dy*inv*1.8 else local f=0.4*(1-d2/196) i.dx+=dx*inv*f i.dy+=dy*inv*f end
-         elseif i.d==7 then i.dx*=0.94 i.dy*=0.94 end
+         elseif i.d>7 then i.dx*=0.94 i.dy*=0.94 end
          if ship.magnet_t>0 or d2<196 then capv(i,2) end
    -- pickup capture: collect anything whose centre is within an 8px disc of the ship centre
    -- (64=8^2, ~the visible hull). a round distance test instead of a tight offset box, so a
@@ -61,7 +61,7 @@ function p_upd()
       if d2<64 then local d=i.d
    if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(9)
        elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end ship.heal_t=t()+0.4 hud_add_score(20) snd_sfx(15)
-       elseif d==7 then money_total+=4 last_bonus+=4 snd_sfx(13)
+       elseif d>7 then local v=d==10 and 5 or d-7 money_total+=v last_bonus+=v snd_sfx(13)
        elseif d==3 then bomb_fire(ship.x+4,ship.y+4)
        elseif d==5 then ship.rfb=210 snd_sfx(14)
        elseif d==6 then ship.magnet_t=420 snd_sfx(14)
@@ -72,15 +72,13 @@ function p_upd()
  end
 end
 
-local CF={128,129,130,129} -- spinning-coin animation frames (credit shards)
 function p_draw()
  for i in all(p) do
       if i.t==7 then
      local d=i.d
-     if d==7 then
-          -- spinning coin: 4-frame animation (128,129,130,129). art is the tile's top-left 5x5,
-          -- so offset by -2 to centre that on the particle point.
-          spr(CF[(ppf\4)%4+1],i.x-2,i.y-2)
+     if d>7 then
+          local a=(ppf\4)%4
+          spr(d*16-32+min(a,4-a),i.x-2,i.y-2)
      else
        local o,f=d*3,ppf%12<6 and 1 or 0
        pal(7,PS[o-f])pal(13,PS[o-1+f])

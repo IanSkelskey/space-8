@@ -38,11 +38,11 @@ function rprint(txt,x,y,m,s)
  print(txt,x,y,m)
 end
 
--- print s with any '$' drawn as the coin sprite (tile 67, 5px wide) -- the coin is the money symbol.
+-- print s with any '$' drawn as the coin sprite (tile 128 gold coin, 5px wide) -- the money symbol.
 -- raised (1px shadow colour sh) when sh is set. for right/centre alignment, width = #s*4+2 (one coin).
 function mprint(s,x,y,c,sh)
  for i=1,#s do local ch=sub(s,i,i)
-  if ch=="$" then spr(67,x,y) x+=6
+  if ch=="$" then spr(128,x,y) x+=6
   else if sh then print(ch,x,y+1,sh) end x=print(ch,x,y,c) end
  end
 end

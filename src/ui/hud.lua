@@ -32,7 +32,7 @@ function draw_hud()
  rprint(scoreh>0 and (scoreh..sub(ls,#ls-2)) or score,2,2,7,5) -- gray shadow reads on the black band
  local run=(game_state=="game" or game_state=="dying")
  local sa=(run and last_payout_ready) and (money_total-last_pay-last_bonus) or money_total
- local ns=""..sa rprint(ns,125-#ns*4,2,10,9) spr(67,119-#ns*4,2)
+ local ns=""..sa rprint(ns,125-#ns*4,2,10,9) spr(128,119-#ns*4,2)
  -- hull meter: FIXED 24px total (divisible by 2/3/4) split into mh EQUAL segments, so the
  -- bar is the same size for 2/3/4 hulls; filled=green, lost=grey. icon (spr 38) at left.
  spr(38,26,2)

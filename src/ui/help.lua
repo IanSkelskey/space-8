@@ -102,8 +102,8 @@ function draw_help()
   for i=1,#items do
    local icon=items[i][1]
    if icon==-1 then
-    -- spinning coin, matching the in-game credit animation (frames 67,68,69,68)
-    spr(69-abs(2-flr(time()*8)%4),7,y+1)
+    -- spinning coin, matching the in-game gold credit animation (frames 128,129,130,129)
+    spr(130-abs(2-flr(time()*8)%4),7,y+1)
    else
     spr(icon,7,y)
    end
