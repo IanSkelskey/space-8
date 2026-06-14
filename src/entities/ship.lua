@@ -158,7 +158,7 @@ function update_ship()
    local so=lvl>1 and 6 or 3
    if lvl~=1 then add(bullets,{x=cx,y=by,dx=iv,dy=-3})end
    if lvl>=1 then add(bullets,{x=cx-so,y=by,dx=iv-sdx,dy=-3}) add(bullets,{x=cx+so,y=by,dx=iv+sdx,dy=-3}) end
-  muzzle_t=4 -- two-frame muzzle flash (72 then 73) at the nose
+  muzzle_t=4 -- two-frame muzzle flash (tile 88 quads) at the nose
   -- 2-3 hot muzzle sparks: warm ramp that darkens with distance, then vanishes
   for i=1,2+rndi(2) do p_add(x+4+rnd()*2-1,y-4,iv+(rnd()-0.5)*1.2,-(0.6+rnd()*1.1),8+rndi(3),8) end
   snd_sfx(0,2)
@@ -263,15 +263,16 @@ function draw_ship()
   draw_hull()
  end
  
- -- muzzle flash at the nose: frame1 always 72; frame2 is 73/74/75 by lean stage (flipped to match the bank)
+ -- muzzle flash at the nose: four 4x4 quads packed into tile 88 (src 64,40).
+ -- frame1 = top-left quad; frame2 picks the lean-stage quad (TR/BL/BR), flipped to match the bank.
  if ship.muzzle_t>0 and not ship.dying then
   if ship.rfb>0 then rfpal() end
   local st=abs(ship.vlean)
   st=st<0.33 and 0 or(st<0.66 and 1 or 2)
-  local f1=ship.muzzle_t>2
-  -- at max lean, nudge frame-1 (72) 1px left (right when flipped)
-  local ox=(f1 and st==2)and(ship.vlean>0 and 1 or -1)or 0
-  spr(f1 and 72 or 73+st,ship.x+ox,ship.y-9,1,1,st>0 and ship.vlean>0)
+  local q=ship.muzzle_t>2 and 0 or 1+st -- 0=TL,1=TR,2=BL,3=BR
+  -- at max lean, nudge frame-1 1px left (right when flipped)
+  local ox=(q==0 and st==2)and(ship.vlean>0 and 1 or -1)or 0
+  sspr(64+(q%2)*4,40+flr(q/2)*4,4,4,ship.x+ox+2,ship.y-5,4,4,st>0 and ship.vlean>0)
   pal()
  end
 
