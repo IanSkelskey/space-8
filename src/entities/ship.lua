@@ -81,7 +81,9 @@ function eaoe(e,die,cx,cy)
  if nh<e.hp then e.flash=4 e.hp=nh if e.hp<=0 then die(e) return true end end
 end
 
-function ship_kill()
+-- instant=true wipes the whole hull in one hit (black-hole contact). it only reaches the
+-- hull path when the shield is down, so a shielded ship still takes its normal 1-segment hit.
+function ship_kill(instant)
  if ship.dying or ship.shield_invuln>0 or ship.hull_invuln>0 then return end
  sfx(-1,3)
  if ship.shield_active then
@@ -100,7 +102,7 @@ function ship_kill()
   if ship.shield_power<=0 then sh_off(1) end
   return
  end
- ship.hull-=1
+ ship.hull=instant and 0 or ship.hull-1
  ship.hull_invuln=60
  shake=max(shake,5) -- kick the screen on a hull hit
   snd_sfx(4)

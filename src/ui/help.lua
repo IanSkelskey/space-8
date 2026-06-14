@@ -76,15 +76,14 @@ function draw_help()
  elseif hp==4 then
   -- hazards 2: black holes
   shead("black holes",30)
-  -- spinning 2x sprite (same flip cycle as the live black hole)
-  local ph=flr(time()*8)%4
-  sspr(24,0,8,8,56,36,16,16,ph==1 or ph==2,ph==2 or ph==3)
+  -- live 16x16 black-hole art (tiles 172/174), alternating like draw_blackhole
+  spr(flr(time()*8)%2==0 and 172 or 174,56,36,2,2)
   local y=52
   print("appear at \f9round 5\f6",8,y,6) y+=8
   print("\f8pull your ship inward\f6",8,y,7) y+=8
   print("swallow asteroids & loot",8,y,6) y+=8
-  print("\f8death on contact\f6",8,y,8) y+=8
-  print("shield won't save you",8,y,6) y+=10
+  print("\f8one-shot kill if exposed\f6",8,y,8) y+=8
+  print("\fcshield\f6 lives / takes 1 hit",8,y,6) y+=10
   print("\fcsurvive:\f6 thrust away early",8,y,6) y+=8
   print("keep your distance",8,y,6)
  else

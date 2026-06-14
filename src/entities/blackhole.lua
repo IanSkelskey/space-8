@@ -44,15 +44,23 @@ function update_blackhole()
 		local d2=dx*dx+dy*dy
 		local r2=h.r*h.r
 		if d2<r2 and d2>0 then
-			local invd,str=1/sqrt(d2),0.75*(1-d2/r2)
+			-- the player feels a noticeably stronger drag than other objects (which keep their
+			-- gentler p_pull/comet_pull strengths above) so the well actually feels threatening.
+			local invd,str=1/sqrt(d2),1.05*(1-d2/r2)
 			ship.x=mid(0,ship.x+dx*invd*str,128-ship.w)
 			ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
 			-- gravity drama: subtle shake builds as the ship is dragged deeper into the well
 			shake=max(shake,str*2)
 		end
 		if scoll(h.x,h.y,8,8) and not ship.dying then
-			ship.shield_power,ship.shield_active=0,false
-			ship_kill()
+			if ship.shield_active then
+				-- shielded: the well collapses the shield and costs one hull segment, but you live
+				ship.shield_power,ship.shield_active=0,false
+				ship_kill()
+			else
+				-- unshielded: the well swallows the ship outright (one-shot kill)
+				ship_kill(true)
+			end
 		end
 
 		if h.y>136 then del(holes,h) end
