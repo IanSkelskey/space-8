@@ -94,7 +94,8 @@ function shop_draw()
   -- thrusters step through one icon frame per owned level (base..base+max).
   local icon=it[1]
   if i==7 and locked then icon="102"
-  elseif it[5]=="thruster_level" then icon=it[1]+min(ship.thruster_level or 0,it[2]) end
+  elseif it[5]=="thruster_level" then icon=it[1]+min(ship.thruster_level or 0,it[2])
+  elseif it[5]=="spread_level" then icon=48+min(ship.spread_level or 0,it[2]) end
   sspr((icon%16)*8,(icon\16)*8,8,8,cx-4,ty,8,8) -- native 8x8 (sspr coerces the string id)
   -- pips below the icon: hull for repair, level for upgrades
   if i==5 then pips(cx,ty+9,ship.hull,2+ship.hull_level)
