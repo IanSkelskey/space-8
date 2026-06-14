@@ -126,7 +126,7 @@ function draw_station()
                 y+=14
             end
             local prompt,px=first_station and "🅾️ select  ❎ back" or "🅾️ select",first_station and 22 or 42
-            print(prompt,px,115,6)
+            print(prompt,px,115,5)
         end
     else
         if shop_draw then shop_draw() else print("shop",58,76,7) end

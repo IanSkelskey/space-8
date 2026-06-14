@@ -29,5 +29,5 @@ function draw_summary()
  srow(70,"payout","+"..flr(last_pay*a),10)
  srow(78,"bonus","+"..flr(last_bonus*a),10)
  srow(88,"earned","$"..flr((last_pay+last_bonus)*a),10)
- if a>=1 and time()%1<0.66 then local l="🅾️ continue" print(l,64-#l*2,100,6) end
+ if a>=1 and time()%1<0.66 then local l="🅾️ continue" print(l,64-#l*2,100,5) end
 end

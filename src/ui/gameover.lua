@@ -32,9 +32,9 @@ function draw_gameover()
 		end
 		print("new high score!",32,86,time()%0.3<0.15 and 11 or 10)
 		local l="🅾️/❎ enter name"
-		print(l,64-#l*2,102,7)
+		print(l,64-#l*2,102,5)
 	else
 		local l="🅾️/❎ main menu"
-		print(l,64-#l*2,90,6)
+		print(l,64-#l*2,90,5)
 	end
 end

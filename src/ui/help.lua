@@ -114,5 +114,5 @@ function draw_help()
  end
 
  -- footer: page nav + exit
- print("\f6⬅️➡️ page    \f9❎\f6 back",24,118,5)
+ print("⬅️➡️ page    ❎ back",24,118,5)
 end

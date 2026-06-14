@@ -144,5 +144,5 @@ function draw_highscore_entry()
  
  -- Instructions pushed to bottom
  print("⬆️⬇️ change  ⬅️➡️ move",20,108,5)
- print("🅾️ confirm  ❎ cancel",22,116,7)
+ print("🅾️ confirm  ❎ cancel",22,116,5)
 end

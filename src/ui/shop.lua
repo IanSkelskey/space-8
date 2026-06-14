@@ -126,6 +126,6 @@ function shop_draw()
  if stat then rprint(stat,120-#stat*4,64,6,5) end   -- level/hull/status, right-aligned on the name line
  print(desc,8,74,11)                                -- effect description
  print("cost",8,84,6) mprint(cstr,30,84,12)
- print("⬅️➡️ select  🅾️ buy  ❎ back",6,104,6) -- navigation + actions
+ print("⬅️➡️ select  🅾️ buy  ❎ back",6,104,5) -- navigation + actions
  if sm~="" then print(sm,8,114,sc) end
 end
