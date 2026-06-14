@@ -8,8 +8,10 @@ since each cart is reloaded fresh and shares no RAM.
 - **Per slot:** one PICO-8 number, stored as 32-bit **16.16 fixed point** (so fractional
   values persist fine; integer magnitudes up to 32767).
 - **Authoritative index map:** [`src/persist.lua`](src/persist.lua) (full, UI cart).
-  [`src/persist_game.lua`](src/persist_game.lua) is a trimmed copy for the gameplay cart
-  that only declares slots `0`–`17`.
+  [`src/persist_game.lua`](src/persist_game.lua) is a trimmed copy for the gameplay cart:
+  it drives the shuttle slots `0`–`17` and also writes the round-summary scratch slots
+  `33`/`47` (raw `dset`, read back by [`src/ui/summary.lua`](src/ui/summary.lua)). Those
+  two scratch slots are the only cartdata not declared as `I_*` constants in `persist.lua`.
 
 ## Slot map
 
@@ -37,10 +39,10 @@ since each cart is reloaded fresh and shares no RAM.
 | `19` | `I_LAST_RUN_HI`   | **gameplay** (`ship_kill`, raw `dset(19)`) | UI | Last run final score, thousands. |
 | `20` | `I_HS1_COUNT`     | UI only | UI only | Easy highscore: entry count. |
 | `21`–`32` | `I_HS1_BASE` | UI only | UI only | Easy: 4 entries × 3 slots each → `(hi, lo, name_code)`. |
-| `33` | — | — | — | **spare** (block stride is 14, only 13 used). |
+| `33` | (`last_kills`) | **gameplay** (`persist_game` raw `dset(33)`) | UI summary | Round-clear obstacle-kill tally (`obk`), shown on the round-summary screen. Reuses the easy-highscore block's stride-padding slot (the HS logic never touches it). |
 | `34` | `I_HS2_COUNT`     | UI only | UI only | Normal highscore: entry count. |
 | `35`–`46` | `I_HS2_BASE` | UI only | UI only | Normal: 4 entries × `(hi, lo, name_code)`. |
-| `47` | — | — | — | **spare**. |
+| `47` | (`last_score`) | **gameplay** (`persist_game` raw `dset(47)`) | UI summary | Round-clear score (`scoreh*1000 + score`) for the round-summary screen. Reuses the normal-highscore block's stride-padding slot. |
 | `48` | `I_HS3_COUNT`     | UI only | UI only | Veteran highscore: entry count. |
 | `49`–`60` | `I_HS3_BASE` | UI only | UI only | Veteran: 4 entries × `(hi, lo, name_code)`. |
 | `61` | — | — | — | **spare**. |
@@ -61,7 +63,9 @@ Each highscore table (easy/normal/veteran) stores up to `MAX_HS=4` entries, 3 sl
   is `0`–`25` (base-26). Decoded back via `dec_name`.
 
 Layout per block: `[count][e1.hi e1.lo e1.nc][e2…][e3…][e4…]` = 1 + 4×3 = **13 slots used**,
-with a **14-slot stride** between block starts (`20`, `34`, `48`), leaving one spare each.
+with a **14-slot stride** between block starts (`20`, `34`, `48`), leaving one padding slot
+each (`33`, `47`, `61`). The first two of those are reused as round-summary scratch (see the
+slot map), so only `61` is genuinely free.
 
 ## Cross-cart ownership notes
 
@@ -71,16 +75,24 @@ with a **14-slot stride** between block starts (`20`, `34`, `48`), leaving one s
 - **Last-run score (`18`–`19`)** is written directly by the gameplay cart inside
   `ship_kill` (raw `dset`), because by the time game.lua's death block runs, `game_state`
   is already `"dying"`. The UI reads it for gameover + highscore qualification.
-- **Highscores (`20`–`61`) and lifetime money (`62`–`63`)** are owned entirely by the UI
-  cart. As of the 2026-06-07 refactor, the gameplay cart no longer touches lifetime money;
+- **Round-summary scratch (`33`, `47`)** carries the just-cleared round's obstacle-kill
+  tally and score from the gameplay cart to the UI's round-summary screen. The gameplay
+  cart writes them raw on exit (`persist_save_from_game`); [`summary.lua`](src/ui/summary.lua)
+  reads them. They live in highscore-block padding slots that the HS code never writes, so
+  there's no collision.
+- **The highscore tables (blocks at `20`/`34`/`48`) and lifetime money (`62`–`63`)** are
+  owned entirely by the UI cart — except for the `33`/`47` padding slots noted above, which
+  the gameplay cart borrows. As of the 2026-06-07 refactor, the gameplay cart no longer
+  touches lifetime money;
   the UI folds each run's earnings in at the handoff
   (`add_life(st==1 and last_pay+last_bonus or last_bonus)` in `persist_load_ui_state`).
 
 ## Free space
 
-Spare slots: **`33`, `47`, `61`** (3 total). These are the only currently-unused slots —
-there is no contiguous room for a large new block. Notably, this is **not enough to persist
-the ~10 difficulty-scaling floats** that `sl()` ([`src/levels.lua`](src/levels.lua))
-computes, which is why that function can't be offloaded from the gameplay cart to the UI
-cart without first reclaiming highscore space (e.g. packing `hi`+`lo` into one slot, or
-dropping to 3 highscore entries per difficulty).
+Genuinely free: **`61`** only. The other two highscore-padding slots (`33`, `47`) are now
+occupied by round-summary scratch (see slot map), so they're no longer available. With a
+single spare slot there is nowhere near contiguous room for a large new block — in
+particular **not enough to persist the ~10 difficulty-scaling floats** that `sl()`
+([`src/levels.lua`](src/levels.lua)) computes, which is why that function can't be offloaded
+from the gameplay cart to the UI cart without first reclaiming highscore space (e.g. packing
+`hi`+`lo` into one slot, or dropping to 3 highscore entries per difficulty).

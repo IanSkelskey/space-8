@@ -105,7 +105,7 @@ Want to make your own shmup? The tilesheet and assets from this game are availab
     - `export space_8.html ui.p8` (PICO-8 will include the gameplay cart it loads)
 
 ### Persisted Values Between Carts
-The following values are serialized with `dset/dget` (indices documented in `src/persist.lua`): difficulty, round, visible round, money, last payout + bonus, score totals (ts,tsh), upgrade levels (fire, shield, spread, hull, thruster), shield unlocked, current hull, payout-ready flag, and a start flag instructing gameplay cart to begin a mission immediately.
+Both carts share a single 64-slot `cartdata("sp8")` block to save progress **and** shuttle run state across the handoff (difficulty, round, money, last payout + bonus, score totals, upgrade levels, shield unlock, current hull, payout-ready and mission-start flags, per-difficulty high scores, and lifetime money). The full slot-by-slot memory map is documented in **[CARTDATA.md](CARTDATA.md)**.
 
 ## Hardware
 
