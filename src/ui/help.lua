@@ -35,12 +35,12 @@ function draw_help()
   -- permanent upgrades (descriptions match the shop)
   shead("upgrades",30)
   local e={
-   {83,"fire rate","faster shots"},
-   {84,"shield","lasts longer"},
-   {50,"spread","more lasers"},
-   {82,"hull","+1 max hull"},
-   {65,"thrusters","+ top speed"},
-   {85,"shock","blast on hit"}
+   {18,"fire rate","faster shots"},
+   {19,"shield","lasts longer"},
+   {24,"spread","more lasers"},
+   {17,"hull","+1 max hull"},
+   {25,"thrusters","+ top speed"},
+   {20,"shock","blast on hit"}
   }
   local y=42
   for i=1,#e do
@@ -54,22 +54,22 @@ function draw_help()
   -- hazards 1: asteroids, then comets (two labelled sections, no repeated word)
   shead("asteroids",30)
   local y=42
-  spr(2,8,y) print("\f8asteroid\f6",20,y+1,7) print("loot + debris",62,y+1,6)
+  spr(48,8,y) print("\f8asteroid\f6",20,y+1,7) print("loot + debris",62,y+1,6)
   y+=13
-  spr(7,8,y) spr(8,16,y) spr(23,8,y+8) spr(24,16,y+8)
+  spr(49,8,y,2,2)
   print("\f8big asteroid\f6",28,y+1,7) print("more loot; splits",28,y+9,6)
   y+=24
   print("\fccomets\f6 (round 3+):",8,y,7)
   y+=10
-  -- live comet art (200) recoloured per variant: magnet/rapid/hull/charge
+  -- live comet art (base 51) recoloured per variant: magnet/rapid/hull/charge
   local csrc=split"1,3,11,10"
   local cramps={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6"}
-  local comets={{56,"magnet"},{11,"rapid"},{38,"hull"},{10,"charge"}}
+  local comets={{35,"magnet"},{34,"rapid"},{32,"hull"},{33,"charge"}}
   for i=1,4 do
    local cx=10+((i-1)%2)*58
    local cy=y+((i-1)\2)*11
    for k=1,4 do pal(csrc[k],cramps[i][k]) end
-   spr(200,cx,cy) pal()
+   spr(51,cx,cy) pal()
    spr(comets[i][1],cx+9,cy)
    print(comets[i][2],cx+19,cy+2,6)
   end
@@ -91,18 +91,18 @@ function draw_help()
   -- comet rows on page 3.
   shead("powerups",30)
   local items={
-   {38,"hull","+1 hp"},
-   {10,"charge","shield + free"},
+   {32,"hull","+1 hp"},
+   {33,"charge","shield + free"},
    {-1,"credits","cash bonus"},
-   {11,"rapid","burst fire 6s"},
-   {56,"magnet","pulls loot in"}
+   {34,"rapid","burst fire 6s"},
+   {35,"magnet","pulls loot in"}
   }
   local y=42
   for i=1,#items do
    local icon=items[i][1]
    if icon==-1 then
-    -- spinning coin, matching the in-game gold credit animation (frames 128,129,130,129)
-    spr(130-abs(2-flr(time()*8)%4),7,y+1)
+    -- spinning coin, matching the in-game gold credit animation (frames 52,53,54,53)
+    spr(54-abs(2-flr(time()*8)%4),7,y+1)
    else
     spr(icon,7,y)
    end

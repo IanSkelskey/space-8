@@ -51,7 +51,7 @@ function draw_popcorn()
   if e.flash>0 then fl(8) end
   local x,y=e.x,e.y
   if e.flash>0 then x+=jit() y+=jit() end
-  spr(e.c>0 and(e.s>6 and 17 or 33)or 1,x,y)
+  spr(e.c>0 and(e.s>6 and 11 or 12)or 10,x,y) -- body run 10 idle / 11,12 shooting
   if e.flash>0 then pal() end
  end
 end

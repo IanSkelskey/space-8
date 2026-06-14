@@ -16,9 +16,6 @@ bullets={}
 -- precomputed color triplets: base, level1, level2, level3+
 local thr_cols={split"10,9,8",split"12,13,1",split"11,3,1",split"7,6,5",split"8,9,2"}
 
--- rapid-fire recolor: shift warm bullet/flash colors one step hotter (yellow->white, orange->yellow, red->orange)
-local function rfpal() pal(10,7)pal(9,10)pal(8,9) end
-
 -- polar pset: plot colour c at angle a / radius r around (cx,cy), rounded to nearest pixel
 local function pp(cx,cy,a,r,c) pset(flr(cx+cos(a)*r+0.5),flr(cy+sin(a)*r+0.5),c) end
 
@@ -217,11 +214,11 @@ function update_ship()
  end -- _ENV block
 end
 
--- draw the 16x16 hull at its current visual lean (level 137 / bank 139 / max 141)
+-- draw the 16x16 hull at its current visual lean (level 192 / bank 194 / max 196, stride 2)
 local function draw_hull()
- local al=abs(ship.vlean)
- if al<0.33 then spr(137,ship.x-4,ship.y-4,2,2)
- else spr(al<0.66 and 139 or 141,ship.x-4,ship.y-4,2,2,ship.vlean>0) end
+ local s=abs(ship.vlean)
+ s=s<0.33 and 0 or s<0.66 and 1 or 2
+ spr(192+s*2,ship.x-4,ship.y-4,2,2,ship.vlean>0) -- flip is harmless on the symmetric level frame
 end
 
 -- flash the hull with a 2-colour ramp (light a / dark b), draw it, reset:
@@ -249,10 +246,10 @@ function draw_ship()
  -- (the magnet still pulls loot during the fly-off, so keep its aura visible)
  if game_state=="fanfare_depart" then draw_hull() draw_magnet() return end
  if ship.dying then
-  -- death: a hit flash first, then the full 6-frame 16x16 explosion (tiles 160..170), 4 game-frames each
+  -- death: a hit flash first, then the full 6-frame 16x16 explosion (bases 224,226..234), 4 game-frames each
   local f=ship.death_t\4
   if f<1 then hf(8,2)
-  elseif f<7 then spr(160+(f-1)*2,ship.x-4,ship.y-4,2,2) end
+  elseif f<7 then spr(224+(f-1)*2,ship.x-4,ship.y-4,2,2) end
  elseif ship.heal_t>t() then
   -- heal flash: blink the green-ramped hull on/off, same cadence as the red hit flash
   if (flr(t()*15))%2<1 then hf(11,3) end
@@ -263,23 +260,21 @@ function draw_ship()
   draw_hull()
  end
  
- -- muzzle flash at the nose: four 4x4 quads packed into tile 88 (src 64,40).
- -- frame1 = top-left quad; frame2 picks the lean-stage quad (TR/BL/BR), flipped to match the bank.
+ -- muzzle flash at the nose: four 4x4 quads packed into tile 8 (src 64,0). rapid-fire uses
+ -- the baked hot variant in tile 9 (one quad-row over, rb). frame1=TL; frame2=lean quad TR/BL/BR.
  if ship.muzzle_t>0 and not ship.dying then
-  if ship.rfb>0 then rfpal() end
+  local rb=ship.rfb>0 and 1 or 0
   local st=abs(ship.vlean)
   st=st<0.33 and 0 or(st<0.66 and 1 or 2)
   local q=ship.muzzle_t>2 and 0 or 1+st -- 0=TL,1=TR,2=BL,3=BR
   -- at max lean, nudge frame-1 1px left (right when flipped)
   local ox=(q==0 and st==2)and(ship.vlean>0 and 1 or -1)or 0
-  sspr(64+(q%2)*4,40+flr(q/2)*4,4,4,ship.x+ox+2,ship.y-5,4,4,st>0 and ship.vlean>0)
-  pal()
+  sspr(64+rb*8+(q%2)*4,flr(q/2)*4,4,4,ship.x+ox+2,ship.y-5,4,4,st>0 and ship.vlean>0)
  end
 
- -- bullets: animated 5x6 sprite over the 5x5 hitbox; rapid fire recolors the base sprite hotter via palette
- if ship.rfb>0 then rfpal() end
- for b in all(bullets)do sspr(64+(flr(time()*16+b.x+b.y)%2)*8,56,5,6,flr(b.x),flr(b.y)-1) end
- pal()
+ -- bullets: animated 5x6 sprite (tiles 4,5); rapid fire uses the baked hot variant (tiles 6,7)
+ local rb=ship.rfb>0 and 1 or 0
+ for b in all(bullets)do sspr(32+rb*16+(flr(time()*16+b.x+b.y)%2)*8,0,5,6,flr(b.x),flr(b.y)-1) end
  -- shield bubble depletes for BOTH shields: rings shed (3->2->1) and the ring blinks as the charge
  -- runs low (manual: power; powerup: time), so each reads as "about to break".
  local lvl=ship.shield_free>0 and ship.shield_free/110 or ship.shield_power/100

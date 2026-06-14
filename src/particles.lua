@@ -2,8 +2,8 @@
 local p={}
 local ppf=0 -- frame counter for shimmer
 Gp=p
--- powerup icon by drop kind: 82 hull,84 shield,41 bomb,83 rapid,57 magnet
-local PS=split"38,11,3,10,12,15,40,8,2,0,0,0,11,10,9,56,14,2"
+-- powerup icon by drop kind (icon at PS[d*3-2]): 32 hull,33 charge,34 bomb,35 rapid,36 magnet
+local PS=split"32,11,3,33,12,15,34,8,2,0,0,0,35,10,9,36,14,2"
 -- shared explosion: the 6-frame blast (spr 202..207) recoloured per-source by a ramp.
 -- SRC = green-comet body colours setramp() swaps; EXR = red blast (popcorn + red comets).
 -- moved here so comets AND popcorn spawn the explosion as a one-shot particle (type 10).
@@ -78,11 +78,11 @@ function p_draw()
      local d=i.d
      if d>7 then
           local a=(ppf\4)%4
-          spr(d*16-32+min(a,4-a),i.x-2,i.y-2)
+          spr(48+(d-8)*16+min(a,4-a),i.x-2,i.y-2) -- credits small/mid/gold at 48/64/80
      else
        local o,f=d*3,ppf%12<6 and 1 or 0
        pal(7,PS[o-f])pal(13,PS[o-1+f])
-       sspr(24,56,9,9,i.x-1,i.y-1)
+       sspr(80,16,9,9,i.x-1,i.y-1)
        pal()
        spr(PS[o-2],i.x+1,i.y+1)
      end
@@ -92,10 +92,10 @@ function p_draw()
      sspr(i.d[1],i.d[2],4,4,i.x,i.y)
      if i.c then pal() end
     elseif i.t==9 then
-     sspr(112+((ppf\4)%2)*8,56,5,5,flr(i.x),flr(i.y))
+     sspr(104+((ppf\4)%2)*8,0,5,5,flr(i.x),flr(i.y))
     elseif i.t==10 then
      -- explosion: frame from remaining life; flip by spawn-pos parity for variety
-     setramp(i.d) spr(202+(18-i.l)\3,i.x,i.y,1,1,i.x%2<1,i.y%2<1) pal()
+     setramp(i.d) spr(25+(18-i.l)\3,i.x,i.y,1,1,i.x%2<1,i.y%2<1) pal()
     else
      local c=i.c
      if not c then

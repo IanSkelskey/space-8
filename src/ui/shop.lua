@@ -3,7 +3,7 @@ local s,sm,st,sc=1,"",0,11 -- s=selected item index (single grid now, no pages)
 -- compressed items: icon,max,base$,inc$,field,unlock,name,desc
 -- rebalance: cheaper early items, expensive later upgrades for 1-2 round affordability but >12 round completion
 -- NOTE: fields are comma-split, so name/desc must NOT contain commas (use / or + instead).
-local id="83,3,100,120,fire_rate_level,,fire rate,-20% shot cooldown / lvl;84,3,140,150,shield_level,shield_unlocked,shield,holds longer + recharges;87,2,180,200,spread_level,,spread shot,more lasers / wider spread;82,2,200,220,hull_level,,hull,+1 max hull segment;81,99,180,0,,,repair,restore 1 hull segment;65,3,90,140,thruster_level,,thrusters,+12% top speed / lvl;85,2,220,180,shield_pulse_level,shield_unlocked,shield shock,shielded hits blast foes"
+local id="18,3,100,120,fire_rate_level,,fire rate,-20% shot cooldown / lvl;19,3,140,150,shield_level,shield_unlocked,shield,holds longer + recharges;22,2,180,200,spread_level,,spread shot,more lasers / wider spread;17,2,200,220,hull_level,,hull,+1 max hull segment;16,99,180,0,,,repair,restore 1 hull segment;25,3,90,140,thruster_level,,thrusters,+12% top speed / lvl;20,2,220,180,shield_pulse_level,shield_unlocked,shield shock,shielded hits blast foes"
 -- pre-split once to save tokens (was repeatedly split each access)
 local items={}
 for e in all(split(id,";")) do add(items,split(e,",")) end
@@ -93,9 +93,9 @@ function shop_draw()
   -- icon: shield shock shows its pre-grayed variant (tile 102) while shield-locked.
   -- thrusters step through one icon frame per owned level (base..base+max).
   local icon=it[1]
-  if i==7 and locked then icon="102"
+  if i==7 and locked then icon="21"
   elseif it[5]=="thruster_level" then icon=it[1]+min(ship.thruster_level or 0,it[2])
-  elseif it[5]=="spread_level" then icon=48+min(ship.spread_level or 0,it[2]) end
+  elseif it[5]=="spread_level" then icon=22+min(ship.spread_level or 0,it[2]) end
   sspr((icon%16)*8,(icon\16)*8,8,8,cx-4,ty,8,8) -- native 8x8 (sspr coerces the string id)
   -- pips below the icon: hull for repair, level for upgrades
   if i==5 then pips(cx,ty+9,ship.hull,2+ship.hull_level)

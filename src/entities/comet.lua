@@ -103,8 +103,9 @@ function draw_comet()
 			local ax,ay=abs(c.dx),abs(c.dy)
 			local angled=ax*2.414>ay and ay*2.414>ax
 			local vert=ay>ax  -- vertical-dominant heading (only reached when not angled)
-			-- 2-frame flight anim; base sprite by orientation: angled 198 / vertical 196 / horizontal 200
-			local sid,flash=(angled and 198 or(vert and 196 or 200))+flr(t()*6+c.x)%2,c.flash>0
+			-- 2-frame flight anim; orientation run base 19, stride 2 (vert 19 / angled 21 / horizontal 23)
+			local o=angled and 1 or vert and 0 or 2
+			local sid,flash=19+o*2+flr(t()*6+c.x)%2,c.flash>0
 			-- per-object hit shake: jitter the draw position +-1px while flashing
 			local cx,cy=c.x,c.y
 			if flash then fl(7) cx+=jit() cy+=jit()

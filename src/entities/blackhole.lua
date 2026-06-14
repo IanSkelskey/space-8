@@ -91,9 +91,9 @@ function update_blackhole()
 end
 
 function draw_blackhole()
-	-- 16x16 two-frame body (tiles 172/174), centred on the 8x8 logical position.
+	-- 16x16 two-frame body (bases 198/200), centred on the 8x8 logical position.
 	-- particle swirls are still spawned in update_blackhole.
 	for h in all(holes) do
-		spr(h.spin_t\3%2==0 and 172 or 174,h.x-4,h.y-4,2,2)
+		spr(h.spin_t\3%2==0 and 198 or 200,h.x-4,h.y-4,2,2)
 	end
 end

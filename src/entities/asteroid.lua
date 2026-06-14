@@ -30,8 +30,8 @@ local function spawn_asteroid_debris(x,y,alt)
 	for i=1,2+rndi(2) do
 		local ox,oy=rndi(2)*4,rndi(2)*4
 		local a,s=atan2(x+ox-ship.x,y+oy-ship.y)+rnd(.6)-.3,1+rnd(.5)
-		-- chunks always sampled from sprite 5 (src x=40); alt recoloured by pal swap at draw (c=alt)
-		p_add(x+ox,y+oy,cos(a)*s,sin(a)*s,999,4,alt,{40+ox,oy})
+		-- chunks always sampled from debris tile 3 (src x=24,y=0); alt recoloured by pal swap at draw (c=alt)
+		p_add(x+ox,y+oy,cos(a)*s,sin(a)*s,999,4,alt,{24+ox,oy})
 	end
 end
 
@@ -136,10 +136,10 @@ function draw_asteroid()
 		local dx,dy=m.x,m.y
 		if m.flash>0 then dx+=jit() dy+=jit() end
 		if m.large then
-			-- 2x2 block; alt uses the same sprites, recoloured by the swap above
-			spr(7,dx,dy) spr(8,dx+8,dy) spr(23,dx,dy+8) spr(24,dx+8,dy+8)
+			-- 2x2 block (base 1); alt uses the same sprites, recoloured by the swap above
+			spr(1,dx,dy,2,2)
 		else
-			spr(2,dx,dy)
+			spr(0,dx,dy)
 		end
 		pal()
 	end
