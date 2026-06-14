@@ -38,6 +38,7 @@
 | ![Medium](preview/entities/asteroid-md.png) ![Large](preview/entities/asteroid-lg.png)                                                                        | Asteroid   | Slow-moving space rock. Takes multiple hits and splits into smaller chunks when destroyed. Chance to drop money. |
 | ![Yellow Comet](preview/entities/comet-yellow.png) ![Green Comet](preview/entities/comet-green.png) ![Blue Comet](preview/entities/comet-blue.png) ![Red Comet](preview/entities/comet-red.png) ![Pink Comet](preview/entities/comet-pink.png) | Comet      | Fast movers that arrive from round 3. Takes two hits to destroy, and each colour drops a different power-up — or just dodge them. |
 | ![Black Hole](preview/entities/black-hole.gif)                                                                                               | Black Hole | A space anomaly that appears from round 5 and pulls your ship inward. Death on contact — your shield won't save you, so thrust away early. |
+| ![Popcorn](preview/entities/popcorn.gif)                                                                                                     | Popcorn    | A little alien gunner that weaves down from round 2, winds up, and spits a shot tracked toward you. Takes two hits to pop and usually drops money. |
 
 ## Upgrades
 
