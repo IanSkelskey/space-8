@@ -37,9 +37,9 @@ function draw_help()
   local e={
    {83,"fire rate","faster shots"},
    {84,"shield","lasts longer"},
-   {87,"spread","more lasers"},
+   {50,"spread","more lasers"},
    {82,"hull","+1 max hull"},
-   {86,"thrusters","+ top speed"},
+   {65,"thrusters","+ top speed"},
    {85,"shock","blast on hit"}
   }
   local y=42
