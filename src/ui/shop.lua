@@ -80,9 +80,15 @@ function shop_draw()
   local sel=i==s
   local locked=it[6]~="" and not ship[it[6]] and i~=2 -- shield-gated, pre-unlock
   if sel then
-   -- selection highlight, centred on the 8px icon (cx-4..cx+3) + pips
-   rectfill(cx-6,ty-2,cx+5,ty+12,1)
-   rect(cx-6,ty-2,cx+5,ty+12,12)
+   -- selection highlight, centred on the 8px icon (cx-4..cx+3) + pips.
+   -- roomier padding, with a border that breathes up/down the blue ramp (1>15>12>15)
+   -- plus brighter corner ticks for a touch of sparkle.
+   local x0,y0,x1,y1=cx-8,ty-3,cx+7,ty+13
+   local pc=({1,15,12,15})[flr(time()*4)%4+1]
+   rectfill(x0,y0,x1,y1,1)
+   rect(x0,y0,x1,y1,pc)
+   local cc=pc==1 and 12 or 7
+   pset(x0,y0,cc) pset(x1,y0,cc) pset(x0,y1,cc) pset(x1,y1,cc)
   end
   -- icon: shield shock shows its pre-grayed variant (tile 102) while shield-locked.
   -- thrusters step through one icon frame per owned level (base..base+max).
