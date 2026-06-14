@@ -3,7 +3,7 @@
 # Space 8 (PICO-8)
 
 <p align="center">
-    <img src="preview/cart-preview.png" alt="Cartridge Art" width="160">
+    <img src="preview/cart.png" alt="Cartridge Art" width="320" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;">
 </p>
 
 <p align="center">
@@ -35,9 +35,9 @@
 
 | Sprite                                                                                                                      | Name       | Description                                                                                                 |
 | --------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
-| ![Medium](preview/entities/asteroid-md.png) ![Large](preview/entities/asteroid-lg.png)                                                                        | Asteroid   | Large space rock that moves slowly. Can be destroyed with multiple hits. Breaks into chunks when destroyed. Chance to drop money. |
-| ![Orange Comet](preview/entities/comet-orange.png) ![Green Comet](preview/entities/comet-green.png) ![Blue Comet](preview/entities/comet-blue.png) ![Red Comet](preview/entities/comet-red.png) ![Pink Comet](preview/entities/comet-pink.png) | Comet      | Fast-moving space debris that cannot be destroyed. Must be avoided to prevent damage. Chance to drop powerups                       |
-| ![Black Hole](preview/entities/black-hole.gif)                                                                                               | Black Hole | A dangerous space anomaly that pulls the player in. Avoid getting too close or you'll be sucked in!         |
+| ![Medium](preview/entities/asteroid-md.png) ![Large](preview/entities/asteroid-lg.png)                                                                        | Asteroid   | Slow-moving space rock. Takes multiple hits and splits into smaller chunks when destroyed. Chance to drop money. |
+| ![Yellow Comet](preview/entities/comet-yellow.png) ![Green Comet](preview/entities/comet-green.png) ![Blue Comet](preview/entities/comet-blue.png) ![Red Comet](preview/entities/comet-red.png) ![Pink Comet](preview/entities/comet-pink.png) | Comet      | Fast movers that arrive from round 3. Takes two hits to destroy, and each colour drops a different power-up — or just dodge them. |
+| ![Black Hole](preview/entities/black-hole.gif)                                                                                               | Black Hole | A space anomaly that appears from round 5 and pulls your ship inward. Death on contact — your shield won't save you, so thrust away early. |
 
 ## Upgrades
 
@@ -55,14 +55,25 @@ Purchasables available at the Station shop.
 
 ## Power-ups
 
-Dropped by comets during missions. Temporary or immediate effects.
+Dropped by comets during missions. Effects are temporary and reset at the end of each round.
 
 | Icon | Name | Description |
 | ---- | ---- | ----------- |
-| ![Hull +1](preview/entities/upgrade-hull.png) | Hull | +1 HP if you have room; dropped from green comets. |
-| ![Shield](preview/entities/upgrade-shield.png) | Shield Refill | Fully recharges shield; gives free shield time; dropped from blue comets. |
-| ![Rapid Fire](preview/entities/upgrade-fire-rate.png) | Rapid | Temporary burst of faster fire; dropped from yellow comets. |
-| ![Magnet](preview/entities/powerup-magnet.png) | Magnet | Attracts nearby loot and pickups; dropped by pink comets. |
+| ![Hull +1](preview/entities/powerup-hull.gif) | Hull | +1 HP if you have room; dropped by green comets. |
+| ![Charge](preview/entities/powerup-charge.gif) | Charge | Fully recharges your shield and grants a stretch of free shield time; dropped by blue comets. |
+| ![Rapid Fire](preview/entities/powerup-rapid.gif) | Rapid | A ~6 second burst of faster fire; dropped by yellow comets. |
+| ![Magnet](preview/entities/powerup-magnet.gif) | Magnet | Pulls nearby loot and pickups toward you; dropped by pink comets. |
+| ![Bomb](preview/entities/powerup-bomb.gif) | Bomb | Detonates an expanding shockwave that vaporises every obstacle it sweeps over; dropped (rarely) by red comets. |
+
+## Credits
+
+Coins dropped by destroyed asteroids and enemies. Scoop them up mid-mission to fund upgrades at the Station — they come in three tiers (rarer coins are worth more).
+
+| Coin | Tier | Value |
+| ---- | ---- | ----- |
+| ![Bronze](preview/entities/coin-bronze.gif) | Bronze | 1 credit (common) |
+| ![Silver](preview/entities/coin-silver.gif) | Silver | 2 credits |
+| ![Gold](preview/entities/coin-gold.gif) | Gold | 5 credits (rare) |
 
 ## Free Assets
 
