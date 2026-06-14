@@ -16,9 +16,10 @@ end
 function sbar(x,y,w,c) for r=0,2 do rectfill(x+2-r,y+r,x+1-r+w,y+r,c) end end
 
 -- temp-effect icon at x (status row): when active, the colour sprite `id` plus a
--- remaining-time bar (t of tm) the width of the 5px icon; otherwise the dimmed grayscale `gid`.
+-- remaining-time bar (t of tm) the width of the 5px icon, 1px below the icon art;
+-- otherwise the dimmed grayscale `gid`.
 function fxi(x,id,gid,t,tm,c)
- if t>0 then spr(id,x,8) rectfill(x,13,x+t/tm*4,13,c)
+ if t>0 then spr(id,x,8) rectfill(x,14,x+t/tm*4,14,c)
  else spr(gid,x,8) end
 end
 
@@ -57,12 +58,12 @@ function draw_hud()
  fxi(33,shk and 105 or 10,36,ship.shield_free,110,shk and 8 or 12)
  fxi(40,56,37,ship.magnet_t,420,14)
  -- mission progress: full-width 1px bar at the very bottom of the band (slimmed from 2px to give
- -- the status row a clear margin above it)
+ -- the status row a clear margin above it -- 1px gap under the icons, then the timer row, then this)
  if run and mission_distance>0 then
   local pt=min(1,(mission_distance-(dr or mission_distance))/mission_distance)
   db=mid(pt,db-0.02,db+0.02) -- ease toward pt, 0.02/frame
   local w=db*124
-  rectfill(2,16,125,16,1)
-  if w>0 then rectfill(2,16,1+w,16,db>0.95 and(flr(time()*4)%2==0 and 6 or 13)or 13) end
+  rectfill(2,17,125,17,1)
+  if w>0 then rectfill(2,17,1+w,17,db>0.95 and(flr(time()*4)%2==0 and 6 or 13)or 13) end
  end
 end

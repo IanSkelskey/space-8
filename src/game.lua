@@ -105,7 +105,7 @@ function _draw()
 	cls()
 	-- screen shake: jitter the world camera; reset before HUD so it stays fixed
 	if shake>0 then camera(rnd(shake)-shake/2,rnd(shake)-shake/2) end
-	clip(0,17,128,128) -- confine all gameplay below the 17px HUD band so nothing overlaps it
+	clip(0,18,128,128) -- confine all gameplay below the 18px HUD band so nothing overlaps it
 	draw_starfield()
 	if game_state=="fanfare_depart"then
 		draw_ship()

@@ -142,7 +142,7 @@ function update_ship()
   local s=spd*(1+0.12*thruster_level)
   vx,vy=dx*s,dy*s
   x+=vx y+=vy
-  x=mid(0,x,120) y=mid(17,y,120) -- y top = HUD band height (17)
+  x=mid(0,x,120) y=mid(18,y,120) -- y top = HUD band height (18)
   -- visual lean: ease toward heading so direction changes roll through every lean frame (no gameplay effect)
   vlean+=mid(-0.2,(vx>0.05 and 1 or(vx<-0.05 and -1 or 0))-vlean,0.2)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
