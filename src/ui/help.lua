@@ -110,7 +110,7 @@ function draw_help()
    -- {icon,name,desc,glow1,glow2} -- ring recolours 7/13 -> the two glow tones, toggling
    {32,"hull","+1 hp",11,3},
    {33,"charge","shield + free",12,15},
-   {34,"rapid","burst fire 6s",10,9},
+   {34,"rapid","burst fire 3s",10,9},
    {35,"magnet","pulls loot in",14,2},
    {36,"bomb","blast on grab",8,2}
   }
@@ -131,9 +131,9 @@ function draw_help()
   -- credits: cash from destroyed hazards. three coin tiers, kept between rounds.
   shead("credits",30)
   local coins={
-   {52,"bronze","+1 cash"},
-   {68,"silver","+2 cash"},
-   {84,"gold","+5 cash"}
+   {52,"bronze","+2 cash"},
+   {68,"silver","+4 cash"},
+   {84,"gold","+8 cash"}
   }
   local y=50
   for i=1,#coins do

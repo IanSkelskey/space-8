@@ -19,7 +19,7 @@ Space 8 originally began as a way to prepare for the [PVGD PICOJam 2025](https:/
 
 ## What to Expect
 
-- Score-chasing arcade missions with rising pressure each round
+- Score-chasing arcade missions where the pressure never stops climbing — the ramp keeps going long after your ship is fully upgraded, so every run eventually ends
 - Asteroids, color-coded comets, black holes, and alien gunners
 - Credits collected mid-flight and spent at the Station shop
 - Persistent upgrades for fire rate, shields, spread, hull, thrusters, and shield shock
@@ -67,7 +67,7 @@ Dropped by comets during missions. Effects are temporary and reset at the end of
 | ---- | ---- | ----------- |
 | ![Hull +1](preview/entities/powerup-hull.gif) | Hull | +1 HP if you have room; dropped by green comets. |
 | ![Charge](preview/entities/powerup-charge.gif) | Charge | Fully recharges your shield and grants a stretch of free shield time; dropped by blue comets. |
-| ![Rapid Fire](preview/entities/powerup-rapid.gif) | Rapid | A ~6 second burst of faster fire; dropped by yellow comets. |
+| ![Rapid Fire](preview/entities/powerup-rapid.gif) | Rapid | A ~3 second burst of faster fire; dropped by yellow comets. |
 | ![Magnet](preview/entities/powerup-magnet.gif) | Magnet | Pulls nearby loot and pickups toward you; dropped by pink comets. |
 | ![Bomb](preview/entities/powerup-bomb.gif) | Bomb | Detonates an expanding shockwave that vaporises every obstacle it sweeps over; dropped (rarely) by red comets. |
 
@@ -77,9 +77,9 @@ Coins dropped by destroyed asteroids and enemies. Scoop them up mid-mission to f
 
 | Coin | Tier | Value |
 | ---- | ---- | ----- |
-| ![Bronze](preview/entities/coin-bronze.gif) | Bronze | 1 credit (common) |
-| ![Silver](preview/entities/coin-silver.gif) | Silver | 2 credits |
-| ![Gold](preview/entities/coin-gold.gif) | Gold | 5 credits (rare) |
+| ![Bronze](preview/entities/coin-bronze.gif) | Bronze | 2 credits (common) |
+| ![Silver](preview/entities/coin-silver.gif) | Silver | 4 credits |
+| ![Gold](preview/entities/coin-gold.gif) | Gold | 8 credits (rare) |
 
 ## Free Assets
 

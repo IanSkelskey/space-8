@@ -1,5 +1,5 @@
 -- ship state. fields that genuinely need a default HERE:
---   * w/h/spd : constants, never reassigned
+--   * spd : constant, never reassigned (w/h were a constant 8 -- now inlined: w/2->4, 128-w->120)
 --   * heal_t  : compared in draw_ship before it's ever set
 --   * the 8 upgrade fields (fire_rate_level..hull): persist_save_from_game() READS
 --     these, and a direct boot (the not-resumed path) calls it via tu(0) to write a
@@ -8,7 +8,7 @@
 -- shield_anim shield_invuln shield_cool laser_cd hull_invuln shield_free rfb
 -- magnet_t shield_retaliate_t shield_retaliate_r vlean muzzle_t -- is set by
 -- ship_init() on each mission launch, so defaulting it here was pure duplication.
-ship={x=60,y=77,w=8,h=8,spd=2.5,heal_t=0,fire_rate_level=0,shield_level=0,shield_pulse_level=0,spread_level=0,hull_level=0,thruster_level=0,shield_unlocked=false,hull=2}
+ship={x=60,y=77,spd=2.5,heal_t=0,fire_rate_level=0,shield_level=0,shield_pulse_level=0,spread_level=0,hull_level=0,thruster_level=0,shield_unlocked=false,hull=2}
 
 bullets={}
 

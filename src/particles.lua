@@ -61,9 +61,9 @@ function p_upd()
       if d2<64 then local d=i.d
    if d==2 then ship.shield_active=true ship.shield_free=110 ship.shield_power=100 snd_sfx(9)
        elseif d==1 then if ship.hull<2+ship.hull_level then ship.hull+=1 end ship.heal_t=t()+0.4 hud_add_score(20) snd_sfx(15)
-       elseif d>7 then local v=d==10 and 5 or d-7 money_total+=v last_bonus+=v snd_sfx(13)
+       elseif d>7 then local v=d==10 and 8 or (d-7)*2 money_total+=v last_bonus+=v snd_sfx(13)
        elseif d==3 then bomb_fire(ship.x+4,ship.y+4)
-       elseif d==5 then ship.rfb=210 snd_sfx(14)
+       elseif d==5 then ship.rfb=105 snd_sfx(14)
        elseif d==6 then ship.magnet_t=420 snd_sfx(14)
        end del(p,i) goto continue end
    end
@@ -92,7 +92,7 @@ function p_draw()
      sspr(i.d[1],i.d[2],4,4,i.x,i.y)
      if i.c then pal() end
     elseif i.t==9 then
-     sspr(104+((ppf\4)%2)*8,0,5,5,flr(i.x),flr(i.y))
+     sspr(104+((ppf\4)%2)*8,0,7,7,flr(i.x)-1,flr(i.y)-1) -- 7x7 art, drawn -1,-1 to stay centred (hitbox unchanged)
     elseif i.t==10 then
      -- explosion: frame from remaining life; flip by spawn-pos parity for variety
      setramp(i.d) spr(25+(18-i.l)\3,i.x,i.y,1,1,i.x%2<1,i.y%2<1) pal()

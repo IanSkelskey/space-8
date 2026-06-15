@@ -72,7 +72,7 @@ function _update()
 	  ship.y-=1.5
 	  ship_thrust(0.8,0,-1.5) -- boost trail while flying off
 	  ship.vlean+=mid(-0.2,-ship.vlean,0.2) -- roll lean back to level
-	  if ship.y+ship.h<0 then ship_departing=false end
+	  if ship.y+8<0 then ship_departing=false end
 	 else
 	  -- ship gone: let the round-clear jingle finish (or skip with a press), then hand off
 	  if btnp(4)or btnp(5) then jingle_t=0 end
@@ -132,7 +132,6 @@ function _draw()
 			end
 		end
 	end -- gameover + round summary now handled in the ui cart
-
 	-- map screen-palette slot 15 -> hidden colour 140 (blue comet ramp); set last so per-entity pal() resets don't clobber it before flip
 	pal(15,140,1)
 end

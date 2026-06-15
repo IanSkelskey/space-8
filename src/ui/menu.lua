@@ -107,7 +107,7 @@ function draw_menu()
   draw_list(diff_labels,diff_icons,56)
   print("🅾️ select  ❎ back",22,104,5)
  else
-  print("v2.1.0",52,40,6)
+  rprint("v3.0",56,40,10,9) -- raised gold (yellow main / dark-gold shadow), centred
   draw_list(root_labels,root_icons,56)
   print("🅾️ select",40,104,5)
  end

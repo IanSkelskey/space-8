@@ -17,7 +17,10 @@ local function spawn_chunk_dust(x,y,alt)
 	end
 end
 
-local function cash(x,y,n)for i=1,n do local r=rnd() p_add(x,y,rnd()-0.5,rnd()-0.5,999,7,nil,r<.65 and 8 or r<.9 and 9 or 10)end end
+-- coin tiers: bronze(8)=2 / silver(9)=4 / gold(10)=8 -- a memorable doubling set.
+-- weights 50/30/20 give avg ~3.8, restoring the income of the old gold-only (4) drop
+-- while keeping the three-coin variety (value resolved in particles.lua p_upd).
+local function cash(x,y,n)for i=1,n do local r=rnd() p_add(x,y,rnd()-0.5,rnd()-0.5,999,7,nil,r<.5 and 8 or r<.8 and 9 or 10)end end
 
 local function kill_debris(p)
 	local x,y=p.x+2,p.y+2
@@ -68,8 +71,10 @@ function asteroid_init()
 end
 
 local function spawn_asteroid()
-	local spd,alt=mspd,round_number>6 and rnd()<min(0.12+0.06*(round_number-6),0.65)
-	local large=round_number>=3 and rnd()<mlc
+	-- reveals key off vr (visible round) so every difficulty gets the same roster-reveal
+	-- cadence; veteran's extra bite comes from sl()'s higher scaling round, not an earlier dump
+	local spd,alt=mspd,vr>6 and rnd()<min(0.12+0.06*(vr-6),0.65)
+	local large=vr>=3 and rnd()<mlc
 	local sz=large and 16 or 8
 	add(asteroids,{
 		x=flr(rnd(large and 112 or 120)),

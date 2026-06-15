@@ -16,7 +16,10 @@ local DROP_D,DROP_ODDS,DROP_LIFE=split"6,5,1,2,3",split".35,.35,.35,.35,.35",spl
 local function comet_die(c)
 	obk+=1 -- round-summary obstacle tally
 	local k=c.ci+1
-	if rnd()<DROP_ODDS[k] then p_add(c.x,c.y,0,0,DROP_LIFE[k],7,nil,DROP_D[k]) end
+	-- powerup taper: full drop odds through the early game (vr<=3), thinning to 0.4x by
+	-- vr~15 so a maxed late-game ship isn't swimming in shields/bombs. coins are unaffected.
+	local taper=mid(0.4,1.15-0.05*vr,1)
+	if rnd()<DROP_ODDS[k]*taper then p_add(c.x,c.y,0,0,DROP_LIFE[k],7,nil,DROP_D[k]) end
 	hud_add_score(55) snd_sfx(8)
 	boom(c.x,c.y,c.ramp) del(comets,c)
 end
@@ -62,13 +65,12 @@ local function spawn_comet()
 end
 
 function update_comet()
-	if round_number<3 then return end
+	if vr<3 then return end
 	spawn_t-=FT
-	local mx,mi,rg=cm,cmin,crng
-	if round_number<5 then mx=min(mx,1) end
-	if spawn_t<=0 and #comets<mx then
+	-- max comets: 1 until round 5 (min(cm,1)=1 since cm>=1), else cm. inlined (dropped mx/mi/rg locals)
+	if spawn_t<=0 and #comets<(vr<5 and 1 or cm) then
 		spawn_comet()
-		spawn_t=(mi+rnd(rg))*(round_number<5 and 1.5 or 1)
+		spawn_t=(cmin+rnd(crng))*(vr<5 and 1.5 or 1)
 	end
 
 	for c in all(comets) do

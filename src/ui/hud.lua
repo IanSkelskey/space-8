@@ -54,9 +54,12 @@ function draw_hud()
  end
  -- temp-effect status row (y8): rapid fire, free shield (shock-aware icon/colour), magnet.
  -- always shown (grayscale dim icons 37/38/39 when idle); active = colour icon + colour time bar.
- fxi(26,35,37,ship.rfb,120,10)
+ fxi(26,35,37,ship.rfb,105,10)
  fxi(33,shk and 41 or 33,38,ship.shield_free,110,shk and 8 or 12)
  fxi(40,36,39,ship.magnet_t,420,14)
+ -- current round (visible counter), right-aligned in the lower band so it clears the cash
+ -- readout above (y2) and sits just above the progress bar (y17)
+ local rs="r"..vr rprint(rs,125-#rs*4,10,6,5)
  -- mission progress: full-width 1px bar at the very bottom of the band (slimmed from 2px to give
  -- the status row a clear margin above it -- 1px gap under the icons, then the timer row, then this)
  if run and mission_distance>0 then

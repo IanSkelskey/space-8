@@ -17,12 +17,12 @@ function blackhole_init()
 end
 
 function update_blackhole()
-	if round_number<5 then return end
+	if vr<5 then return end
 	spawn_t-=FT
-	local hm=round_number<7 and 1 or 2
+	local hm=vr<7 and 1 or 2
 	if spawn_t<=0 and #holes<hm then
 		spawn_hole()
-		spawn_t=(3+rnd(3))*(round_number<7 and 1.5 or 1)
+		spawn_t=(3+rnd(3))*(vr<7 and 1.5 or 1)
 	end
 
 	-- black-hole kills run the full death (boom + loot) but award NO score (not a skill kill)
@@ -40,15 +40,15 @@ function update_blackhole()
 		p_pull(cx,cy,h.r,0.22,{[2]=true,[3]=true})
 		comet_pull(cx,cy,h.r,0.3)
 
-		local dx,dy=cx-ship.x-ship.w/2,cy-ship.y-ship.h/2
+		local dx,dy=cx-ship.x-4,cy-ship.y-4 -- ship.w/2, ship.h/2 (both 8) inlined
 		local d2=dx*dx+dy*dy
 		local r2=h.r*h.r
 		if d2<r2 and d2>0 then
 			-- the player feels a noticeably stronger drag than other objects (which keep their
 			-- gentler p_pull/comet_pull strengths above) so the well actually feels threatening.
 			local invd,str=1/sqrt(d2),1.05*(1-d2/r2)
-			ship.x=mid(0,ship.x+dx*invd*str,128-ship.w)
-			ship.y=mid(0,ship.y+dy*invd*str,128-ship.h)
+			ship.x=mid(0,ship.x+dx*invd*str,120)
+			ship.y=mid(0,ship.y+dy*invd*str,120)
 			-- gravity drama: subtle shake builds as the ship is dragged deeper into the well
 			shake=max(shake,str*2)
 		end

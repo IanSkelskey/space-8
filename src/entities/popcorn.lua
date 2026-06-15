@@ -19,13 +19,25 @@ function popcorn_absorb(hx,hy,hw,hh)
 end
 
 function update_popcorn()
- if round_number<2 then return end
+ if vr<2 then return end
  pt-=FT
- if pt<=0 and #pops<(round_number<5 and 1 or 2) then add(pops,{x=rnd(120),y=-8,dy=0.55+rnd(0.4),s=30+rndi(20),c=0,hp=2,flash=0,a=rnd()}) pt=1.2+rnd(1.5) end
+ -- popcorn are turrets: their threat is pellets on screen, which needs TIME on screen. so fall
+ -- speed stays near-constant (NOT scaled by cs -- a faster scroll would just carry them off
+ -- before they wind up). pressure instead comes from numbers: a rising on-screen cap plus rows
+ -- that grow into the endless game, so late rounds face a drifting wall of gunners.
+ local pmax=min((vr+1)\3,4)                -- 1 early, +1 every ~3 rounds, cap 4
+ if pt<=0 and #pops<pmax then
+  -- spawn a row that tops the screen up to the cap, so the row size grows with pmax: a single
+  -- gunner early, a wall of up to 4 once endless. spaced 16px and kept on-screen via x0.
+  local gn=pmax-#pops
+  local x0=rnd(120-(gn-1)*16)
+  for i=0,gn-1 do add(pops,{x=x0+i*16,y=-8,dy=0.5+rnd(0.25),s=30+rndi(20),c=0,hp=2,flash=0,a=rnd()}) end
+  pt=1.2+rnd(1.5)
+ end
  for e in all(pops) do
   -- bomb shockwave or shield pulse: shared damage/death check
   if eaoe(e,pkill,e.x+4,e.y+4) then goto continue end
-  e.y+=e.dy*cs e.x+=sin(e.y/32+e.a)*.4*cs
+  e.y+=e.dy e.x+=sin(e.y/32+e.a)*.4 -- constant fall (no cs): they linger to actually fire
   if e.flash>0 then e.flash-=1 end
   e.s-=1
   if e.c>0 then

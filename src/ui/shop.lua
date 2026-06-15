@@ -1,9 +1,11 @@
 local s,sm,st,sc=1,"",0,11 -- s=selected item index (single grid now, no pages)
 
 -- compressed items: icon,max,base$,inc$,field,unlock,name,desc
--- rebalance: cheaper early items, expensive later upgrades for 1-2 round affordability but >12 round completion
+-- deliberate pricing: every item bases at 100/200/300 and inc==base, so cost = base*(level+1)
+-- (lvl1=base, lvl2=2*base, lvl3=3*base). tiers: 100 intro (thrusters/fire), 200 core
+-- (shield/spread/shock), 300 premium (hull). shield unlock + repair handled below.
 -- NOTE: fields are comma-split, so name/desc must NOT contain commas (use / or + instead).
-local id="18,3,100,120,fire_rate_level,,fire rate,-20% shot cooldown / lvl;19,3,140,150,shield_level,shield_unlocked,shield,holds longer + recharges;22,2,180,200,spread_level,,spread shot,more lasers / wider spread;17,2,200,220,hull_level,,hull,+1 max hull segment;16,99,180,0,,,repair,restore 1 hull segment;25,3,90,140,thruster_level,,thrusters,+12% top speed / lvl;20,2,220,180,shield_pulse_level,shield_unlocked,shield shock,shielded hits blast foes"
+local id="18,3,100,100,fire_rate_level,,fire rate,-20% shot cooldown / lvl;19,3,200,200,shield_level,shield_unlocked,shield,holds longer + recharges;22,2,200,200,spread_level,,spread shot,more lasers / wider spread;17,2,300,300,hull_level,,hull,+1 max hull segment;16,99,150,0,,,repair,restore 1 hull segment;25,3,100,100,thruster_level,,thrusters,+12% top speed / lvl;20,2,200,200,shield_pulse_level,shield_unlocked,shield shock,shielded hits blast foes"
 -- pre-split once to save tokens (was repeatedly split each access)
 local items={}
 for e in all(split(id,";")) do add(items,split(e,",")) end
@@ -26,11 +28,11 @@ local function buy(i)
  if i==5 then -- repair (more affordable scaling)
   local h,mh=ship.hull,2+ship.hull_level
   if h>=mh then msg("hull full",1) return end
-  local c=flr((150+max(0,round_number-8)*30)*dm+0.5)
+  local c=flr((150+max(0,round_number-6)*50)*dm+0.5)
   if m<c then msg("not enough $$$!",1) return end
   money_total=m-c ship.hull=h+1
  elseif i==2 and not ul then -- unlock shield (more accessible)
-  local c=flr(140*dm+0.5)
+  local c=flr(200*dm+0.5)
   if m<c then msg("not enough $$$!",1) return end
   money_total=m-c ship_unlock_shield()
  else -- upgrade
@@ -112,10 +114,10 @@ function shop_draw()
   cstr,desc,stat="locked","+ requires shield","locked"
  elseif s==5 then
   local h,mh=ship.hull,2+ship.hull_level
-  cstr=h>=mh and "hull full" or "$"..flr((150+max(0,round_number-8)*30)*dm+0.5)
+  cstr=h>=mh and "hull full" or "$"..flr((150+max(0,round_number-6)*50)*dm+0.5)
   stat="hull "..h.."/"..mh
  elseif s==2 and not ship.shield_unlocked then
-  cstr,desc,stat="$"..flr(140*dm+0.5),"+ adds shield","not owned"
+  cstr,desc,stat="$"..flr(200*dm+0.5),"+ adds shield","not owned"
  else
   local lv=sit[5]~="" and (ship[sit[5]] or 0) or 0
   cstr=lv<sit[2] and "$"..flr((sit[3]+sit[4]*lv)*dm+0.5) or "owned"
