@@ -88,7 +88,8 @@ function update_comet()
 			if c.hp<=0 then comet_die(c) goto continue
 			else c.flash=4 snd_sfx(2) end
 		end
-		if c.hp>0 then if scoll(c.x,c.y,8,8) then ship_kill() end if c.x<-12 or c.x>140 or c.y<-12 or c.y>140 then del(comets,c) end end
+		if scoll(c.x,c.y,8,8) then ship_kill() end
+		if c.x<-12 or c.x>140 or c.y<-12 or c.y>140 then del(comets,c) end
 		::continue::
 	end
 end

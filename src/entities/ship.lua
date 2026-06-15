@@ -1,4 +1,3 @@
-local START_X,START_Y=60,77
 -- ship state. fields that genuinely need a default HERE:
 --   * w/h/spd : constants, never reassigned
 --   * heal_t  : compared in draw_ship before it's ever set
@@ -9,15 +8,12 @@ local START_X,START_Y=60,77
 -- shield_anim shield_invuln shield_cool laser_cd hull_invuln shield_free rfb
 -- magnet_t shield_retaliate_t shield_retaliate_r vlean muzzle_t -- is set by
 -- ship_init() on each mission launch, so defaulting it here was pure duplication.
-ship={x=START_X,y=START_Y,w=8,h=8,spd=2.5,heal_t=0,fire_rate_level=0,shield_level=0,shield_pulse_level=0,spread_level=0,hull_level=0,thruster_level=0,shield_unlocked=false,hull=2}
+ship={x=60,y=77,w=8,h=8,spd=2.5,heal_t=0,fire_rate_level=0,shield_level=0,shield_pulse_level=0,spread_level=0,hull_level=0,thruster_level=0,shield_unlocked=false,hull=2}
 
 bullets={}
 
 -- precomputed color triplets: base, level1, level2, level3+
 local thr_cols={split"10,9,8",split"12,13,1",split"11,3,1",split"7,6,5",split"8,9,2"}
-
--- polar pset: plot colour c at angle a / radius r around (cx,cy), rounded to nearest pixel
-local function pp(cx,cy,a,r,c) pset(flr(cx+cos(a)*r+0.5),flr(cy+sin(a)*r+0.5),c) end
 
 -- twin exhaust flames for a given thrust strength + velocity (shared by live flight and the round-clear fly-off)
 function ship_thrust(str,vx,vy)
@@ -119,7 +115,7 @@ function ship_init()
  -- zero every numeric runtime field in one split-loop; dying/shield_active must stay
  -- actual false (0 is truthy in lua), so they're set separately
  for f in all(split"vx,vy,death_t,shield_anim,shield_invuln,shield_cool,laser_cd,hull_invuln,shield_free,rfb,magnet_t,vlean,muzzle_t,shield_retaliate_t,shield_retaliate_r")do ship[f]=0 end
- ship.x,ship.y,ship.dying,ship.shield_active=START_X,START_Y,false,false
+ ship.x,ship.y,ship.dying,ship.shield_active=60,77,false,false
  ship.shield_power=ship.shield_unlocked and 100 or 0
  sfx(-1,3)
 end
@@ -143,7 +139,7 @@ function update_ship()
   -- visual lean: ease toward heading so direction changes roll through every lean frame (no gameplay effect)
   vlean+=mid(-0.2,(vx>0.05 and 1 or(vx<-0.05 and -1 or 0))-vlean,0.2)
     local str=(dx==0 and dy==0)and 0.2 or(dy>0 and 0.03 or(dy<0 and 0.45 or 0.6))
-  ship_thrust(mid(0,str,1),vx,vy)
+  ship_thrust(str,vx,vy)
   if laser_cd>0 then laser_cd-=1 end
   if muzzle_t>0 then muzzle_t-=1 end
   -- rapid fire burst timer
@@ -236,7 +232,7 @@ local function draw_magnet()
   local r=43+sin(t*0.5)*1.5
   local ao=t*0.6
   for i=0,23 do
-   pp(cx,cy,ao+i/24,r,i%2==0 and 14 or 2)
+   local a=ao+i/24 pset(flr(cx+cos(a)*r+0.5),flr(cy+sin(a)*r+0.5),i%2==0 and 14 or 2)
   end
  end
 end

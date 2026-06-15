@@ -49,7 +49,7 @@ local function akill(m)
 		-- two halves of the 16px parent split straight outward (left half goes left, right
 		-- half goes right) at a guaranteed minimum horizontal speed, falling at mspd in a
 		-- straight line (constant velocity, no accel/decel) like a normal small asteroid.
-		for i=0,1 do add(asteroids,{x=i*8+m.x+2,y=m.y+2,w=8,h=8,dx=(i*2-1)*(0.5+rnd(0.4)),spd=mspd,hp=m.alt and 4 or 2,large=false,alt=m.alt,flash=0}) end
+		for i=0,1 do add(asteroids,{x=i*8+m.x+2,y=m.y+2,w=8,h=8,dx=(i*2-1)*(0.5+rnd(0.4)),spd=mspd,hp=m.alt and 4 or 2,alt=m.alt,flash=0}) end
 		spawn_asteroid_debris(m.x+4,m.y+4,m.alt)
 		-- fast rock-dust burst (alt-aware via the type-1 ramp); cheaper than a sprite explosion
 		for i=1,12 do local a=rnd() p_add(m.x+8,m.y+8,cos(a)*(.5+rnd(1.6)),sin(a)*(.5+rnd(1.6)),9+rndi(7),1,nil,m.alt) end
@@ -73,7 +73,7 @@ local function spawn_asteroid()
 	local sz=large and 16 or 8
 	add(asteroids,{
 		x=flr(rnd(large and 112 or 120)),
-		y=10-(large and 20 or 10),
+		y=large and -10 or 0,
 		w=sz,h=sz,
 		dx=0,dy=0,
 		spd=large and spd*0.8 or spd,
