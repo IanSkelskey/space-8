@@ -3,7 +3,7 @@
 # Space 8 (PICO-8)
 
 <p align="center">
-    <img src="preview/cart.png" alt="Cartridge Art" width="320" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;">
+    <img src="preview/cart.png" alt="Cartridge Art">
 </p>
 
 <p align="center">
@@ -11,21 +11,24 @@
     <a href="https://ianskelskey.itch.io/space-8"><img src="https://img.shields.io/badge/Play%20on-itch.io-fa5c5c?style=for-the-badge&logo=itch.io&logoColor=white" alt="Play on itch.io"></a>
 </p>
 
-**Space 8** is a retro-inspired arcade game for the PICO-8 fantasy console. Blast asteroids, dodge comets, and survive as long as you can! Click one of the buttons above to play it online, or you can search for "Space 8" in Splore.
+**Space 8** is a compact arcade survival game for the PICO-8 fantasy console. Pilot a small ship through escalating debris fields, collect credits during each mission, and dock at the Station between rounds to buy upgrades for the next launch.
 
+Click one of the buttons above to play online, or search for "Space 8" in Splore.
 
+## What to Expect
 
-## Features
-- Classic arcade-style gameplay
-- Power-ups, scores, and upgrades
-- Custom music and sound effects
-- Optimized for web export and PICO-8
+- Score-chasing arcade missions with rising pressure each round
+- Asteroids, color-coded comets, black holes, and alien gunners
+- Credits collected mid-flight and spent at the Station shop
+- Persistent upgrades for fire rate, shields, spread, hull, thrusters, and shield shock
+- Custom PICO-8 pixel art, music, and sound effects
 
 ## How to Play
-- Arrow keys: Move your ship
-- Z/C/N: Shoot
-- X/V/M: Use your shield
-- Avoid obstacles and collect power-ups to survive longer
+
+- Arrow keys: move your ship
+- Z/C/N: shoot
+- X/V/M: use your shield
+- Avoid hazards, grab power-ups, collect credits, and survive long enough to reach the Station
 
 ## Screenshots
 
@@ -89,24 +92,15 @@ Want to make your own shmup? The tilesheet and assets from this game are availab
     <a href="https://ianskelskey.itch.io/"><img src="https://img.shields.io/badge/More%20Assets%20on-itch.io-fa5c5c?style=for-the-badge&logo=itch.io&logoColor=white" alt="More Assets on itch.io"></a>
 </p>
 
-## Development
-- All source code is in Lua, designed for PICO-8
-- Music and sound created with PICO-8 tools
-- Web export available in the `build/` folder
+## Tinkering
 
-## Running the Game
-1. Open PICO-8
-2. This project now uses a multi-cart setup:
-    - `ui.p8` : menus, station, shop, game over
-    - `space_8.p8` : gameplay (action loop + entities)
-3. Launch the UI cart first: `load ui.p8` then `run`
-4. Selecting a difficulty / launch mission loads `space_8.p8` automatically (state passed via `cartdata`)
-5. When a mission ends or you die, the gameplay cart saves back to `cartdata` and loads `ui.p8` to show station or game over
-6. To export for web you must export both carts (PICO-8 will bundle dependencies if you chain from the UI cart). Example:
-    - `export space_8.html ui.p8` (PICO-8 will include the gameplay cart it loads)
+This repository is public so people can study a finished PICO-8 project, fork it locally, and experiment with how the carts, entities, UI, art, and audio fit together. It is not an open call for outside development, but it is meant to be useful as an educational reference.
 
-### Persisted Values Between Carts
-Both carts share a single 64-slot `cartdata("sp8")` block to save progress **and** shuttle run state across the handoff (difficulty, round, money, last payout + bonus, score totals, upgrade levels, shield unlock, current hull, payout-ready and mission-start flags, per-difficulty high scores, and lifetime money). The full slot-by-slot memory map is documented in **[CARTDATA.md](CARTDATA.md)**.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local running, export, cart handoff, and tinkering notes.
+
+## License
+
+A formal project license has not been added yet. Until one is chosen, treat Space 8, its name, shipped carts, source, art, music, sound effects, and documentation as shared for play, study, and personal tinkering only. Please do not redistribute Space 8 or lightly modified builds as your own.
 
 ## Hardware
 
