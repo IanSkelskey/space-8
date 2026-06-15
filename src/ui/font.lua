@@ -42,18 +42,18 @@ end
 -- raised (1px shadow colour sh) when sh is set. for right/centre alignment, width = #s*4+2 (one coin).
 function mprint(s,x,y,c,sh)
  for i=1,#s do local ch=sub(s,i,i)
-  if ch=="$" then spr(52,x,y) x+=6
+  if ch=="$" then spr(84,x,y) x+=6
   else if sh then print(ch,x,y+1,sh) end x=print(ch,x,y,c) end
  end
 end
 
--- flashing nav arrow built from the two arrow tiles: 7 (lit) + 8 (plain) alternate for the
+-- flashing nav arrow built from the two arrow tiles: 8 (lit) + 9 (plain) alternate for the
 -- flash. right=true points right; false flips to point left. inactive shows a dimmed plain frame.
 function farrow(x,y,right,active)
  local f=not right
  if active then
-  spr(time()%0.8<0.4 and 7 or 8,x,y,1,1,f)
+  spr(time()%0.8<0.4 and 8 or 9,x,y,1,1,f)
  else
-  pal(7,5) pal(6,13) pal(13,1) spr(8,x,y,1,1,f) pal()
+  pal(7,5) pal(6,13) pal(13,1) spr(9,x,y,1,1,f) pal()
  end
 end

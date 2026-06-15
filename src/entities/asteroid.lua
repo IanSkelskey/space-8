@@ -139,7 +139,7 @@ function draw_asteroid()
 			-- 2x2 block (base 1); alt uses the same sprites, recoloured by the swap above
 			spr(1,dx,dy,2,2)
 		else
-			spr(0,dx,dy)
+			spr(16,dx,dy)
 		end
 		pal()
 	end

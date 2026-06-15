@@ -4,8 +4,8 @@ local picking_diff=false -- whether we are on difficulty submenu
 local menu_t0=0        -- time() when the menu was entered; drives the one-shot logo shine
 
 -- difficulty & root label/icon sets
-local diff_labels,diff_icons=split"easy,normal,veteran",{0,1,2} -- difficulty icons (repacked)
-local root_labels,root_icons=split"play,highscores,guide",{12,3,11} -- play / trophy / guide (repacked)
+local diff_labels,diff_icons=split"easy,normal,veteran",{1,2,3} -- difficulty icons (repacked)
+local root_labels,root_icons=split"play,highscores,guide",{13,4,12} -- play / trophy / guide (repacked)
 
 -- start a new run but remain in station before launching first mission
 local function start_game(set_df)
@@ -64,7 +64,7 @@ local function draw_list(labels,icons,start_y)
  local y=start_y
  for i=1,#labels do
   local s=i==sel
-  if s then spr(9,gx-10+time()%1\0.5,y) end -- cursor bobs left of the icon column
+  if s then spr(10,gx-10+time()%1\0.5,y) end -- cursor bobs left of the icon column
   spr(icons[i],gx,y)
   if s then rprint(labels[i],lx,y+1,7,1)  -- selected: white, raised on dark blue
   else rprint(labels[i],lx,y+1,6,5) end  -- idle: muted, subtle raise

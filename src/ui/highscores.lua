@@ -32,7 +32,7 @@ function hs_init()
  hs_entries=hs_sets[hs_tab]
 end
 
-local diff_icons={0,1,2} -- difficulty icons easy/normal/veteran (repacked)
+local diff_icons={1,2,3} -- difficulty icons easy/normal/veteran (repacked)
 -- per-rank {main,shadow} colours for the raised name/score text: gold, silver, bronze, blue
 local rank_cols={{10,9},{6,5},{9,4},{12,1}}
 
@@ -111,7 +111,7 @@ function hs_draw_full()
  if #t==0 then
   cprint("(no scores yet)",y_header+10,5)
  else
-  local trophy_sprs={3,4,5,6} -- gold/silver/bronze/4th (repacked)
+  local trophy_sprs={4,5,6,7} -- gold/silver/bronze/4th (repacked)
   -- calculate even spacing for up to 4 entries
   local content_start=y_header+8
   local content_end=panel_bottom-6
@@ -167,7 +167,7 @@ function hs_draw_compact()
  while x<128 do
   for s in all(segs) do
    if x+s.w>0 then
-    spr(diff_icons[s.di] or 3,x,y)        -- difficulty icon (no trophy)
+    spr(diff_icons[s.di] or 4,x,y)        -- difficulty icon (no trophy)
     local tx=x+11
     rprint(s.nm,tx,y+1,7,5)                 -- name: white, raised
     local scx=tx+#s.nm*4+4

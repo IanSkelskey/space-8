@@ -6,7 +6,7 @@ local sel = sel or 1
 local sci_adj=sci_adj or split"quantum,plasma,ionic,fusion,nano,void"
 local sci_noun=sci_noun or split"core,drive,matrix,relay,reactor,array"
 local diff_labels=diff_labels or split"easy,normal,veteran"
-local diff_icons={0,1,2} -- difficulty icons (easy/normal/veteran, repacked)
+local diff_icons={1,2,3} -- difficulty icons (easy/normal/veteran, repacked)
 
 -- borderless slanted 3px bar, matching the gameplay HUD's hull meter
 function sbar(x,y,w,c) for r=0,2 do rectfill(x+2-r,y+r,x+1-r+w,y+r,c) end end
@@ -111,12 +111,12 @@ function draw_station()
             local y=57
             for i=1,rows do
                 local on=i==sel
-                if on then spr(9,6+time()%1\0.5,y-1) end
+                if on then spr(10,6+time()%1\0.5,y-1) end
                 local m,s=on and 7 or 6,on and 1 or 5
                 if i==1 then
-                    spr(12,16,y-1) rprint("launch mission",27,y,m,s)
+                    spr(13,16,y-1) rprint("launch mission",27,y,m,s)
                 elseif i==2 then
-                    spr(10,16,y-1) rprint("shop",27,y,m,s)
+                    spr(11,16,y-1) rprint("shop",27,y,m,s)
                 else
                     spr(diff_icons[df],16,y-1) rprint("difficulty",27,y,m,s)
                     local dn=diff_labels[df]

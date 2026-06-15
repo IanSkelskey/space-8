@@ -1,4 +1,4 @@
-local hp,MP=1,5
+local hp,MP=1,6
 
 function help_init() hp=1 end
 
@@ -58,14 +58,14 @@ function draw_help()
   y+=13
   spr(49,8,y,2,2)
   print("\f8big asteroid\f6",28,y+1,7) print("more loot; splits",28,y+9,6)
-  y+=24
+  y+=20
   print("\fccomets\f6 (round 3+):",8,y,7)
-  y+=10
-  -- live comet art (base 51) recoloured per variant: magnet/rapid/hull/charge
+  y+=9
+  -- live comet art (base 51) recoloured per variant: magnet/rapid/hull/charge/bomb (red)
   local csrc=split"1,3,11,10"
-  local cramps={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6"}
-  local comets={{35,"magnet"},{34,"rapid"},{32,"hull"},{33,"charge"}}
-  for i=1,4 do
+  local cramps={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6",split"2,8,9,10"}
+  local comets={{35,"magnet"},{34,"rapid"},{32,"hull"},{33,"charge"},{36,"bomb"}}
+  for i=1,5 do
    local cx=10+((i-1)%2)*58
    local cy=y+((i-1)\2)*11
    for k=1,4 do pal(csrc[k],cramps[i][k]) end
@@ -76,8 +76,8 @@ function draw_help()
  elseif hp==4 then
   -- hazards 2: black holes
   shead("black holes",30)
-  -- live 16x16 black-hole art (tiles 172/174), alternating like draw_blackhole
-  spr(flr(time()*8)%2==0 and 172 or 174,56,36,2,2)
+  -- live 16x16 black-hole art (bases 236/238), alternating like draw_blackhole
+  spr(flr(time()*8)%2==0 and 236 or 238,56,36,2,2)
   local y=52
   print("appear at \f9round 5\f6",8,y,6) y+=8
   print("\f8pull your ship inward\f6",8,y,7) y+=8
@@ -86,31 +86,48 @@ function draw_help()
   print("\fcshield\f6 lives / takes 1 hit",8,y,6) y+=10
   print("\fcsurvive:\f6 thrust away early",8,y,6) y+=8
   print("keep your distance",8,y,6)
- else
-  -- powerups (dropped by comets / found in-flight). icon at y, text at y+2 to match the
-  -- comet rows on page 3.
+ elseif hp==5 then
+  -- powerups: dropped by comets / found in-flight. animated palette-swapped ring + icon.
   shead("powerups",30)
   local items={
-   {32,"hull","+1 hp"},
-   {33,"charge","shield + free"},
-   {-1,"credits","cash bonus"},
-   {34,"rapid","burst fire 6s"},
-   {35,"magnet","pulls loot in"}
+   -- {icon,name,desc,glow1,glow2} -- ring recolours 7/13 -> the two glow tones, toggling
+   {32,"hull","+1 hp",11,3},
+   {33,"charge","shield + free",12,15},
+   {34,"rapid","burst fire 6s",10,9},
+   {35,"magnet","pulls loot in",14,2},
+   {36,"bomb","blast on grab",8,2}
   }
   local y=42
   for i=1,#items do
-   local icon=items[i][1]
-   if icon==-1 then
-    -- spinning coin, matching the in-game gold credit animation (frames 52,53,54,53)
-    spr(54-abs(2-flr(time()*8)%4),7,y+1)
-   else
-    spr(icon,7,y)
-   end
-   rprint(items[i][2],22,y+2,10,4)
-   print(items[i][3],54,y+2,6)
+   local it=items[i]
+   local s=flr(time()*8)%2==0
+   pal(7,s and it[4] or it[5]) pal(13,s and it[5] or it[4])
+   sspr(80,16,9,9,5,y-2)
+   pal()
+   spr(it[1],7,y)
+   rprint(it[2],22,y,10,4)
+   print(it[3],54,y,6)
    y+=12
   end
   print("\f5powerups reset each round",8,106,5)
+ else
+  -- credits: cash from destroyed hazards. three coin tiers, kept between rounds.
+  shead("credits",30)
+  local coins={
+   {52,"bronze","+1 cash"},
+   {68,"silver","+2 cash"},
+   {84,"gold","+5 cash"}
+  }
+  local y=50
+  for i=1,#coins do
+   local it=coins[i]
+   local a=flr(time()*8)%4 -- 3-frame spin (base,+1,+2,+1) from its base tile
+   spr(it[1]+min(a,4-a),7,y)
+   rprint(it[2],22,y,10,4)
+   print(it[3],54,y,6)
+   y+=16
+  end
+  print("\f5cash carries between rounds",8,108,5)
  end
 
  -- footer: page nav + exit

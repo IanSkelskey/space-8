@@ -109,7 +109,7 @@ function draw_highscore_entry()
  print(score_str, 64-#score_str*2, 32, 11)
  
  -- Rank with trophy on same line
- local trophy_sprs = {3,4,5} -- trophies: gold, silver, bronze (repacked)
+ local trophy_sprs = {4,5,6} -- trophies: gold, silver, bronze (repacked)
  if entry_rank <= 3 then
   spr(trophy_sprs[entry_rank], 40, 44)  -- moved from 42 to 44 (down 2 pixels)
  end
