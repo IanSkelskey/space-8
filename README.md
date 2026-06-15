@@ -15,6 +15,8 @@
 
 Click one of the buttons above to play online, or search for "Space 8" in Splore.
 
+Space 8 originally began as a way to prepare for the [PVGD PICOJam 2025](https://pvgd.org/picojam2025/), a Western Massachusetts PICO-8 jam organized by the Pioneer Valley Game Developers.
+
 ## What to Expect
 
 - Score-chasing arcade missions with rising pressure each round
