@@ -1,4 +1,4 @@
-local hp,MP=1,6
+local hp,MP=1,8
 
 function help_init() hp=1 end
 
@@ -51,34 +51,37 @@ function draw_help()
   end
   print("\f5buy these at the station shop",8,108,5)
  elseif hp==3 then
-  -- hazards 1: asteroids, then comets (two labelled sections, no repeated word)
   shead("asteroids",30)
-  local y=42
-  spr(48,8,y) print("\f8asteroid\f6",20,y+1,7) print("loot + debris",62,y+1,6)
-  y+=13
-  spr(49,8,y,2,2)
-  print("\f8big asteroid\f6",28,y+1,7) print("more loot; splits",28,y+9,6)
-  y+=20
-  print("\fccomets\f6 (round 3+):",8,y,7)
-  y+=9
-  -- live comet art (base 51) recoloured per variant: magnet/rapid/hull/charge/bomb (red)
+  local b=flr(sin(time()*.5)+.5) -- subtle bob (-1/0/1), shared by the previews
+  spr(48,9,42+b)
+  rprint("asteroid",22,42,10,4) print("loot + debris",22,50,6)
+  spr(49,9,58+b,2,2)
+  rprint("big asteroid",30,58,10,4) print("more loot; splits",30,66,6)
+  pal(4,13) pal(2,5) spr(48,9,84+b) pal() -- armored variant = palette swap, tougher
+  rprint("armored",22,84,10,4) print("extra hits to break",22,92,6)
+ elseif hp==4 then
+  shead("comets",30)
+  print("\f9round 3+\f6 -- each drops:",8,40,6)
+  -- list style matches the powerups page: flashing 2-frame flight (51/55) recoloured per
+  -- variant, then the powerup it drops. flicker mirrors the in-game comet animation.
+  local f=51+(flr(time()*6)%2)*4
   local csrc=split"1,3,11,10"
   local cramps={split"2,8,14,7",split"4,9,10,7",split"1,3,11,10",split"1,15,12,6",split"2,8,9,10"}
-  local comets={{35,"magnet"},{34,"rapid"},{32,"hull"},{33,"charge"},{36,"bomb"}}
+  local drops={{35,"magnet"},{34,"rapid"},{32,"hull"},{33,"charge"},{36,"bomb"}}
+  local y=50
   for i=1,5 do
-   local cx=10+((i-1)%2)*58
-   local cy=y+((i-1)\2)*11
    for k=1,4 do pal(csrc[k],cramps[i][k]) end
-   spr(51,cx,cy) pal()
-   spr(comets[i][1],cx+9,cy)
-   print(comets[i][2],cx+19,cy+2,6)
+   spr(f,8,y) pal()
+   spr(drops[i][1],22,y)
+   rprint(drops[i][2],33,y,10,4)
+   y+=11
   end
- elseif hp==4 then
-  -- hazards 2: black holes
+  print("\f5shoot them to collect",8,107,5)
+ elseif hp==5 then
   shead("black holes",30)
-  -- live 16x16 black-hole art (bases 236/238), alternating like draw_blackhole
-  spr(flr(time()*8)%2==0 and 236 or 238,56,36,2,2)
-  local y=52
+  -- live 16x16 art (bases 236/238) parked top-right so the text can sit high on the left
+  spr(flr(time()*8)%2==0 and 236 or 238,104,32,2,2)
+  local y=40
   print("appear at \f9round 5\f6",8,y,6) y+=8
   print("\f8pull your ship inward\f6",8,y,7) y+=8
   print("swallow asteroids & loot",8,y,6) y+=8
@@ -86,7 +89,21 @@ function draw_help()
   print("\fcshield\f6 lives / takes 1 hit",8,y,6) y+=10
   print("\fcsurvive:\f6 thrust away early",8,y,6) y+=8
   print("keep your distance",8,y,6)
- elseif hp==5 then
+ elseif hp==6 then
+  -- popcorn: a drifting enemy that fires pellets. body 37 idle / 38,39 firing; pellet 40,41.
+  shead("popcorn",30)
+  -- art parked top-right, pellet kept short, so the text sits high on the left
+  local ph=time()%1.2
+  spr(ph<0.35 and(flr(ph*20)%2==0 and 38 or 39)or 37,112,40)
+  if ph<0.5 then sspr(64+(flr(time()*8)%2)*8,16,5,5,113,48+flr(ph*14)) end
+  local y=40
+  print("appears \f9round 2+\f6",8,y,6) y+=10
+  print("\f8drifts in and shoots\f6",8,y,7) y+=10
+  print("aims pellets at your ship",8,y,6) y+=10
+  print("\fc2 hits\f6 to pop it",8,y,6) y+=10
+  print("drops \f9extra loot\f6",8,y,6) y+=10
+  print("\fcdodge\f6 its pellets",8,y,6)
+ elseif hp==7 then
   -- powerups: dropped by comets / found in-flight. animated palette-swapped ring + icon.
   shead("powerups",30)
   local items={
