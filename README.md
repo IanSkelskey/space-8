@@ -1,4 +1,4 @@
-![Banner](preview/banner.gif)
+![Banner](preview/portfolio/hero.png)
 
 # Space 8 (PICO-8)
 
